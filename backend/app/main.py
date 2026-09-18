@@ -1,13 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.location import router as location_router
 from app.api.simulation import router as simulation_router
+from app.api.weather import router as weather_router
 
 
 app = FastAPI(
     title="Thermo Shelter 1 API",
-    description="Backend for passive shelter thermal simulation and optimization.",
-    version="0.1.0",
+    description=(
+        "Backend for passive shelter thermal "
+        "simulation, real weather analysis, "
+        "solar modeling and optimization."
+    ),
+    version="0.2.0",
 )
 
 
@@ -22,8 +28,17 @@ app.add_middleware(
 )
 
 
-# Register simulation API routes
-app.include_router(simulation_router)
+app.include_router(
+    simulation_router
+)
+
+app.include_router(
+    location_router
+)
+
+app.include_router(
+    weather_router
+)
 
 
 @app.get("/")
@@ -31,7 +46,9 @@ def root():
     return {
         "project": "Thermo Shelter 1",
         "status": "running",
-        "message": "Thermo Shelter backend is online",
+        "message": (
+            "Thermo Shelter backend is online"
+        ),
     }
 
 

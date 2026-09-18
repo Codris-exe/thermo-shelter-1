@@ -8,46 +8,37 @@ import {
 
 
 export default function ThreeDPage() {
+  const length = useShelterDesignStore(
+    (state) => state.length_m,
+  );
 
-  const length =
-    useShelterDesignStore(
-      (state) => state.length_m,
-    );
+  const width = useShelterDesignStore(
+    (state) => state.width_m,
+  );
 
-  const width =
-    useShelterDesignStore(
-      (state) => state.width_m,
-    );
+  const height = useShelterDesignStore(
+    (state) => state.height_m,
+  );
 
-  const height =
-    useShelterDesignStore(
-      (state) => state.height_m,
-    );
+  const orientation = useShelterDesignStore(
+    (state) => state.orientation_deg,
+  );
 
-  const orientation =
-    useShelterDesignStore(
-      (state) => state.orientation_deg,
-    );
+  const wallLayers = useShelterDesignStore(
+    (state) => state.wall_layers,
+  );
 
-  const wallLayers =
-    useShelterDesignStore(
-      (state) => state.wall_layers,
-    );
+  const roofLayers = useShelterDesignStore(
+    (state) => state.roof_layers,
+  );
 
-  const roofLayers =
-    useShelterDesignStore(
-      (state) => state.roof_layers,
-    );
+  const setDimensions = useShelterDesignStore(
+    (state) => state.setDimensions,
+  );
 
-  const setDimensions =
-    useShelterDesignStore(
-      (state) => state.setDimensions,
-    );
-
-  const setOrientation =
-    useShelterDesignStore(
-      (state) => state.setOrientation,
-    );
+  const setOrientation = useShelterDesignStore(
+    (state) => state.setOrientation,
+  );
 
   const setWallInsulationThicknessMm =
     useShelterDesignStore(
@@ -66,8 +57,7 @@ export default function ThreeDPage() {
     (
       wallLayers.find(
         (layer) =>
-          layer.material_id ===
-          "brick",
+          layer.material_id === "brick",
       )?.thickness_m ?? 0
     ) * 1000;
 
@@ -76,8 +66,7 @@ export default function ThreeDPage() {
     (
       wallLayers.find(
         (layer) =>
-          layer.material_id ===
-          "rock_wool",
+          layer.material_id === "rock_wool",
       )?.thickness_m ?? 0
     ) * 1000;
 
@@ -86,8 +75,7 @@ export default function ThreeDPage() {
     (
       wallLayers.find(
         (layer) =>
-          layer.material_id ===
-          "gypsum",
+          layer.material_id === "gypsum",
       )?.thickness_m ?? 0
     ) * 1000;
 
@@ -96,8 +84,7 @@ export default function ThreeDPage() {
     (
       roofLayers.find(
         (layer) =>
-          layer.material_id ===
-          "rock_wool",
+          layer.material_id === "rock_wool",
       )?.thickness_m ?? 0
     ) * 1000;
 
@@ -122,16 +109,12 @@ export default function ThreeDPage() {
     0.12 +
     wallLayers.reduce(
       (total, layer) => {
-
         const conductivity =
-          layer.material_id ===
-          "brick"
+          layer.material_id === "brick"
             ? 0.72
-            : layer.material_id ===
-                "rock_wool"
+            : layer.material_id === "rock_wool"
               ? 0.04
-              : layer.material_id ===
-                  "gypsum"
+              : layer.material_id === "gypsum"
                 ? 0.17
                 : 1.0;
 
@@ -163,286 +146,415 @@ export default function ThreeDPage() {
 
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="h-screen overflow-hidden bg-slate-950 text-white">
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto flex h-full max-w-[1600px] flex-col px-5 py-4">
 
-        <header className="mb-8">
+        {/* HEADER */}
+        <header className="flex shrink-0 items-center justify-between border-b border-slate-800 pb-3">
 
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">
-            3D Design Studio
-          </p>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
+              Thermo Shelter 1
+            </p>
 
-          <h1 className="mt-3 text-4xl font-bold">
-            Thermo Shelter 1 — 3D Shelter
-          </h1>
+            <h1 className="mt-1 text-2xl font-bold">
+              3D Design Studio
+            </h1>
+          </div>
 
-          <p className="mt-3 max-w-3xl text-slate-400">
-            This 3D model is driven by the shared
-            Thermo Shelter design state.
-          </p>
+          <div className="hidden items-center gap-3 text-xs text-slate-400 sm:flex">
+
+            <StatusBadge
+              label="3D Model"
+              value="Live"
+            />
+
+            <StatusBadge
+              label="Design State"
+              value="Synced"
+            />
+
+          </div>
 
         </header>
 
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        {/* MAIN SINGLE SCREEN */}
+        <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+
+          {/* 3D AREA */}
+          <section className="min-h-0 rounded-2xl border border-slate-800 bg-slate-900/70">
+
+            <div className="flex h-full min-h-0 flex-col">
+
+              <div className="flex shrink-0 items-center justify-between border-b border-slate-800 px-5 py-3">
+
+                <div>
+                  <h2 className="font-semibold">
+                    Shelter Visualization
+                  </h2>
+
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Drag to rotate • Scroll to zoom • Right-click to pan
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-400">
+                  {orientation}° • {orientationName}
+                </div>
+
+              </div>
 
 
-          <Shelter3D
-            length={length}
-            width={width}
-            height={height}
-            orientation={orientation}
-            wallThickness={
-              wallThickness
-            }
-            roofThickness={
-              roofThickness
-            }
-          />
+              <div className="min-h-0 flex-1 p-3">
 
-
-          <aside className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-
-            <h2 className="text-xl font-semibold">
-              Shelter Configuration
-            </h2>
-
-
-            <Control
-              label="Length"
-              value={length}
-              min={2}
-              max={15}
-              step={0.1}
-              unit="m"
-              onChange={(value) =>
-                setDimensions({
-                  length_m:
-                    value,
-                })
-              }
-            />
-
-
-            <Control
-              label="Width"
-              value={width}
-              min={2}
-              max={12}
-              step={0.1}
-              unit="m"
-              onChange={(value) =>
-                setDimensions({
-                  width_m:
-                    value,
-                })
-              }
-            />
-
-
-            <Control
-              label="Height"
-              value={height}
-              min={2}
-              max={8}
-              step={0.1}
-              unit="m"
-              onChange={(value) =>
-                setDimensions({
-                  height_m:
-                    value,
-                })
-              }
-            />
-
-
-            <Control
-              label="Orientation"
-              value={orientation}
-              min={0}
-              max={360}
-              step={1}
-              unit="°"
-              onChange={
-                setOrientation
-              }
-            />
-
-
-            <Control
-              label="Rock Wool Wall Insulation"
-              value={insulationThickness}
-              min={25}
-              max={250}
-              step={5}
-              unit="mm"
-              onChange={
-                setWallInsulationThicknessMm
-              }
-            />
-
-
-            <Control
-              label="Rock Wool Roof Insulation"
-              value={
-                roofInsulationThickness
-              }
-              min={25}
-              max={300}
-              step={5}
-              unit="mm"
-              onChange={
-                setRoofInsulationThicknessMm
-              }
-            />
-
-
-            <div className="mt-8 rounded-xl border border-cyan-900 bg-cyan-950/20 p-4">
-
-              <p className="font-semibold text-cyan-300">
-                Shared Design State
-              </p>
-
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
-
-                <p>
-                  Dimensions:
-                  <span className="text-white">
-                    {" "}
-                    {length.toFixed(
-                      1,
-                    )}
-                    ×
-                    {width.toFixed(
-                      1,
-                    )}
-                    ×
-                    {height.toFixed(
-                      1,
-                    )}{" "}
-                    m
-                  </span>
-                </p>
-
-                <p>
-                  Wall thickness:
-                  <span className="text-white">
-                    {" "}
-                    {(
-                      wallThickness *
-                      1000
-                    ).toFixed(
-                      0,
-                    )}{" "}
-                    mm
-                  </span>
-                </p>
-
-                <p>
-                  Roof thickness:
-                  <span className="text-white">
-                    {" "}
-                    {(
-                      roofThickness *
-                      1000
-                    ).toFixed(
-                      0,
-                    )}{" "}
-                    mm
-                  </span>
-                </p>
-
-                <p>
-                  Orientation:
-                  <span className="text-white">
-                    {" "}
-                    {orientation}°
-                    {" — "}
-                    {orientationName}
-                  </span>
-                </p>
+                <Shelter3D
+                  length={length}
+                  width={width}
+                  height={height}
+                  orientation={orientation}
+                  wallThickness={wallThickness}
+                  roofThickness={roofThickness}
+                />
 
               </div>
 
             </div>
 
+          </section>
 
-            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
 
-              <p className="font-semibold">
-                Wall Construction
+          {/* CONTROLS */}
+          <aside className="min-h-0 overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-4">
+
+            {/* SECTION */}
+            <PanelSection title="Dimensions">
+
+              <div className="grid grid-cols-3 gap-2">
+
+                <MiniControl
+                  label="Length"
+                  value={length}
+                  unit="m"
+                  min={2}
+                  max={15}
+                  step={0.1}
+                  onChange={(value) =>
+                    setDimensions({
+                      length_m: value,
+                    })
+                  }
+                />
+
+                <MiniControl
+                  label="Width"
+                  value={width}
+                  unit="m"
+                  min={2}
+                  max={12}
+                  step={0.1}
+                  onChange={(value) =>
+                    setDimensions({
+                      width_m: value,
+                    })
+                  }
+                />
+
+                <MiniControl
+                  label="Height"
+                  value={height}
+                  unit="m"
+                  min={2}
+                  max={8}
+                  step={0.1}
+                  onChange={(value) =>
+                    setDimensions({
+                      height_m: value,
+                    })
+                  }
+                />
+
+              </div>
+
+            </PanelSection>
+
+
+            {/* ORIENTATION */}
+            <PanelSection title="Orientation">
+
+              <div className="flex items-center gap-3">
+
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  step="1"
+                  value={orientation}
+                  onChange={(event) =>
+                    setOrientation(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                  className="min-w-0 flex-1 accent-cyan-400"
+                />
+
+                <div className="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-center text-sm font-semibold text-cyan-300">
+                  {orientation}°
+                </div>
+
+              </div>
+
+              <div className="mt-2 flex justify-between text-[10px] text-slate-500">
+                <span>N</span>
+                <span>E</span>
+                <span>S</span>
+                <span>W</span>
+                <span>N</span>
+              </div>
+
+              <p className="mt-2 text-xs text-slate-400">
+                Facing:
+                <span className="ml-1 font-medium text-white">
+                  {orientationName}
+                </span>
               </p>
 
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
+            </PanelSection>
 
-                <p>
-                  Brick:
-                  <span className="text-white">
-                    {" "}
-                    {brickThickness.toFixed(
-                      0,
-                    )}{" "}
-                    mm
+
+            {/* WALL */}
+            <PanelSection title="Wall Construction">
+
+              <LayerRow
+                material="Brick"
+                thickness={`${brickThickness.toFixed(0)} mm`}
+              />
+
+              <div className="mt-2">
+
+                <div className="flex items-center justify-between">
+
+                  <span className="text-xs text-slate-300">
+                    Rock Wool
                   </span>
-                </p>
 
-                <p>
-                  Rock Wool:
-                  <span className="text-white">
-                    {" "}
+                  <span className="text-xs font-semibold text-cyan-300">
                     {insulationThickness.toFixed(
                       0,
                     )}{" "}
                     mm
                   </span>
-                </p>
 
-                <p>
-                  Gypsum:
-                  <span className="text-white">
-                    {" "}
-                    {gypsumThickness.toFixed(
+                </div>
+
+                <input
+                  type="range"
+                  min="25"
+                  max="250"
+                  step="5"
+                  value={
+                    insulationThickness
+                  }
+                  onChange={(event) =>
+                    setWallInsulationThicknessMm(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                  className="mt-1 w-full accent-cyan-400"
+                />
+
+              </div>
+
+              <LayerRow
+                material="Gypsum"
+                thickness={`${gypsumThickness.toFixed(0)} mm`}
+              />
+
+
+              {/* R/U CARDS */}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+
+                <div className="rounded-xl border border-cyan-900/70 bg-cyan-950/30 p-3">
+
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500">
+                    R-Value
+                  </p>
+
+                  <p className="mt-1 text-lg font-bold text-cyan-300">
+                    {wallRValue.toFixed(3)}
+                  </p>
+
+                  <p className="text-[10px] text-slate-500">
+                    m²K/W
+                  </p>
+
+                </div>
+
+
+                <div className="rounded-xl border border-emerald-900/70 bg-emerald-950/30 p-3">
+
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500">
+                    U-Value
+                  </p>
+
+                  <p className="mt-1 text-lg font-bold text-emerald-300">
+                    {wallUValue.toFixed(3)}
+                  </p>
+
+                  <p className="text-[10px] text-slate-500">
+                    W/m²K
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-950 px-3 py-2 text-xs">
+
+                <span className="text-slate-500">
+                  Total wall thickness
+                </span>
+
+                <span className="font-semibold text-white">
+                  {(wallThickness * 1000).toFixed(
+                    0,
+                  )}{" "}
+                  mm
+                </span>
+
+              </div>
+
+            </PanelSection>
+
+
+            {/* ROOF */}
+            <PanelSection title="Roof Construction">
+
+              <div className="flex items-center justify-between">
+
+                <span className="text-xs text-slate-300">
+                  Concrete
+                </span>
+
+                <span className="text-xs text-slate-400">
+                  100 mm
+                </span>
+
+              </div>
+
+              <div className="mt-3">
+
+                <div className="flex items-center justify-between">
+
+                  <span className="text-xs text-slate-300">
+                    Rock Wool
+                  </span>
+
+                  <span className="text-xs font-semibold text-cyan-300">
+                    {roofInsulationThickness.toFixed(
                       0,
                     )}{" "}
                     mm
                   </span>
-                </p>
+
+                </div>
+
+                <input
+                  type="range"
+                  min="25"
+                  max="300"
+                  step="5"
+                  value={
+                    roofInsulationThickness
+                  }
+                  onChange={(event) =>
+                    setRoofInsulationThicknessMm(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                  className="mt-1 w-full accent-cyan-400"
+                />
 
               </div>
 
-            </div>
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-950 px-3 py-2 text-xs">
+
+                <span className="text-slate-500">
+                  Total roof thickness
+                </span>
+
+                <span className="font-semibold text-white">
+                  {(roofThickness * 1000).toFixed(
+                    0,
+                  )}{" "}
+                  mm
+                </span>
+
+              </div>
+
+            </PanelSection>
 
 
-            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
+            {/* DESIGN SUMMARY */}
+            <PanelSection title="Design Summary">
 
-              <p className="font-semibold">
-                Thermal Properties
-              </p>
+              <div className="grid grid-cols-2 gap-2">
 
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
+                <Summary
+                  label="Floor Area"
+                  value={`${(
+                    length * width
+                  ).toFixed(1)} m²`}
+                />
 
-                <p>
-                  R-value:
-                  <span className="text-white">
-                    {" "}
-                    {wallRValue.toFixed(
-                      3,
-                    )}{" "}
-                    m²K/W
-                  </span>
-                </p>
+                <Summary
+                  label="Volume"
+                  value={`${(
+                    length *
+                    width *
+                    height
+                  ).toFixed(1)} m³`}
+                />
 
-                <p>
-                  U-value:
-                  <span className="text-white">
-                    {" "}
-                    {wallUValue.toFixed(
-                      3,
-                    )}{" "}
-                    W/m²K
-                  </span>
-                </p>
+                <Summary
+                  label="Orientation"
+                  value={`${orientation}°`}
+                />
+
+                <Summary
+                  label="Wall"
+                  value={`${(
+                    wallThickness *
+                    1000
+                  ).toFixed(0)} mm`}
+                />
+
+              </div>
+
+            </PanelSection>
+
+
+            {/* LEGEND */}
+            <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950 p-3">
+
+              <div className="flex items-center justify-between">
+
+                <span className="text-xs text-slate-500">
+                  Live design state
+                </span>
+
+                <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Synced
+                </span>
 
               </div>
 
@@ -451,47 +563,66 @@ export default function ThreeDPage() {
           </aside>
 
         </div>
+
       </div>
     </main>
   );
 }
 
 
-function Control({
+function PanelSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-b border-slate-800 pb-3 pt-1 first:pt-0">
+
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        {title}
+      </h3>
+
+      {children}
+
+    </section>
+  );
+}
+
+
+function MiniControl({
   label,
   value,
+  unit,
   min,
   max,
   step,
-  unit,
   onChange,
 }: {
   label: string;
   value: number;
+  unit: string;
   min: number;
   max: number;
   step: number;
-  unit: string;
-  onChange: (
-    value: number,
-  ) => void;
+  onChange: (value: number) => void;
 }) {
-
   return (
-    <div className="mt-6">
+    <div>
 
-      <div className="flex justify-between">
+      <div className="flex items-baseline justify-between">
 
-        <label className="text-sm text-slate-300">
+        <span className="text-[10px] text-slate-500">
           {label}
-        </label>
+        </span>
 
-        <span className="text-sm text-cyan-400">
-          {value} {unit}
+        <span className="text-xs font-semibold text-cyan-300">
+          {value}
+          {unit}
         </span>
 
       </div>
-
 
       <input
         type="range"
@@ -499,36 +630,84 @@ function Control({
         max={max}
         step={step}
         value={value}
-        onChange={(
-          event,
-        ) =>
+        onChange={(event) =>
           onChange(
             Number(
               event.target.value,
             ),
           )
         }
-        className="mt-3 w-full accent-cyan-400"
+        className="mt-1 w-full accent-cyan-400"
       />
 
+    </div>
+  );
+}
 
-      <input
-        type="number"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(
-          event,
-        ) =>
-          onChange(
-            Number(
-              event.target.value,
-            ),
-          )
-        }
-        className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-      />
+
+function LayerRow({
+  material,
+  thickness,
+}: {
+  material: string;
+  thickness: string;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-slate-950 px-3 py-2">
+
+      <span className="text-xs text-slate-300">
+        {material}
+      </span>
+
+      <span className="text-xs text-slate-400">
+        {thickness}
+      </span>
+
+    </div>
+  );
+}
+
+
+function Summary({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg bg-slate-950 p-2.5">
+
+      <p className="text-[10px] text-slate-500">
+        {label}
+      </p>
+
+      <p className="mt-0.5 text-sm font-semibold text-white">
+        {value}
+      </p>
+
+    </div>
+  );
+}
+
+
+function StatusBadge({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5">
+
+      <span className="text-slate-500">
+        {label}
+      </span>
+
+      <span className="text-emerald-400">
+        ● {value}
+      </span>
 
     </div>
   );

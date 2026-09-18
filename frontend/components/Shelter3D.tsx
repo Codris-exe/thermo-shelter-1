@@ -1,18 +1,37 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
-import { Grid, OrbitControls } from "@react-three/drei";
+import {
+  Canvas,
+  useFrame,
+  useThree,
+} from "@react-three/fiber";
+
+import {
+  Grid,
+  OrbitControls,
+} from "@react-three/drei";
+
 import * as THREE from "three";
+
+import {
+  useEffect,
+  useRef,
+} from "react";
+
+import type {
+  OrbitControls as OrbitControlsImpl,
+} from "three-stdlib";
+
 
 interface Shelter3DProps {
   length?: number;
   width?: number;
   height?: number;
   orientation?: number;
-
   wallThickness?: number;
   roofThickness?: number;
 }
+
 
 function ShelterModel({
   length,
@@ -22,17 +41,13 @@ function ShelterModel({
   wallThickness,
   roofThickness,
 }: Required<Shelter3DProps>) {
+
   const windowWidth = 1.5;
   const windowHeight = 1.2;
   const windowBottom = 1.5;
 
   const doorWidth = 0.9;
   const doorHeight = 2.1;
-
-  /*
-   * The wall thickness now comes from the actual
-   * material assembly instead of a fixed 0.20 m value.
-   */
 
   const leftWallWidth =
     (length - windowWidth) / 2;
@@ -41,11 +56,18 @@ function ShelterModel({
     (length - doorWidth) / 2;
 
   const topWindowHeight =
-    height -
-    (windowBottom + windowHeight);
+    Math.max(
+      height -
+        (windowBottom + windowHeight),
+      0,
+    );
 
   const topDoorHeight =
-    height - doorHeight;
+    Math.max(
+      height - doorHeight,
+      0,
+    );
+
 
   const wallMaterial =
     new THREE.MeshStandardMaterial({
@@ -86,6 +108,7 @@ function ShelterModel({
       roughness: 0.95,
     });
 
+
   return (
     <group
       rotation={[
@@ -96,10 +119,18 @@ function ShelterModel({
         0,
       ]}
     >
+
       {/* FLOOR */}
+
       <mesh
-        position={[0, -0.1, 0]}
-        material={floorMaterial}
+        position={[
+          0,
+          -0.1,
+          0,
+        ]}
+        material={
+          floorMaterial
+        }
         receiveShadow
       >
         <boxGeometry
@@ -111,7 +142,9 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* SOUTH WALL - LEFT */}
+
+      {/* SOUTH WALL LEFT */}
+
       <mesh
         position={[
           -(
@@ -121,7 +154,9 @@ function ShelterModel({
           height / 2,
           -width / 2,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -133,7 +168,9 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* SOUTH WALL - RIGHT */}
+
+      {/* SOUTH WALL RIGHT */}
+
       <mesh
         position={[
           windowWidth / 2 +
@@ -141,7 +178,9 @@ function ShelterModel({
           height / 2,
           -width / 2,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -153,7 +192,9 @@ function ShelterModel({
         />
       </mesh>
 
+
       {/* SOUTH WALL ABOVE WINDOW */}
+
       {topWindowHeight > 0 && (
         <mesh
           position={[
@@ -163,7 +204,9 @@ function ShelterModel({
               topWindowHeight / 2,
             -width / 2,
           ]}
-          material={wallMaterial}
+          material={
+            wallMaterial
+          }
           castShadow
         >
           <boxGeometry
@@ -176,7 +219,9 @@ function ShelterModel({
         </mesh>
       )}
 
+
       {/* SOUTH WINDOW */}
+
       <mesh
         position={[
           0,
@@ -186,7 +231,9 @@ function ShelterModel({
             wallThickness / 2 -
             0.03,
         ]}
-        material={glassMaterial}
+        material={
+          glassMaterial
+        }
       >
         <boxGeometry
           args={[
@@ -197,7 +244,9 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* NORTH WALL - LEFT */}
+
+      {/* NORTH WALL LEFT */}
+
       <mesh
         position={[
           -(
@@ -207,7 +256,9 @@ function ShelterModel({
           height / 2,
           width / 2,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -219,7 +270,9 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* NORTH WALL - RIGHT */}
+
+      {/* NORTH WALL RIGHT */}
+
       <mesh
         position={[
           doorWidth / 2 +
@@ -227,7 +280,9 @@ function ShelterModel({
           height / 2,
           width / 2,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -239,7 +294,9 @@ function ShelterModel({
         />
       </mesh>
 
+
       {/* NORTH WALL ABOVE DOOR */}
+
       {topDoorHeight > 0 && (
         <mesh
           position={[
@@ -248,7 +305,9 @@ function ShelterModel({
               topDoorHeight / 2,
             width / 2,
           ]}
-          material={wallMaterial}
+          material={
+            wallMaterial
+          }
           castShadow
         >
           <boxGeometry
@@ -261,7 +320,9 @@ function ShelterModel({
         </mesh>
       )}
 
+
       {/* DOOR */}
+
       <mesh
         position={[
           0,
@@ -270,7 +331,9 @@ function ShelterModel({
             wallThickness / 2 -
             0.03,
         ]}
-        material={doorMaterial}
+        material={
+          doorMaterial
+        }
       >
         <boxGeometry
           args={[
@@ -281,14 +344,18 @@ function ShelterModel({
         />
       </mesh>
 
+
       {/* EAST WALL */}
+
       <mesh
         position={[
           length / 2,
           height / 2,
           0,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -300,14 +367,18 @@ function ShelterModel({
         />
       </mesh>
 
+
       {/* WEST WALL */}
+
       <mesh
         position={[
           -length / 2,
           height / 2,
           0,
         ]}
-        material={wallMaterial}
+        material={
+          wallMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -319,7 +390,9 @@ function ShelterModel({
         />
       </mesh>
 
+
       {/* ROOF */}
+
       <mesh
         position={[
           0,
@@ -327,26 +400,34 @@ function ShelterModel({
             roofThickness / 2,
           0,
         ]}
-        material={roofMaterial}
+        material={
+          roofMaterial
+        }
         castShadow
       >
         <boxGeometry
           args={[
-            length + wallThickness,
+            length +
+              wallThickness,
             roofThickness,
-            width + wallThickness,
+            width +
+              wallThickness,
           ]}
         />
       </mesh>
 
+
       {/* THERMAL MASS */}
+
       <mesh
         position={[
           0,
           0.55,
           0,
         ]}
-        material={massMaterial}
+        material={
+          massMaterial
+        }
         castShadow
       >
         <boxGeometry
@@ -357,13 +438,98 @@ function ShelterModel({
           ]}
         />
       </mesh>
+
     </group>
   );
 }
 
+
+function CameraController({
+  length,
+  width,
+  height,
+}: {
+  length: number;
+  width: number;
+  height: number;
+}) {
+
+  const { camera } =
+    useThree();
+
+  const controlsRef =
+    useRef<OrbitControlsImpl | null>(
+      null,
+    );
+
+
+  useEffect(() => {
+
+    const largestDimension =
+      Math.max(
+        length,
+        width,
+        height,
+      );
+
+    const distance =
+      largestDimension * 2.3;
+
+    camera.position.set(
+      distance,
+      distance * 0.65,
+      distance,
+    );
+
+    camera.lookAt(
+      0,
+      height / 2,
+      0,
+    );
+
+    if (controlsRef.current) {
+
+      controlsRef.current.target.set(
+        0,
+        height / 2,
+        0,
+      );
+
+      controlsRef.current.update();
+    }
+
+    camera.updateProjectionMatrix();
+
+  }, [
+    camera,
+    length,
+    width,
+    height,
+  ]);
+
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enableDamping
+      dampingFactor={0.08}
+      minDistance={3}
+      maxDistance={50}
+      target={[
+        0,
+        height / 2,
+        0,
+      ]}
+    />
+  );
+}
+
+
 function SunLight() {
+
   return (
     <>
+
       <directionalLight
         position={[
           6,
@@ -381,6 +547,7 @@ function SunLight() {
           -6,
         ]}
       >
+
         <sphereGeometry
           args={[
             0.4,
@@ -392,10 +559,13 @@ function SunLight() {
         <meshBasicMaterial
           color="#facc15"
         />
+
       </mesh>
+
     </>
   );
 }
+
 
 export default function Shelter3D({
   length = 5,
@@ -405,8 +575,10 @@ export default function Shelter3D({
   wallThickness = 0.312,
   roofThickness = 0.22,
 }: Shelter3DProps) {
+
   return (
-    <div className="h-[650px] w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
+    <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-950">
+
       <Canvas
         shadows
         camera={{
@@ -423,6 +595,7 @@ export default function Shelter3D({
           antialias: true,
         }}
       >
+
         <color
           attach="background"
           args={[
@@ -430,11 +603,14 @@ export default function Shelter3D({
           ]}
         />
 
+
         <ambientLight
           intensity={1.2}
         />
 
+
         <SunLight />
+
 
         <Grid
           args={[
@@ -451,11 +627,14 @@ export default function Shelter3D({
           fadeStrength={1}
         />
 
+
         <ShelterModel
           length={length}
           width={width}
           height={height}
-          orientation={orientation}
+          orientation={
+            orientation
+          }
           wallThickness={
             wallThickness
           }
@@ -464,18 +643,15 @@ export default function Shelter3D({
           }
         />
 
-        <OrbitControls
-          enableDamping
-          dampingFactor={0.08}
-          target={[
-            0,
-            1.3,
-            0,
-          ]}
-          minDistance={4}
-          maxDistance={25}
+
+        <CameraController
+          length={length}
+          width={width}
+          height={height}
         />
+
       </Canvas>
+
     </div>
   );
 }

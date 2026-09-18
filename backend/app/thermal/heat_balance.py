@@ -31,7 +31,11 @@ class HeatTransferBreakdown:
     net_gain_w: float
 
 
-def _window_area_by_wall(design: ShelterDesign) -> dict[str, float]:
+def _window_area_by_wall(
+    design: ShelterDesign,
+) -> dict[str, float]:
+    """Calculate total window area for each wall."""
+
     areas = {
         "north": 0.0,
         "south": 0.0,
@@ -40,12 +44,18 @@ def _window_area_by_wall(design: ShelterDesign) -> dict[str, float]:
     }
 
     for window in design.windows:
-        areas[window.wall] += window.width_m * window.height_m
+        areas[window.wall] += (
+            window.width_m * window.height_m
+        )
 
     return areas
 
 
-def _door_area_by_wall(design: ShelterDesign) -> dict[str, float]:
+def _door_area_by_wall(
+    design: ShelterDesign,
+) -> dict[str, float]:
+    """Calculate total door area for each wall."""
+
     areas = {
         "north": 0.0,
         "south": 0.0,
@@ -54,7 +64,9 @@ def _door_area_by_wall(design: ShelterDesign) -> dict[str, float]:
     }
 
     for door in design.doors:
-        areas[door.wall] += door.width_m * door.height_m
+        areas[door.wall] += (
+            door.width_m * door.height_m
+        )
 
     return areas
 
@@ -66,17 +78,32 @@ def calculate_heat_balance(
     Calculate the instantaneous thermal energy balance.
 
     Sign convention:
-        Positive heat transfer = heat leaves the shelter.
-        Negative heat transfer = heat enters the shelter.
 
-    Therefore:
-        net_gain_w > 0  -> shelter gains net heat
-        net_gain_w < 0  -> shelter loses net heat
+    Positive heat transfer:
+        heat is leaving the shelter.
+
+    Negative heat transfer:
+        heat is entering the shelter.
+
+    Net heat gain:
+
+        solar gain
+        + internal gain
+        - total heat loss
+
+    Positive net_gain_w means the shelter gains heat.
+    Negative net_gain_w means the shelter loses heat.
     """
 
     design = request.design
-    indoor_c = request.indoor_temperature_c
-    outdoor_c = request.weather.outdoor_temperature_c
+
+    indoor_temperature_c = (
+        request.indoor_temperature_c
+    )
+
+    outdoor_temperature_c = (
+        request.weather.outdoor_temperature_c
+    )
 
     geometry = calculate_geometry(design)
 
@@ -84,8 +111,10 @@ def calculate_heat_balance(
     # WALLS
     # ---------------------------------------------------------
 
-    wall_thermal = calculate_assembly_thermal_properties(
-        design.wall_assembly
+    wall_thermal = (
+        calculate_assembly_thermal_properties(
+            design.wall_assembly
+        )
     )
 
     windows_by_wall = _window_area_by_wall(design)
@@ -101,6 +130,7 @@ def calculate_heat_balance(
     wall_heat_transfer = 0.0
 
     for wall_name, gross_area in wall_areas.items():
+
         opening_area = (
             windows_by_wall[wall_name]
             + doors_by_wall[wall_name]
@@ -114,43 +144,48 @@ def calculate_heat_balance(
         wall_heat_transfer += heat_transfer_w(
             wall_thermal.u_value_w_m2k,
             opaque_area,
-            indoor_c,
-            outdoor_c,
+            indoor_temperature_c,
+            outdoor_temperature_c,
         )
 
     # ---------------------------------------------------------
     # ROOF
     # ---------------------------------------------------------
 
-    roof_thermal = calculate_assembly_thermal_properties(
-        design.roof_assembly
+    roof_thermal = (
+        calculate_assembly_thermal_properties(
+            design.roof_assembly
+        )
     )
 
     roof_heat_transfer = heat_transfer_w(
         roof_thermal.u_value_w_m2k,
         geometry.roof_area_m2,
-        indoor_c,
-        outdoor_c,
+        indoor_temperature_c,
+        outdoor_temperature_c,
     )
 
     # ---------------------------------------------------------
     # FLOOR
     # ---------------------------------------------------------
 
-    floor_thermal = calculate_assembly_thermal_properties(
-        design.floor_assembly
+    floor_thermal = (
+        calculate_assembly_thermal_properties(
+            design.floor_assembly
+        )
     )
 
-    ground_temperature_c = (
-        request.weather.ground_temperature_c
-        if request.weather.ground_temperature_c is not None
-        else outdoor_c
-    )
+    if request.weather.ground_temperature_c is not None:
+        ground_temperature_c = (
+            request.weather.ground_temperature_c
+        )
+    else:
+        ground_temperature_c = outdoor_temperature_c
 
     floor_heat_transfer = heat_transfer_w(
         floor_thermal.u_value_w_m2k,
         geometry.floor_area_m2,
-        indoor_c,
+        indoor_temperature_c,
         ground_temperature_c,
     )
 
@@ -161,12 +196,19 @@ def calculate_heat_balance(
     window_heat_transfer = 0.0
 
     for window in design.windows:
-        area = window.width_m * window.height_m
+
+        area = (
+            window.width_m
+            * window.height_m
+        )
 
         window_heat_transfer += (
             window.u_value_w_m2k
             * area
-            * (indoor_c - outdoor_c)
+            * (
+                indoor_temperature_c
+                - outdoor_temperature_c
+            )
         )
 
     # ---------------------------------------------------------
@@ -176,12 +218,19 @@ def calculate_heat_balance(
     door_heat_transfer = 0.0
 
     for door in design.doors:
-        area = door.width_m * door.height_m
+
+        area = (
+            door.width_m
+            * door.height_m
+        )
 
         door_heat_transfer += (
             door.u_value_w_m2k
             * area
-            * (indoor_c - outdoor_c)
+            * (
+                indoor_temperature_c
+                - outdoor_temperature_c
+            )
         )
 
     # ---------------------------------------------------------
@@ -200,11 +249,14 @@ def calculate_heat_balance(
     ventilation_heat_transfer = (
         air_mass_flow_kg_s
         * AIR_SPECIFIC_HEAT_J_KGK
-        * (indoor_c - outdoor_c)
+        * (
+            indoor_temperature_c
+            - outdoor_temperature_c
+        )
     )
 
     # ---------------------------------------------------------
-    # TOTAL CONDUCTIVE / ENVELOPE TRANSFER
+    # TOTAL CONDUCTIVE HEAT TRANSFER
     # ---------------------------------------------------------
 
     conductive_heat_transfer = (
@@ -224,10 +276,20 @@ def calculate_heat_balance(
     # SOLAR + INTERNAL GAINS
     # ---------------------------------------------------------
 
-    solar_gain = request.solar_gain_w
-    internal_gain = request.internal_heat_gain_w
+    # IMPORTANT:
+    # solar_gain_w now comes from WeatherPoint because
+    # the transient simulation supplies solar gain for
+    # each weather timestep.
+    solar_gain = request.weather.solar_gain_w
 
-    # Positive value means the shelter gains net heat.
+    internal_gain = (
+        request.internal_heat_gain_w
+    )
+
+    # ---------------------------------------------------------
+    # NET HEAT GAIN
+    # ---------------------------------------------------------
+
     net_gain = (
         solar_gain
         + internal_gain

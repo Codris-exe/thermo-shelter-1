@@ -14,6 +14,10 @@ class WeatherPoint(BaseModel):
 
     solar_irradiance_w_m2: float = Field(default=0.0, ge=0)
 
+    # Solar gain is supplied by the solar model.
+    # For now it can be entered directly for testing.
+    solar_gain_w: float = Field(default=0.0, ge=0)
+
     relative_humidity_pct: float | None = Field(
         default=None,
         ge=0,
@@ -30,11 +34,6 @@ class HeatBalanceRequest(BaseModel):
 
     weather: WeatherPoint
 
-    solar_gain_w: float = Field(
-        default=0.0,
-        ge=0,
-    )
-
     internal_heat_gain_w: float = Field(
         default=0.0,
         ge=0,
@@ -42,6 +41,8 @@ class HeatBalanceRequest(BaseModel):
 
 
 class HeatBalanceResult(BaseModel):
+    timestamp: datetime
+
     wall_heat_transfer_w: float
     roof_heat_transfer_w: float
     floor_heat_transfer_w: float
@@ -61,3 +62,60 @@ class HeatBalanceResult(BaseModel):
 
     indoor_temperature_c: float
     outdoor_temperature_c: float
+
+
+class SimulationRequest(BaseModel):
+    design: ShelterDesign
+
+    initial_indoor_temperature_c: float = 18.0
+
+    weather: list[WeatherPoint] = Field(
+        min_length=2
+    )
+
+    internal_heat_gain_w: float = Field(
+        default=0.0,
+        ge=0,
+    )
+
+    timestep_minutes: int = Field(
+        default=60,
+        ge=5,
+        le=60,
+    )
+
+
+class SimulationPoint(BaseModel):
+    timestamp: datetime
+
+    indoor_temperature_c: float
+    outdoor_temperature_c: float
+
+    solar_irradiance_w_m2: float
+    solar_gain_w: float
+
+    wall_heat_transfer_w: float
+    roof_heat_transfer_w: float
+    floor_heat_transfer_w: float
+
+    window_heat_transfer_w: float
+    door_heat_transfer_w: float
+    ventilation_heat_transfer_w: float
+
+    total_heat_loss_w: float
+    net_heat_gain_w: float
+
+
+class SimulationResult(BaseModel):
+    initial_indoor_temperature_c: float
+    final_indoor_temperature_c: float
+
+    minimum_indoor_temperature_c: float
+    maximum_indoor_temperature_c: float
+
+    comfort_hours: float
+    cold_hours: float
+    hot_hours: float
+    comfort_percentage: float
+
+    points: list[SimulationPoint]

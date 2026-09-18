@@ -10,13 +10,20 @@ class WeatherPoint(BaseModel):
 
     outdoor_temperature_c: float
 
-    wind_speed_m_s: float = Field(default=0.0, ge=0)
+    wind_speed_m_s: float = Field(
+        default=0.0,
+        ge=0,
+    )
 
-    solar_irradiance_w_m2: float = Field(default=0.0, ge=0)
+    solar_irradiance_w_m2: float = Field(
+        default=0.0,
+        ge=0,
+    )
 
-    # Solar gain is supplied by the solar model.
-    # For now it can be entered directly for testing.
-    solar_gain_w: float = Field(default=0.0, ge=0)
+    solar_gain_w: float = Field(
+        default=0.0,
+        ge=0,
+    )
 
     relative_humidity_pct: float | None = Field(
         default=None,
@@ -89,6 +96,8 @@ class SimulationPoint(BaseModel):
     timestamp: datetime
 
     indoor_temperature_c: float
+    thermal_mass_temperature_c: float
+
     outdoor_temperature_c: float
 
     solar_irradiance_w_m2: float
@@ -102,6 +111,8 @@ class SimulationPoint(BaseModel):
     door_heat_transfer_w: float
     ventilation_heat_transfer_w: float
 
+    thermal_mass_heat_transfer_w: float
+
     total_heat_loss_w: float
     net_heat_gain_w: float
 
@@ -112,6 +123,12 @@ class SimulationResult(BaseModel):
 
     minimum_indoor_temperature_c: float
     maximum_indoor_temperature_c: float
+
+    initial_thermal_mass_temperature_c: float | None
+    final_thermal_mass_temperature_c: float | None
+
+    minimum_thermal_mass_temperature_c: float | None
+    maximum_thermal_mass_temperature_c: float | None
 
     comfort_hours: float
     cold_hours: float

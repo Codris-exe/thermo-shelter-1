@@ -53,7 +53,15 @@ class ThermalMassConfig(BaseModel):
     material_id: str
     mass_kg: float = Field(gt=0)
     specific_heat_j_kgk: float = Field(gt=0)
+
     initial_temperature_c: float
+
+    # Effective coupling between indoor air and thermal mass.
+    # This is a simplified lumped-model parameter.
+    coupling_w_per_k: float = Field(
+        default=5.0,
+        gt=0,
+    )
 
 
 class VentilationConfig(BaseModel):
@@ -67,6 +75,7 @@ class ComfortConfig(BaseModel):
 
 class ShelterDesign(BaseModel):
     location: LocationConfig
+
     geometry: GeometryConfig
 
     orientation_deg: float = Field(
@@ -76,11 +85,18 @@ class ShelterDesign(BaseModel):
     )
 
     wall_assembly: MaterialAssembly
+
     roof_assembly: MaterialAssembly
+
     floor_assembly: MaterialAssembly
 
-    windows: list[WindowConfig] = Field(default_factory=list)
-    doors: list[DoorConfig] = Field(default_factory=list)
+    windows: list[WindowConfig] = Field(
+        default_factory=list
+    )
+
+    doors: list[DoorConfig] = Field(
+        default_factory=list
+    )
 
     thermal_mass: ThermalMassConfig | None = None
 

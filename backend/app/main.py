@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.location import router as location_router
 from app.api.simulation import router as simulation_router
+from app.api.solar import router as solar_router
 from app.api.weather import router as weather_router
 
 
@@ -13,7 +14,7 @@ app = FastAPI(
         "simulation, real weather analysis, "
         "solar modeling and optimization."
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 
@@ -38,6 +39,10 @@ app.include_router(
 
 app.include_router(
     weather_router
+)
+
+app.include_router(
+    solar_router
 )
 
 

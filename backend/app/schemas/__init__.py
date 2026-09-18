@@ -11,6 +11,23 @@ from .design import (
     WindowConfig,
 )
 
+from .simulation import (
+    HeatBalanceRequest,
+    HeatBalanceResult,
+    SimulationPoint,
+    SimulationRequest,
+    SimulationResult,
+    WeatherPoint,
+)
+
+from .solar import (
+    SolarCalculationRequest,
+    SolarCalculationResult,
+    SolarSurfaceResult,
+    SolarWindowResult,
+)
+
+
 __all__ = [
     "ComfortConfig",
     "DoorConfig",
@@ -22,9 +39,16 @@ __all__ = [
     "ThermalMassConfig",
     "VentilationConfig",
     "WindowConfig",
+
+    "HeatBalanceRequest",
+    "HeatBalanceResult",
+    "SimulationPoint",
+    "SimulationRequest",
+    "SimulationResult",
+    "WeatherPoint",
+
+    "SolarCalculationRequest",
+    "SolarCalculationResult",
+    "SolarSurfaceResult",
+    "SolarWindowResult",
 ]
-from .simulation import (
-    HeatBalanceRequest,
-    HeatBalanceResult,
-    WeatherPoint,
-)

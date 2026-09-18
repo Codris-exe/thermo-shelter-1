@@ -25,6 +25,29 @@ class WeatherPoint(BaseModel):
         ge=0,
     )
 
+    direct_radiation_w_m2: float = Field(
+        default=0.0,
+        ge=0,
+    )
+
+    diffuse_radiation_w_m2: float = Field(
+        default=0.0,
+        ge=0,
+    )
+
+    direct_normal_irradiance_w_m2: float = Field(
+        default=0.0,
+        ge=0,
+    )
+
+    cloud_cover_pct: float | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
+
+    is_day: bool = False
+
     relative_humidity_pct: float | None = Field(
         default=None,
         ge=0,

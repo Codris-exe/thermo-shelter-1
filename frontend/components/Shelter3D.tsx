@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Grid } from "@react-three/drei";
+import { Grid, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 interface Shelter3DProps {
@@ -9,6 +9,9 @@ interface Shelter3DProps {
   width?: number;
   height?: number;
   orientation?: number;
+
+  wallThickness?: number;
+  roofThickness?: number;
 }
 
 function ShelterModel({
@@ -16,16 +19,20 @@ function ShelterModel({
   width,
   height,
   orientation,
+  wallThickness,
+  roofThickness,
 }: Required<Shelter3DProps>) {
-  const wallThickness = 0.2;
-
   const windowWidth = 1.5;
   const windowHeight = 1.2;
+  const windowBottom = 1.5;
 
   const doorWidth = 0.9;
   const doorHeight = 2.1;
 
-  const windowBottom = 1.5;
+  /*
+   * The wall thickness now comes from the actual
+   * material assembly instead of a fixed 0.20 m value.
+   */
 
   const leftWallWidth =
     (length - windowWidth) / 2;
@@ -34,7 +41,8 @@ function ShelterModel({
     (length - doorWidth) / 2;
 
   const topWindowHeight =
-    height - (windowBottom + windowHeight);
+    height -
+    (windowBottom + windowHeight);
 
   const topDoorHeight =
     height - doorHeight;
@@ -103,10 +111,13 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* SOUTH WALL LEFT */}
+      {/* SOUTH WALL - LEFT */}
       <mesh
         position={[
-          -(windowWidth / 2 + leftWallWidth / 2),
+          -(
+            windowWidth / 2 +
+            leftWallWidth / 2
+          ),
           height / 2,
           -width / 2,
         ]}
@@ -122,10 +133,11 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* SOUTH WALL RIGHT */}
+      {/* SOUTH WALL - RIGHT */}
       <mesh
         position={[
-          windowWidth / 2 + leftWallWidth / 2,
+          windowWidth / 2 +
+            leftWallWidth / 2,
           height / 2,
           -width / 2,
         ]}
@@ -170,7 +182,9 @@ function ShelterModel({
           0,
           windowBottom +
             windowHeight / 2,
-          -width / 2 - 0.03,
+          -width / 2 -
+            wallThickness / 2 -
+            0.03,
         ]}
         material={glassMaterial}
       >
@@ -183,10 +197,13 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* NORTH WALL LEFT */}
+      {/* NORTH WALL - LEFT */}
       <mesh
         position={[
-          -(doorWidth / 2 + doorSideWidth / 2),
+          -(
+            doorWidth / 2 +
+            doorSideWidth / 2
+          ),
           height / 2,
           width / 2,
         ]}
@@ -202,10 +219,11 @@ function ShelterModel({
         />
       </mesh>
 
-      {/* NORTH WALL RIGHT */}
+      {/* NORTH WALL - RIGHT */}
       <mesh
         position={[
-          doorWidth / 2 + doorSideWidth / 2,
+          doorWidth / 2 +
+            doorSideWidth / 2,
           height / 2,
           width / 2,
         ]}
@@ -248,7 +266,9 @@ function ShelterModel({
         position={[
           0,
           doorHeight / 2,
-          width / 2 - 0.03,
+          width / 2 -
+            wallThickness / 2 -
+            0.03,
         ]}
         material={doorMaterial}
       >
@@ -303,7 +323,8 @@ function ShelterModel({
       <mesh
         position={[
           0,
-          height + 0.1,
+          height +
+            roofThickness / 2,
           0,
         ]}
         material={roofMaterial}
@@ -311,9 +332,9 @@ function ShelterModel({
       >
         <boxGeometry
           args={[
-            length + 0.2,
-            0.2,
-            width + 0.2,
+            length + wallThickness,
+            roofThickness,
+            width + wallThickness,
           ]}
         />
       </mesh>
@@ -381,6 +402,8 @@ export default function Shelter3D({
   width = 4,
   height = 3,
   orientation = 180,
+  wallThickness = 0.312,
+  roofThickness = 0.22,
 }: Shelter3DProps) {
   return (
     <div className="h-[650px] w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
@@ -402,7 +425,9 @@ export default function Shelter3D({
       >
         <color
           attach="background"
-          args={["#020617"]}
+          args={[
+            "#020617",
+          ]}
         />
 
         <ambientLight
@@ -431,6 +456,12 @@ export default function Shelter3D({
           width={width}
           height={height}
           orientation={orientation}
+          wallThickness={
+            wallThickness
+          }
+          roofThickness={
+            roofThickness
+          }
         />
 
         <OrbitControls

@@ -5,7 +5,10 @@ from app.schemas.simulation import (
     SimulationPoint,
     SimulationRequest,
     SimulationResult,
+    WeatherPoint,
 )
+from app.schemas.solar import SolarCalculationRequest
+from app.solar.model import calculate_solar
 from app.thermal.heat_balance import calculate_heat_balance
 from app.thermal.geometry import calculate_geometry
 
@@ -18,7 +21,7 @@ def _air_thermal_capacity_j_per_k(
     volume_m3: float,
 ) -> float:
     """
-    Thermal capacity of indoor air.
+    Calculate thermal capacity of indoor air.
 
     C = m × cp
     """
@@ -47,11 +50,85 @@ def _hours_between(
     )
 
 
+def _calculate_real_solar_gain(
+    design,
+    weather: WeatherPoint,
+) -> float:
+    """
+    Calculate actual window-transmitted solar gain
+    using the solar engine.
+
+    The solar engine uses:
+    - shelter latitude/longitude
+    - shelter orientation
+    - timestamp
+    - real weather solar radiation
+    - window area
+    - window solar transmittance
+    """
+
+    latitude = design.location.latitude
+    longitude = design.location.longitude
+
+    timezone = (
+        design.location.timezone
+        or "UTC"
+    )
+
+    solar_request = SolarCalculationRequest(
+        design=design,
+        timestamp=weather.timestamp,
+        latitude=latitude,
+        longitude=longitude,
+        solar_irradiance_w_m2=(
+            weather.solar_irradiance_w_m2
+        ),
+        direct_radiation_w_m2=(
+            weather.direct_radiation_w_m2
+        ),
+        diffuse_radiation_w_m2=(
+            weather.diffuse_radiation_w_m2
+        ),
+        direct_normal_irradiance_w_m2=(
+            weather.direct_normal_irradiance_w_m2
+        ),
+        timezone=timezone,
+    )
+
+    solar_result = calculate_solar(
+        solar_request
+    )
+
+    return max(
+        solar_result.total_window_solar_gain_w,
+        0.0,
+    )
+
+
+def _weather_with_solar_gain(
+    weather: WeatherPoint,
+    solar_gain_w: float,
+) -> WeatherPoint:
+    """
+    Create a weather point containing the calculated
+    solar gain.
+
+    This prevents the solar gain from being manually
+    entered by the user.
+    """
+
+    return weather.model_copy(
+        update={
+            "solar_gain_w": solar_gain_w,
+        }
+    )
+
+
 def run_transient_simulation(
     request: SimulationRequest,
 ) -> SimulationResult:
     """
-    Run the simplified two-node thermal simulation.
+    Run the two-node transient thermal simulation.
 
     Node 1:
         Indoor air
@@ -59,18 +136,14 @@ def run_transient_simulation(
     Node 2:
         Thermal mass
 
-    Heat flow:
+    Real weather data drives:
+        - outdoor temperature
+        - solar radiation
+        - wind
+        - humidity
 
-        Outside
-           ↓
-       Envelope
-           ↓
-       Indoor Air
-           ↕
-      Thermal Mass
-
-    If no thermal mass is defined, the model behaves
-    as a single indoor-air node.
+    The solar engine calculates actual
+    window-transmitted solar gain at every timestep.
     """
 
     if len(request.weather) < 2:
@@ -158,13 +231,37 @@ def run_transient_simulation(
         weather_points
     ):
 
+        # -----------------------------------------------------
+        # REAL SOLAR CALCULATION
+        # -----------------------------------------------------
+
+        solar_gain_w = (
+            _calculate_real_solar_gain(
+                design=design,
+                weather=weather,
+            )
+        )
+
+        weather_for_thermal_model = (
+            _weather_with_solar_gain(
+                weather=weather,
+                solar_gain_w=solar_gain_w,
+            )
+        )
+
+        # -----------------------------------------------------
+        # ENVELOPE HEAT BALANCE
+        # -----------------------------------------------------
+
         heat_balance_request = (
             HeatBalanceRequest(
                 design=design,
                 indoor_temperature_c=(
                     indoor_temperature_c
                 ),
-                weather=weather,
+                weather=(
+                    weather_for_thermal_model
+                ),
                 internal_heat_gain_w=(
                     request.internal_heat_gain_w
                 ),
@@ -209,7 +306,7 @@ def run_transient_simulation(
             )
 
         # -----------------------------------------------------
-        # THERMAL MASS ↔ AIR HEAT TRANSFER
+        # THERMAL MASS ↔ AIR
         # -----------------------------------------------------
 
         if (
@@ -272,7 +369,7 @@ def run_transient_simulation(
             thermal_mass_temperature_change_c = 0.0
 
         # -----------------------------------------------------
-        # RECORD CURRENT STATE
+        # SAVE CURRENT STATE
         # -----------------------------------------------------
 
         current_indoor_temperature_c = (
@@ -307,12 +404,12 @@ def run_transient_simulation(
                 ),
 
                 solar_irradiance_w_m2=(
-                    weather
-                    .solar_irradiance_w_m2
+                    weather.solar_irradiance_w_m2
                 ),
 
-                solar_gain_w=(
-                    heat_balance.solar_gain_w
+                solar_gain_w=round(
+                    solar_gain_w,
+                    3,
                 ),
 
                 wall_heat_transfer_w=(
@@ -339,16 +436,18 @@ def run_transient_simulation(
                     heat_balance.ventilation_w
                 ),
 
-                thermal_mass_heat_transfer_w=(
-                    thermal_mass_heat_transfer_w
+                thermal_mass_heat_transfer_w=round(
+                    thermal_mass_heat_transfer_w,
+                    3,
                 ),
 
                 total_heat_loss_w=(
                     heat_balance.total_loss_w
                 ),
 
-                net_heat_gain_w=(
-                    indoor_net_gain_w
+                net_heat_gain_w=round(
+                    indoor_net_gain_w,
+                    3,
                 ),
             )
         )
@@ -373,7 +472,7 @@ def run_transient_simulation(
             )
 
         # -----------------------------------------------------
-        # COMFORT ACCOUNTING
+        # COMFORT
         # -----------------------------------------------------
 
         if (

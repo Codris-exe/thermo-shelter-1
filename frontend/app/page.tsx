@@ -2,6 +2,39 @@
 
 import { useState } from "react";
 
+
+interface WeatherPoint {
+  timestamp: string;
+
+  outdoor_temperature_c: number;
+  wind_speed_m_s: number;
+
+  solar_irradiance_w_m2: number;
+  solar_gain_w: number;
+
+  direct_radiation_w_m2: number;
+  diffuse_radiation_w_m2: number;
+  direct_normal_irradiance_w_m2: number;
+
+  cloud_cover_pct: number | null;
+
+  is_day: boolean;
+
+  relative_humidity_pct: number | null;
+  ground_temperature_c: number | null;
+}
+
+
+interface WeatherResponse {
+  latitude: number;
+  longitude: number;
+  elevation_m: number;
+  timezone: string;
+  source: string;
+  points: WeatherPoint[];
+}
+
+
 interface SimulationPoint {
   timestamp: string;
 
@@ -26,6 +59,7 @@ interface SimulationPoint {
   total_heat_loss_w: number;
   net_heat_gain_w: number;
 }
+
 
 interface SimulationResult {
   initial_indoor_temperature_c: number;
@@ -59,158 +93,294 @@ interface SimulationResult {
 }
 
 
-function createDemoWeather() {
-  const start =
-    new Date("2026-01-15T00:00:00");
+interface LocationResult {
+  name: string;
+  country: string | null;
+  country_code: string | null;
+  region: string | null;
 
-  return Array.from(
-    { length: 24 },
-    (_, hour) => {
-      const timestamp =
-        new Date(start);
+  latitude: number;
+  longitude: number;
 
-      timestamp.setHours(
-        start.getHours() + hour,
-      );
-
-      const daylightFactor =
-        Math.max(
-          0,
-          1 - Math.abs(hour - 12) / 7,
-        );
-
-      const solarIrradiance =
-        Math.round(
-          700 * daylightFactor,
-        );
-
-      const solarGain =
-        Math.round(
-          1200 * daylightFactor,
-        );
-
-      let outdoorTemperature = -14;
-
-      if (hour >= 6 && hour <= 14) {
-        outdoorTemperature =
-          -14 + (hour - 6) * 1.5;
-      } else if (hour > 14) {
-        outdoorTemperature =
-          -2 - (hour - 14) * 1.5;
-      }
-
-      return {
-        timestamp:
-          timestamp.toISOString(),
-
-        outdoor_temperature_c:
-          Number(
-            outdoorTemperature.toFixed(1),
-          ),
-
-        wind_speed_m_s: 2.5,
-
-        solar_irradiance_w_m2:
-          solarIrradiance,
-
-        solar_gain_w:
-          solarGain,
-
-        relative_humidity_pct: 40,
-
-        ground_temperature_c: -2,
-      };
-    },
-  );
+  elevation_m: number | null;
+  timezone: string | null;
 }
 
 
 export default function Home() {
 
   const [
+    locationQuery,
+    setLocationQuery,
+  ] = useState("Leh");
+
+  const [
+    locations,
+    setLocations,
+  ] = useState<LocationResult[]>(
+    [],
+  );
+
+  const [
+    selectedLocation,
+    setSelectedLocation,
+  ] =
+    useState<LocationResult | null>(
+      null,
+    );
+
+  const [
+    weather,
+    setWeather,
+  ] =
+    useState<WeatherResponse | null>(
+      null,
+    );
+
+  const [
     initialTemperature,
     setInitialTemperature,
   ] = useState(18);
 
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const [
+    isSearchingLocation,
+    setIsSearchingLocation,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [
+    isLoadingWeather,
+    setIsLoadingWeather,
+  ] = useState(false);
 
-  const [result, setResult] =
+  const [
+    isLoadingSimulation,
+    setIsLoadingSimulation,
+  ] = useState(false);
+
+  const [
+    result,
+    setResult,
+  ] =
     useState<SimulationResult | null>(
       null,
     );
 
+  const [
+    error,
+    setError,
+  ] = useState("");
 
-  async function runSimulation() {
 
-    setIsLoading(true);
+  async function searchLocation() {
+
+    setIsSearchingLocation(true);
     setError("");
 
     try {
 
-      const weather =
-        createDemoWeather();
+      const response =
+        await fetch(
+          `/backend-api/api/location/search?q=${encodeURIComponent(
+            locationQuery,
+          )}`,
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Location search failed.",
+        );
+      }
+
+      const data =
+        await response.json();
+
+      setLocations(
+        data.results ?? [],
+      );
+
+    } catch (searchError) {
+
+      console.error(
+        searchError,
+      );
+
+      setError(
+        "Unable to search for the location.",
+      );
+
+    } finally {
+
+      setIsSearchingLocation(false);
+
+    }
+  }
+
+
+  async function loadWeather(
+    location: LocationResult,
+  ) {
+
+    setSelectedLocation(
+      location,
+    );
+
+    setIsLoadingWeather(true);
+    setError("");
+    setResult(null);
+
+    try {
+
+      const response =
+        await fetch(
+          `/backend-api/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`,
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Weather request failed.",
+        );
+      }
+
+      const data:
+        WeatherResponse =
+        await response.json();
+
+      setWeather(data);
+
+    } catch (weatherError) {
+
+      console.error(
+        weatherError,
+      );
+
+      setError(
+        "Unable to retrieve real weather data.",
+      );
+
+    } finally {
+
+      setIsLoadingWeather(false);
+
+    }
+  }
+
+
+  async function runSimulation() {
+
+    if (
+      !selectedLocation
+      || !weather
+    ) {
+
+      setError(
+        "Select a location and load weather before running the simulation.",
+      );
+
+      return;
+    }
+
+    setIsLoadingSimulation(
+      true,
+    );
+
+    setError("");
+
+    try {
 
       const payload = {
 
         design: {
 
           location: {
-            name: "Leh, Ladakh",
-            latitude: 34.1526,
-            longitude: 77.5771,
-            elevation_m: 3500,
-            timezone: "Asia/Kolkata",
-            source: "manual",
+            name:
+              selectedLocation.name,
+
+            latitude:
+              selectedLocation.latitude,
+
+            longitude:
+              selectedLocation.longitude,
+
+            elevation_m:
+              selectedLocation.elevation_m,
+
+            timezone:
+              weather.timezone,
+
+            source: "search",
           },
 
           geometry: {
             shape: "rectangular",
+
             length_m: 5,
+
             width_m: 4,
+
             height_m: 3,
           },
 
           orientation_deg: 180,
 
           wall_assembly: {
+
             layers: [
               {
-                material_id: "brick",
-                thickness_m: 0.2,
+                material_id:
+                  "brick",
+
+                thickness_m:
+                  0.20,
               },
+
               {
-                material_id: "rock_wool",
-                thickness_m: 0.1,
+                material_id:
+                  "rock_wool",
+
+                thickness_m:
+                  0.10,
               },
+
               {
-                material_id: "gypsum",
-                thickness_m: 0.012,
+                material_id:
+                  "gypsum",
+
+                thickness_m:
+                  0.012,
               },
             ],
           },
 
           roof_assembly: {
+
             layers: [
               {
-                material_id: "concrete",
-                thickness_m: 0.1,
+                material_id:
+                  "concrete",
+
+                thickness_m:
+                  0.10,
               },
+
               {
-                material_id: "rock_wool",
-                thickness_m: 0.12,
+                material_id:
+                  "rock_wool",
+
+                thickness_m:
+                  0.12,
               },
             ],
           },
 
           floor_assembly: {
+
             layers: [
               {
-                material_id: "concrete",
-                thickness_m: 0.12,
+                material_id:
+                  "concrete",
+
+                thickness_m:
+                  0.12,
               },
             ],
           },
@@ -218,28 +388,52 @@ export default function Home() {
           windows: [
             {
               wall: "south",
-              width_m: 1.5,
-              height_m: 1.2,
-              u_value_w_m2k: 2.7,
-              solar_transmittance: 0.65,
+
+              width_m:
+                1.5,
+
+              height_m:
+                1.2,
+
+              u_value_w_m2k:
+                2.7,
+
+              solar_transmittance:
+                0.65,
             },
           ],
 
           doors: [
             {
               wall: "north",
-              width_m: 0.9,
-              height_m: 2.1,
-              u_value_w_m2k: 1.8,
+
+              width_m:
+                0.9,
+
+              height_m:
+                2.1,
+
+              u_value_w_m2k:
+                1.8,
             },
           ],
 
           thermal_mass: {
-            material_id: "stone",
-            mass_kg: 1000,
-            specific_heat_j_kgk: 800,
-            initial_temperature_c: 12,
-            coupling_w_per_k: 5,
+
+            material_id:
+              "stone",
+
+            mass_kg:
+              1000,
+
+            specific_heat_j_kgk:
+              800,
+
+            initial_temperature_c:
+              12,
+
+            coupling_w_per_k:
+              5,
           },
 
           ventilation: {
@@ -255,11 +449,14 @@ export default function Home() {
         initial_indoor_temperature_c:
           initialTemperature,
 
-        weather,
+        weather:
+          weather.points,
 
-        internal_heat_gain_w: 200,
+        internal_heat_gain_w:
+          200,
 
-        timestep_minutes: 60,
+        timestep_minutes:
+          60,
       };
 
 
@@ -267,25 +464,31 @@ export default function Home() {
         await fetch(
           "/backend-api/api/simulations/run",
           {
-            method: "POST",
+
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
                 "application/json",
             },
 
-            body: JSON.stringify(
-              payload,
-            ),
+            body:
+              JSON.stringify(
+                payload,
+              ),
           },
         );
 
 
       if (!response.ok) {
+
         const message =
           await response.text();
 
-        throw new Error(message);
+        throw new Error(
+          message,
+        );
       }
 
 
@@ -305,15 +508,22 @@ export default function Home() {
       );
 
       setError(
-        "Simulation failed. Check the FastAPI terminal for the exact error.",
+        "Simulation failed. Check the FastAPI terminal.",
       );
 
     } finally {
 
-      setIsLoading(false);
-
+      setIsLoadingSimulation(
+        false,
+      );
     }
   }
+
+
+  const latestPoint =
+    result?.points[
+      result.points.length - 1
+    ];
 
 
   return (
@@ -332,31 +542,230 @@ export default function Home() {
           </h1>
 
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            Physics-based passive shelter
+            Real-location weather +
+            physics-based passive shelter
             thermal simulation.
           </p>
 
         </header>
 
 
-        <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <section className="grid gap-6 lg:grid-cols-[340px_1fr]">
 
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
 
             <h2 className="text-xl font-semibold">
-              Simulation Setup
+              Location & Weather
             </h2>
 
-            <p className="mt-2 text-sm text-slate-400">
-              Demo location: Leh, Ladakh
-            </p>
+
+            <div className="mt-6 flex gap-2">
+
+              <input
+                value={
+                  locationQuery
+                }
+
+                onChange={(
+                  event,
+                ) =>
+                  setLocationQuery(
+                    event.target.value,
+                  )
+                }
+
+                onKeyDown={(
+                  event,
+                ) => {
+
+                  if (
+                    event.key ===
+                    "Enter"
+                  ) {
+
+                    searchLocation();
+
+                  }
+
+                }}
+
+                placeholder="Search location"
+
+                className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none focus:border-cyan-400"
+              />
+
+              <button
+                onClick={
+                  searchLocation
+                }
+
+                disabled={
+                  isSearchingLocation
+                }
+
+                className="rounded-lg bg-slate-700 px-4 py-3 text-sm font-semibold hover:bg-slate-600 disabled:opacity-50"
+              >
+                {isSearchingLocation
+                  ? "..."
+                  : "Search"}
+              </button>
+
+            </div>
 
 
-            <div className="mt-8">
+            {locations.length >
+              0 && (
+
+              <div className="mt-3 space-y-2">
+
+                {locations.map(
+                  (location) => (
+
+                    <button
+                      key={`${location.latitude}-${location.longitude}-${location.name}`}
+                      onClick={() =>
+                        loadWeather(
+                          location,
+                        )
+                      }
+
+                      className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-left hover:border-cyan-500"
+                    >
+
+                      <p className="font-medium">
+                        {location.name}
+                      </p>
+
+                      <p className="text-xs text-slate-400">
+                        {location.region
+                          ? `${location.region}, `
+                          : ""}
+                        {
+                          location.country
+                        }
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        {location.latitude.toFixed(
+                          4,
+                        )}
+                        °,
+                        {" "}
+                        {location.longitude.toFixed(
+                          4,
+                        )}
+                        °
+                      </p>
+
+                    </button>
+
+                  ),
+                )}
+
+              </div>
+
+            )}
+
+
+            {selectedLocation && (
+
+              <div className="mt-5 rounded-xl border border-cyan-900 bg-cyan-950/20 p-4">
+
+                <p className="font-semibold text-cyan-300">
+                  Selected Location
+                </p>
+
+                <p className="mt-2">
+                  {selectedLocation.name}
+                </p>
+
+                <p className="text-sm text-slate-400">
+                  {selectedLocation.region
+                    ? `${selectedLocation.region}, `
+                    : ""}
+                  {
+                    selectedLocation.country
+                  }
+                </p>
+
+                <p className="mt-2 text-xs text-slate-500">
+                  {selectedLocation.latitude.toFixed(
+                    5,
+                  )}
+                  °
+                  {" "}
+                  N/S,
+                  {" "}
+                  {selectedLocation.longitude.toFixed(
+                    5,
+                  )}
+                  °
+                  {" "}
+                  E/W
+                </p>
+
+              </div>
+
+            )}
+
+
+            {weather && (
+
+              <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950 p-4">
+
+                <p className="font-semibold">
+                  Real Weather Data
+                </p>
+
+                <div className="mt-3 space-y-2 text-sm text-slate-400">
+
+                  <p>
+                    Source:
+                    {" "}
+                    <span className="text-white">
+                      {weather.source}
+                    </span>
+                  </p>
+
+                  <p>
+                    Timezone:
+                    {" "}
+                    <span className="text-white">
+                      {weather.timezone}
+                    </span>
+                  </p>
+
+                  <p>
+                    Elevation:
+                    {" "}
+                    <span className="text-white">
+                      {weather.elevation_m?.toFixed(
+                        0,
+                      )}{" "}
+                      m
+                    </span>
+                  </p>
+
+                  <p>
+                    Hourly points:
+                    {" "}
+                    <span className="text-white">
+                      {weather.points.length}
+                    </span>
+                  </p>
+
+                </div>
+
+              </div>
+
+            )}
+
+
+            <div className="mt-6">
 
               <label className="text-sm text-slate-300">
-                Initial Indoor Temperature
+                Initial Indoor Temperature °C
               </label>
 
               <input
@@ -371,6 +780,7 @@ export default function Home() {
                     ),
                   )
                 }
+
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white"
               />
 
@@ -380,33 +790,45 @@ export default function Home() {
             <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
 
               <p className="font-medium">
-                Shelter
+                Shelter Configuration
               </p>
 
               <div className="mt-3 space-y-2 text-sm text-slate-400">
 
                 <p>
-                  Dimensions: 5 × 4 × 3 m
+                  Dimensions:
+                  {" "}
+                  5 × 4 × 3 m
                 </p>
 
                 <p>
-                  Orientation: South
+                  Orientation:
+                  {" "}
+                  South
                 </p>
 
                 <p>
-                  Wall: Brick + Rock Wool
+                  Wall:
+                  {" "}
+                  Brick + Rock Wool
                 </p>
 
                 <p>
-                  Thermal Mass: 1000 kg Stone
+                  Window:
+                  {" "}
+                  1.5 × 1.2 m
                 </p>
 
                 <p>
-                  Thermal Mass Coupling: 5 W/K
+                  Thermal Mass:
+                  {" "}
+                  1000 kg Stone
                 </p>
 
                 <p>
-                  Ventilation: 0.5 ACH
+                  Ventilation:
+                  {" "}
+                  0.5 ACH
                 </p>
 
               </div>
@@ -415,26 +837,30 @@ export default function Home() {
 
 
             <button
+
               onClick={
                 runSimulation
               }
+
               disabled={
-                isLoading
+                isLoadingSimulation
+                || !weather
               }
-              className="mt-8 w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:opacity-50"
+
+              className="mt-8 w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {
-                isLoading
-                  ? "Running Simulation..."
-                  : "Run 24-Hour Simulation"
-              }
+              {isLoadingSimulation
+                ? "Running Simulation..."
+                : "Run Real-Weather Simulation"}
             </button>
 
 
             {error && (
+
               <div className="mt-5 rounded-xl border border-red-900 bg-red-950/40 p-4 text-sm text-red-300">
                 {error}
               </div>
+
             )}
 
           </div>
@@ -444,23 +870,24 @@ export default function Home() {
 
             {!result && (
 
-              <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-900">
+              <div className="flex min-h-[600px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-900">
 
-                <div className="text-center">
+                <div className="max-w-lg text-center">
 
                   <div className="text-6xl">
-                    🏠
+                    ☀️🏠❄️
                   </div>
 
                   <h2 className="mt-5 text-2xl font-semibold">
-                    Ready to Simulate
+                    Real Weather Thermal Simulation
                   </h2>
 
-                  <p className="mt-3 max-w-md text-slate-400">
-                    Run the model to calculate
-                    indoor temperature,
-                    thermal-mass behavior,
-                    heat loss and solar gain.
+                  <p className="mt-3 text-slate-400">
+                    Search for a location,
+                    load its real hourly
+                    weather data, then run
+                    the passive shelter
+                    simulation.
                   </p>
 
                 </div>
@@ -504,20 +931,16 @@ export default function Home() {
                   <MetricCard
                     title="Final Thermal Mass"
                     value={
-                      result.final_thermal_mass_temperature_c !== null
+                      result.final_thermal_mass_temperature_c !==
+                      null
                         ? `${result.final_thermal_mass_temperature_c.toFixed(1)} °C`
                         : "Not configured"
                     }
                   />
 
                   <MetricCard
-                    title="Thermal Mass Range"
-                    value={
-                      result.minimum_thermal_mass_temperature_c !== null &&
-                      result.maximum_thermal_mass_temperature_c !== null
-                        ? `${result.minimum_thermal_mass_temperature_c.toFixed(1)} – ${result.maximum_thermal_mass_temperature_c.toFixed(1)} °C`
-                        : "Not configured"
-                    }
+                    title="Cold Hours"
+                    value={`${result.cold_hours.toFixed(1)} h`}
                   />
 
                 </div>
@@ -525,13 +948,28 @@ export default function Home() {
 
                 <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
 
-                  <h2 className="text-xl font-semibold">
-                    24-Hour Thermal Simulation
-                  </h2>
+                  <div className="flex items-center justify-between">
+
+                    <div>
+
+                      <h2 className="text-xl font-semibold">
+                        Real-Weather Simulation
+                      </h2>
+
+                      <p className="mt-1 text-sm text-slate-400">
+                        Weather source:
+                        {" "}
+                        {weather?.source}
+                      </p>
+
+                    </div>
+
+                  </div>
+
 
                   <div className="mt-6 overflow-x-auto">
 
-                    <table className="w-full min-w-[1100px] text-left text-sm">
+                    <table className="w-full min-w-[1150px] text-left text-sm">
 
                       <thead>
 
@@ -565,10 +1003,6 @@ export default function Home() {
                             Mass Flow W
                           </th>
 
-                          <th className="px-3 py-3">
-                            Net Heat W
-                          </th>
-
                         </tr>
 
                       </thead>
@@ -583,6 +1017,7 @@ export default function Home() {
                               key={
                                 point.timestamp
                               }
+
                               className="border-b border-slate-800/60"
                             >
 
@@ -593,8 +1028,11 @@ export default function Home() {
                                 ).toLocaleTimeString(
                                   [],
                                   {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
+                                    hour:
+                                      "2-digit",
+
+                                    minute:
+                                      "2-digit",
                                   },
                                 )}
 
@@ -649,21 +1087,6 @@ export default function Home() {
                               <td className="px-3 py-3">
 
                                 {point.thermal_mass_heat_transfer_w.toFixed(
-                                  0,
-                                )}
-
-                              </td>
-
-
-                              <td
-                                className={`px-3 py-3 ${
-                                  point.net_heat_gain_w >= 0
-                                    ? "text-emerald-400"
-                                    : "text-red-400"
-                                }`}
-                              >
-
-                                {point.net_heat_gain_w.toFixed(
                                   0,
                                 )}
 

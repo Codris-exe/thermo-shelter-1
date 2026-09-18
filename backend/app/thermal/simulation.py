@@ -5,16 +5,29 @@ from app.schemas.simulation import (
     SimulationPoint,
     SimulationRequest,
     SimulationResult,
-    WeatherPoint,
 )
-from app.schemas.solar import SolarCalculationRequest
 from app.solar.model import calculate_solar
-from app.thermal.heat_balance import calculate_heat_balance
+from app.schemas.solar import SolarCalculationRequest
+from app.thermal.envelope import (
+    calculate_assembly_thermal_properties,
+)
 from app.thermal.geometry import calculate_geometry
+from app.thermal.heat_balance import calculate_heat_balance
+from app.thermal.materials import get_material
 
 
 AIR_DENSITY_KG_M3 = 1.225
 AIR_SPECIFIC_HEAT_J_KGK = 1005.0
+
+# Only a fraction of the total wall/roof/floor material
+# participates in the short-term hourly indoor thermal response.
+#
+# This is a simplified lumped-model assumption.
+#
+# 0.20 means 20% of the calculated envelope thermal
+# capacity is treated as thermally active over the
+# simulation timescale.
+ACTIVE_ENVELOPE_THERMAL_FRACTION = 0.20
 
 
 def _air_thermal_capacity_j_per_k(
@@ -23,10 +36,12 @@ def _air_thermal_capacity_j_per_k(
     """
     Calculate thermal capacity of indoor air.
 
-    C = m × cp
+    C = mass × specific heat
     """
+
     air_mass_kg = (
-        AIR_DENSITY_KG_M3 * volume_m3
+        AIR_DENSITY_KG_M3
+        * volume_m3
     )
 
     return (
@@ -35,11 +50,105 @@ def _air_thermal_capacity_j_per_k(
     )
 
 
+def _assembly_thermal_capacity_j_per_k(
+    assembly,
+    area_m2: float,
+) -> float:
+    """
+    Calculate the thermal capacity of all material
+    layers in an assembly.
+
+    C = mass × specific heat
+
+    mass = area × thickness × density
+    """
+
+    total_capacity = 0.0
+
+    for layer in assembly.layers:
+
+        material = get_material(
+            layer.material_id
+        )
+
+        mass_kg = (
+            area_m2
+            * layer.thickness_m
+            * material.density_kg_m3
+        )
+
+        capacity = (
+            mass_kg
+            * material.specific_heat_j_kgk
+        )
+
+        total_capacity += capacity
+
+    return total_capacity
+
+
+def _active_envelope_thermal_capacity_j_per_k(
+    design,
+) -> float:
+    """
+    Calculate an effective thermal capacity for the
+    shelter envelope.
+
+    This includes:
+
+    - opaque walls
+    - roof
+    - floor
+
+    Only a fraction of the total construction mass is
+    treated as thermally active for the hourly model.
+
+    This is a simplified lumped thermal model, not CFD.
+    """
+
+    geometry = calculate_geometry(
+        design
+    )
+
+    wall_capacity = (
+        _assembly_thermal_capacity_j_per_k(
+            design.wall_assembly,
+            geometry.walls.opaque_wall_area_m2,
+        )
+    )
+
+    roof_capacity = (
+        _assembly_thermal_capacity_j_per_k(
+            design.roof_assembly,
+            geometry.roof_area_m2,
+        )
+    )
+
+    floor_capacity = (
+        _assembly_thermal_capacity_j_per_k(
+            design.floor_assembly,
+            geometry.floor_area_m2,
+        )
+    )
+
+    total_construction_capacity = (
+        wall_capacity
+        + roof_capacity
+        + floor_capacity
+    )
+
+    return (
+        total_construction_capacity
+        * ACTIVE_ENVELOPE_THERMAL_FRACTION
+    )
+
+
 def _hours_between(
     start: datetime,
     end: datetime,
 ) -> float:
     """Return time difference in hours."""
+
     seconds = (
         end - start
     ).total_seconds()
@@ -52,34 +161,27 @@ def _hours_between(
 
 def _calculate_real_solar_gain(
     design,
-    weather: WeatherPoint,
+    weather,
 ) -> float:
     """
-    Calculate actual window-transmitted solar gain
-    using the solar engine.
-
-    The solar engine uses:
-    - shelter latitude/longitude
-    - shelter orientation
-    - timestamp
-    - real weather solar radiation
-    - window area
-    - window solar transmittance
+    Calculate window-transmitted solar gain using
+    the solar-position model and real solar data.
     """
-
-    latitude = design.location.latitude
-    longitude = design.location.longitude
 
     timezone = (
         design.location.timezone
         or "UTC"
     )
 
-    solar_request = SolarCalculationRequest(
+    request = SolarCalculationRequest(
         design=design,
         timestamp=weather.timestamp,
-        latitude=latitude,
-        longitude=longitude,
+        latitude=(
+            design.location.latitude
+        ),
+        longitude=(
+            design.location.longitude
+        ),
         solar_irradiance_w_m2=(
             weather.solar_irradiance_w_m2
         ),
@@ -95,32 +197,13 @@ def _calculate_real_solar_gain(
         timezone=timezone,
     )
 
-    solar_result = calculate_solar(
-        solar_request
+    result = calculate_solar(
+        request
     )
 
     return max(
-        solar_result.total_window_solar_gain_w,
+        result.total_window_solar_gain_w,
         0.0,
-    )
-
-
-def _weather_with_solar_gain(
-    weather: WeatherPoint,
-    solar_gain_w: float,
-) -> WeatherPoint:
-    """
-    Create a weather point containing the calculated
-    solar gain.
-
-    This prevents the solar gain from being manually
-    entered by the user.
-    """
-
-    return weather.model_copy(
-        update={
-            "solar_gain_w": solar_gain_w,
-        }
     )
 
 
@@ -128,22 +211,27 @@ def run_transient_simulation(
     request: SimulationRequest,
 ) -> SimulationResult:
     """
-    Run the two-node transient thermal simulation.
+    Run the Thermo Shelter transient thermal model.
 
-    Node 1:
-        Indoor air
+    Thermal representation:
 
-    Node 2:
-        Thermal mass
+        REAL WEATHER
+              ↓
+         Solar Engine
+              ↓
+        ┌───────────────┐
+        │  Heat Balance │
+        └───────┬───────┘
+                ↓
+          Indoor Air
+                ↕
+         Active Envelope
+                ↕
+         Optional Thermal Mass
 
-    Real weather data drives:
-        - outdoor temperature
-        - solar radiation
-        - wind
-        - humidity
+    This is a simplified lumped thermal model.
 
-    The solar engine calculates actual
-    window-transmitted solar gain at every timestep.
+    It is NOT a CFD/FEA simulation.
     """
 
     if len(request.weather) < 2:
@@ -162,24 +250,43 @@ def run_transient_simulation(
         design
     )
 
-    air_capacity_j_per_k = (
+    # ---------------------------------------------------------
+    # THERMAL CAPACITY
+    # ---------------------------------------------------------
+
+    air_capacity = (
         _air_thermal_capacity_j_per_k(
             geometry.volume_m3
         )
     )
 
-    if air_capacity_j_per_k <= 0:
+    envelope_capacity = (
+        _active_envelope_thermal_capacity_j_per_k(
+            design
+        )
+    )
+
+    effective_indoor_capacity = (
+        air_capacity
+        + envelope_capacity
+    )
+
+    if effective_indoor_capacity <= 0:
         raise ValueError(
-            "Indoor air thermal capacity must be greater than zero."
+            "Effective thermal capacity must be greater than zero."
         )
 
     # ---------------------------------------------------------
-    # INITIAL TEMPERATURES
+    # INITIAL INDOOR TEMPERATURE
     # ---------------------------------------------------------
 
     indoor_temperature_c = (
         request.initial_indoor_temperature_c
     )
+
+    # ---------------------------------------------------------
+    # OPTIONAL EXPLICIT THERMAL MASS
+    # ---------------------------------------------------------
 
     if design.thermal_mass is not None:
 
@@ -194,7 +301,7 @@ def run_transient_simulation(
             .specific_heat_j_kgk
         )
 
-        mass_coupling_w_per_k = (
+        thermal_mass_coupling_w_per_k = (
             design.thermal_mass
             .coupling_w_per_k
         )
@@ -202,11 +309,13 @@ def run_transient_simulation(
     else:
 
         thermal_mass_temperature_c = None
+
         thermal_mass_capacity_j_per_k = 0.0
-        mass_coupling_w_per_k = 0.0
+
+        thermal_mass_coupling_w_per_k = 0.0
 
     # ---------------------------------------------------------
-    # RESULT STORAGE
+    # RESULTS
     # ---------------------------------------------------------
 
     points: list[SimulationPoint] = []
@@ -232,45 +341,38 @@ def run_transient_simulation(
     ):
 
         # -----------------------------------------------------
-        # REAL SOLAR CALCULATION
+        # SOLAR GAIN
         # -----------------------------------------------------
 
         solar_gain_w = (
             _calculate_real_solar_gain(
-                design=design,
-                weather=weather,
+                design,
+                weather,
             )
         )
 
-        weather_for_thermal_model = (
-            _weather_with_solar_gain(
-                weather=weather,
-                solar_gain_w=solar_gain_w,
+        weather_with_solar = (
+            weather.model_copy(
+                update={
+                    "solar_gain_w": solar_gain_w
+                }
             )
         )
 
         # -----------------------------------------------------
-        # ENVELOPE HEAT BALANCE
+        # HEAT BALANCE
         # -----------------------------------------------------
 
-        heat_balance_request = (
+        heat_balance = calculate_heat_balance(
             HeatBalanceRequest(
                 design=design,
                 indoor_temperature_c=(
                     indoor_temperature_c
                 ),
-                weather=(
-                    weather_for_thermal_model
-                ),
+                weather=weather_with_solar,
                 internal_heat_gain_w=(
                     request.internal_heat_gain_w
                 ),
-            )
-        )
-
-        heat_balance = (
-            calculate_heat_balance(
-                heat_balance_request
             )
         )
 
@@ -306,7 +408,7 @@ def run_transient_simulation(
             )
 
         # -----------------------------------------------------
-        # THERMAL MASS ↔ AIR
+        # THERMAL MASS ↔ INDOOR AIR
         # -----------------------------------------------------
 
         if (
@@ -315,7 +417,7 @@ def run_transient_simulation(
         ):
 
             thermal_mass_heat_transfer_w = (
-                mass_coupling_w_per_k
+                thermal_mass_coupling_w_per_k
                 * (
                     thermal_mass_temperature_c
                     - indoor_temperature_c
@@ -327,7 +429,7 @@ def run_transient_simulation(
             thermal_mass_heat_transfer_w = 0.0
 
         # -----------------------------------------------------
-        # INDOOR AIR ENERGY BALANCE
+        # NET INDOOR HEAT GAIN
         # -----------------------------------------------------
 
         indoor_net_gain_w = (
@@ -342,11 +444,11 @@ def run_transient_simulation(
 
         indoor_temperature_change_c = (
             indoor_energy_change_j
-            / air_capacity_j_per_k
+            / effective_indoor_capacity
         )
 
         # -----------------------------------------------------
-        # THERMAL MASS ENERGY BALANCE
+        # THERMAL MASS TEMPERATURE CHANGE
         # -----------------------------------------------------
 
         if (
@@ -369,16 +471,27 @@ def run_transient_simulation(
             thermal_mass_temperature_change_c = 0.0
 
         # -----------------------------------------------------
-        # SAVE CURRENT STATE
+        # STORE CURRENT STATE
         # -----------------------------------------------------
 
         current_indoor_temperature_c = (
             indoor_temperature_c
         )
 
-        current_thermal_mass_temperature_c = (
+        if (
             thermal_mass_temperature_c
-        )
+            is not None
+        ):
+
+            current_thermal_mass_temperature_c = (
+                thermal_mass_temperature_c
+            )
+
+        else:
+
+            current_thermal_mass_temperature_c = (
+                indoor_temperature_c
+            )
 
         points.append(
             SimulationPoint(
@@ -389,22 +502,19 @@ def run_transient_simulation(
                     3,
                 ),
 
-                thermal_mass_temperature_c=(
-                    round(
-                        current_thermal_mass_temperature_c,
-                        3,
-                    )
-                    if current_thermal_mass_temperature_c
-                    is not None
-                    else current_indoor_temperature_c
+                thermal_mass_temperature_c=round(
+                    current_thermal_mass_temperature_c,
+                    3,
                 ),
 
-                outdoor_temperature_c=(
-                    weather.outdoor_temperature_c
+                outdoor_temperature_c=round(
+                    weather.outdoor_temperature_c,
+                    3,
                 ),
 
-                solar_irradiance_w_m2=(
-                    weather.solar_irradiance_w_m2
+                solar_irradiance_w_m2=round(
+                    weather.solar_irradiance_w_m2,
+                    3,
                 ),
 
                 solar_gain_w=round(
@@ -412,28 +522,34 @@ def run_transient_simulation(
                     3,
                 ),
 
-                wall_heat_transfer_w=(
-                    heat_balance.wall_w
+                wall_heat_transfer_w=round(
+                    heat_balance.wall_w,
+                    3,
                 ),
 
-                roof_heat_transfer_w=(
-                    heat_balance.roof_w
+                roof_heat_transfer_w=round(
+                    heat_balance.roof_w,
+                    3,
                 ),
 
-                floor_heat_transfer_w=(
-                    heat_balance.floor_w
+                floor_heat_transfer_w=round(
+                    heat_balance.floor_w,
+                    3,
                 ),
 
-                window_heat_transfer_w=(
-                    heat_balance.windows_w
+                window_heat_transfer_w=round(
+                    heat_balance.windows_w,
+                    3,
                 ),
 
-                door_heat_transfer_w=(
-                    heat_balance.doors_w
+                door_heat_transfer_w=round(
+                    heat_balance.doors_w,
+                    3,
                 ),
 
-                ventilation_heat_transfer_w=(
-                    heat_balance.ventilation_w
+                ventilation_heat_transfer_w=round(
+                    heat_balance.ventilation_w,
+                    3,
                 ),
 
                 thermal_mass_heat_transfer_w=round(
@@ -441,8 +557,9 @@ def run_transient_simulation(
                     3,
                 ),
 
-                total_heat_loss_w=(
-                    heat_balance.total_loss_w
+                total_heat_loss_w=round(
+                    heat_balance.total_loss_w,
+                    3,
                 ),
 
                 net_heat_gain_w=round(
@@ -453,13 +570,17 @@ def run_transient_simulation(
         )
 
         # -----------------------------------------------------
-        # ADVANCE TEMPERATURES
+        # ADVANCE INDOOR TEMPERATURE
         # -----------------------------------------------------
 
         indoor_temperature_c = (
             current_indoor_temperature_c
             + indoor_temperature_change_c
         )
+
+        # -----------------------------------------------------
+        # ADVANCE THERMAL MASS
+        # -----------------------------------------------------
 
         if (
             thermal_mass_temperature_c

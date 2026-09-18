@@ -1,46 +1,154 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Shelter3D from "@/components/Shelter3D";
 
+import {
+  useShelterDesignStore,
+} from "@/stores/shelterDesignStore";
+
+
 export default function ThreeDPage() {
-  const [length, setLength] = useState(5);
-  const [width, setWidth] = useState(4);
-  const [height, setHeight] = useState(3);
 
-  const [orientation, setOrientation] =
-    useState(180);
+  const length =
+    useShelterDesignStore(
+      (state) => state.length_m,
+    );
 
-  const [insulationThickness, setInsulationThickness] =
-    useState(100);
+  const width =
+    useShelterDesignStore(
+      (state) => state.width_m,
+    );
 
-  const [roofInsulationThickness, setRoofInsulationThickness] =
-    useState(120);
+  const height =
+    useShelterDesignStore(
+      (state) => state.height_m,
+    );
 
-  const brickThickness = 200;
-  const gypsumThickness = 12;
+  const orientation =
+    useShelterDesignStore(
+      (state) => state.orientation_deg,
+    );
 
-  /*
-   * Total wall thickness is now calculated
-   * from the actual construction layers.
-   *
-   * Brick + Rock Wool + Gypsum
-   */
+  const wallLayers =
+    useShelterDesignStore(
+      (state) => state.wall_layers,
+    );
+
+  const roofLayers =
+    useShelterDesignStore(
+      (state) => state.roof_layers,
+    );
+
+  const setDimensions =
+    useShelterDesignStore(
+      (state) => state.setDimensions,
+    );
+
+  const setOrientation =
+    useShelterDesignStore(
+      (state) => state.setOrientation,
+    );
+
+  const setWallInsulationThicknessMm =
+    useShelterDesignStore(
+      (state) =>
+        state.setWallInsulationThicknessMm,
+    );
+
+  const setRoofInsulationThicknessMm =
+    useShelterDesignStore(
+      (state) =>
+        state.setRoofInsulationThicknessMm,
+    );
+
+
+  const brickThickness =
+    (
+      wallLayers.find(
+        (layer) =>
+          layer.material_id ===
+          "brick",
+      )?.thickness_m ?? 0
+    ) * 1000;
+
+
+  const insulationThickness =
+    (
+      wallLayers.find(
+        (layer) =>
+          layer.material_id ===
+          "rock_wool",
+      )?.thickness_m ?? 0
+    ) * 1000;
+
+
+  const gypsumThickness =
+    (
+      wallLayers.find(
+        (layer) =>
+          layer.material_id ===
+          "gypsum",
+      )?.thickness_m ?? 0
+    ) * 1000;
+
+
+  const roofInsulationThickness =
+    (
+      roofLayers.find(
+        (layer) =>
+          layer.material_id ===
+          "rock_wool",
+      )?.thickness_m ?? 0
+    ) * 1000;
+
+
   const wallThickness =
-    (
-      brickThickness +
-      insulationThickness +
-      gypsumThickness
-    ) / 1000;
+    wallLayers.reduce(
+      (total, layer) =>
+        total + layer.thickness_m,
+      0,
+    );
 
-  /*
-   * Concrete roof + Rock Wool insulation
-   */
+
   const roofThickness =
-    (
-      100 +
-      roofInsulationThickness
-    ) / 1000;
+    roofLayers.reduce(
+      (total, layer) =>
+        total + layer.thickness_m,
+      0,
+    );
+
+
+  const wallRValue =
+    0.12 +
+    wallLayers.reduce(
+      (total, layer) => {
+
+        const conductivity =
+          layer.material_id ===
+          "brick"
+            ? 0.72
+            : layer.material_id ===
+                "rock_wool"
+              ? 0.04
+              : layer.material_id ===
+                  "gypsum"
+                ? 0.17
+                : 1.0;
+
+        return (
+          total +
+          layer.thickness_m /
+            conductivity
+        );
+      },
+      0,
+    ) +
+    0.03;
+
+
+  const wallUValue =
+    1 / wallRValue;
+
 
   const orientationName =
     orientation === 0
@@ -53,33 +161,14 @@ export default function ThreeDPage() {
             ? "West"
             : "Custom";
 
-  const wallRValue = useMemo(() => {
-    const brickK = 0.72;
-    const rockWoolK = 0.04;
-    const gypsumK = 0.17;
-
-    const rInside = 0.12;
-    const rOutside = 0.03;
-
-    return (
-      rInside +
-      brickThickness / 1000 / brickK +
-      insulationThickness /
-        1000 /
-        rockWoolK +
-      gypsumThickness / 1000 / gypsumK +
-      rOutside
-    );
-  }, [insulationThickness]);
-
-  const wallUValue =
-    1 / wallRValue;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
+
       <div className="mx-auto max-w-7xl px-6 py-10">
 
         <header className="mb-8">
+
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">
             3D Design Studio
           </p>
@@ -89,21 +178,29 @@ export default function ThreeDPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl text-slate-400">
-            Interactive shelter geometry and
-            construction configuration.
+            This 3D model is driven by the shared
+            Thermo Shelter design state.
           </p>
+
         </header>
 
+
         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+
 
           <Shelter3D
             length={length}
             width={width}
             height={height}
             orientation={orientation}
-            wallThickness={wallThickness}
-            roofThickness={roofThickness}
+            wallThickness={
+              wallThickness
+            }
+            roofThickness={
+              roofThickness
+            }
           />
+
 
           <aside className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
 
@@ -111,7 +208,7 @@ export default function ThreeDPage() {
               Shelter Configuration
             </h2>
 
-            {/* LENGTH */}
+
             <Control
               label="Length"
               value={length}
@@ -119,10 +216,15 @@ export default function ThreeDPage() {
               max={15}
               step={0.1}
               unit="m"
-              onChange={setLength}
+              onChange={(value) =>
+                setDimensions({
+                  length_m:
+                    value,
+                })
+              }
             />
 
-            {/* WIDTH */}
+
             <Control
               label="Width"
               value={width}
@@ -130,10 +232,15 @@ export default function ThreeDPage() {
               max={12}
               step={0.1}
               unit="m"
-              onChange={setWidth}
+              onChange={(value) =>
+                setDimensions({
+                  width_m:
+                    value,
+                })
+              }
             />
 
-            {/* HEIGHT */}
+
             <Control
               label="Height"
               value={height}
@@ -141,10 +248,15 @@ export default function ThreeDPage() {
               max={8}
               step={0.1}
               unit="m"
-              onChange={setHeight}
+              onChange={(value) =>
+                setDimensions({
+                  height_m:
+                    value,
+                })
+              }
             />
 
-            {/* ORIENTATION */}
+
             <Control
               label="Orientation"
               value={orientation}
@@ -152,25 +264,27 @@ export default function ThreeDPage() {
               max={360}
               step={1}
               unit="°"
-              onChange={setOrientation}
+              onChange={
+                setOrientation
+              }
             />
 
-            {/* WALL INSULATION */}
+
             <Control
-              label="Rock Wool Insulation"
+              label="Rock Wool Wall Insulation"
               value={insulationThickness}
               min={25}
               max={250}
               step={5}
               unit="mm"
               onChange={
-                setInsulationThickness
+                setWallInsulationThicknessMm
               }
             />
 
-            {/* ROOF INSULATION */}
+
             <Control
-              label="Roof Rock Wool"
+              label="Rock Wool Roof Insulation"
               value={
                 roofInsulationThickness
               }
@@ -179,118 +293,63 @@ export default function ThreeDPage() {
               step={5}
               unit="mm"
               onChange={
-                setRoofInsulationThickness
+                setRoofInsulationThicknessMm
               }
             />
 
-            {/* CONSTRUCTION */}
+
             <div className="mt-8 rounded-xl border border-cyan-900 bg-cyan-950/20 p-4">
 
               <p className="font-semibold text-cyan-300">
-                Wall Construction
+                Shared Design State
               </p>
 
               <div className="mt-3 space-y-2 text-sm text-slate-400">
 
                 <p>
-                  Brick:
+                  Dimensions:
                   <span className="text-white">
                     {" "}
-                    200 mm
+                    {length.toFixed(
+                      1,
+                    )}
+                    ×
+                    {width.toFixed(
+                      1,
+                    )}
+                    ×
+                    {height.toFixed(
+                      1,
+                    )}{" "}
+                    m
                   </span>
                 </p>
 
                 <p>
-                  Rock Wool:
+                  Wall thickness:
                   <span className="text-white">
                     {" "}
-                    {insulationThickness} mm
-                  </span>
-                </p>
-
-                <p>
-                  Gypsum:
-                  <span className="text-white">
-                    {" "}
-                    12 mm
-                  </span>
-                </p>
-
-                <p className="border-t border-cyan-900 pt-2">
-
-                  Total Wall Thickness:
-                  <span className="font-semibold text-cyan-300">
-                    {" "}
-                    {(wallThickness * 1000).toFixed(
+                    {(
+                      wallThickness *
+                      1000
+                    ).toFixed(
                       0,
-                    )} mm
-                  </span>
-
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* THERMAL PROPERTIES */}
-            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
-
-              <p className="font-semibold">
-                Thermal Properties
-              </p>
-
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
-
-                <p>
-                  R-value:
-                  <span className="text-white">
-                    {" "}
-                    {wallRValue.toFixed(3)}{" "}
-                    m²K/W
-                  </span>
-                </p>
-
-                <p>
-                  U-value:
-                  <span className="text-white">
-                    {" "}
-                    {wallUValue.toFixed(3)}{" "}
-                    W/m²K
-                  </span>
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* DESIGN SUMMARY */}
-            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
-
-              <p className="font-semibold">
-                Current Design
-              </p>
-
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
-
-                <p>
-                  Floor Area:
-                  <span className="text-white">
-                    {" "}
-                    {(length * width).toFixed(
-                      2,
                     )}{" "}
-                    m²
+                    mm
                   </span>
                 </p>
 
                 <p>
-                  Volume:
+                  Roof thickness:
                   <span className="text-white">
                     {" "}
-                    {(length * width * height).toFixed(
-                      2,
+                    {(
+                      roofThickness *
+                      1000
+                    ).toFixed(
+                      0,
                     )}{" "}
-                    m³
+                    mm
                   </span>
                 </p>
 
@@ -304,11 +363,46 @@ export default function ThreeDPage() {
                   </span>
                 </p>
 
+              </div>
+
+            </div>
+
+
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
+
+              <p className="font-semibold">
+                Wall Construction
+              </p>
+
+              <div className="mt-3 space-y-2 text-sm text-slate-400">
+
                 <p>
-                  Roof Thickness:
+                  Brick:
                   <span className="text-white">
                     {" "}
-                    {(roofThickness * 1000).toFixed(
+                    {brickThickness.toFixed(
+                      0,
+                    )}{" "}
+                    mm
+                  </span>
+                </p>
+
+                <p>
+                  Rock Wool:
+                  <span className="text-white">
+                    {" "}
+                    {insulationThickness.toFixed(
+                      0,
+                    )}{" "}
+                    mm
+                  </span>
+                </p>
+
+                <p>
+                  Gypsum:
+                  <span className="text-white">
+                    {" "}
+                    {gypsumThickness.toFixed(
                       0,
                     )}{" "}
                     mm
@@ -319,28 +413,49 @@ export default function ThreeDPage() {
 
             </div>
 
-            <div className="mt-4 rounded-xl border border-amber-900 bg-amber-950/20 p-4">
 
-              <p className="font-semibold text-amber-300">
-                Model Assumption
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-4">
+
+              <p className="font-semibold">
+                Thermal Properties
               </p>
 
-              <p className="mt-2 text-xs leading-5 text-slate-400">
-                Wall R-value uses the current
-                multilayer construction:
-                brick + rock wool + gypsum,
-                including simplified internal
-                and external surface resistances.
-              </p>
+              <div className="mt-3 space-y-2 text-sm text-slate-400">
+
+                <p>
+                  R-value:
+                  <span className="text-white">
+                    {" "}
+                    {wallRValue.toFixed(
+                      3,
+                    )}{" "}
+                    m²K/W
+                  </span>
+                </p>
+
+                <p>
+                  U-value:
+                  <span className="text-white">
+                    {" "}
+                    {wallUValue.toFixed(
+                      3,
+                    )}{" "}
+                    W/m²K
+                  </span>
+                </p>
+
+              </div>
 
             </div>
 
           </aside>
+
         </div>
       </div>
     </main>
   );
 }
+
 
 function Control({
   label,
@@ -357,8 +472,11 @@ function Control({
   max: number;
   step: number;
   unit: string;
-  onChange: (value: number) => void;
+  onChange: (
+    value: number,
+  ) => void;
 }) {
+
   return (
     <div className="mt-6">
 
@@ -374,13 +492,16 @@ function Control({
 
       </div>
 
+
       <input
         type="range"
         min={min}
         max={max}
         step={step}
         value={value}
-        onChange={(event) =>
+        onChange={(
+          event,
+        ) =>
           onChange(
             Number(
               event.target.value,
@@ -390,13 +511,16 @@ function Control({
         className="mt-3 w-full accent-cyan-400"
       />
 
+
       <input
         type="number"
         min={min}
         max={max}
         step={step}
         value={value}
-        onChange={(event) =>
+        onChange={(
+          event,
+        ) =>
           onChange(
             Number(
               event.target.value,

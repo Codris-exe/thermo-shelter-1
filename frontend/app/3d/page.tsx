@@ -55,6 +55,25 @@ interface SimulationResult {
   points: SimulationPoint[];
 }
 
+interface OptimizationCandidate {
+  rank: number;
+  orientation_deg: number;
+  wall_insulation_thickness_mm: number;
+  roof_insulation_thickness_mm: number;
+  comfort_percentage: number;
+  comfort_hours: number;
+  minimum_indoor_temperature_c: number;
+  maximum_indoor_temperature_c: number;
+  final_indoor_temperature_c: number;
+}
+
+interface OptimizationResult {
+  total_candidates_tested: number;
+  baseline_comfort_percentage: number;
+  best_candidate: OptimizationCandidate;
+  candidates: OptimizationCandidate[];
+}
+
 const MATERIAL_K: Record<string, number> = {
   brick: 0.72,
   concrete: 1.4,
@@ -67,7 +86,9 @@ const MATERIAL_K: Record<string, number> = {
   adobe: 0.43,
 };
 
-function calculateAssembly(layers: { material_id: string; thickness_m: number }[]) {
+function calculateAssembly(
+  layers: { material_id: string; thickness_m: number }[],
+) {
   const rInterior = 0.12;
   const rExterior = 0.03;
 
@@ -78,6 +99,7 @@ function calculateAssembly(layers: { material_id: string; thickness_m: number }[
 
   const totalR = rInterior + materialResistance + rExterior;
   const uValue = totalR > 0 ? 1 / totalR : 0;
+
   const thickness = layers.reduce(
     (sum, layer) => sum + layer.thickness_m,
     0,
@@ -118,7 +140,11 @@ export default function ThreeDPage() {
   const [simulationResult, setSimulationResult] =
     useState<SimulationResult | null>(null);
 
+  const [optimizationResult, setOptimizationResult] =
+    useState<OptimizationResult | null>(null);
+
   const [isSimulating, setIsSimulating] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [error, setError] = useState("");
 
   const wallAssembly = useMemo(
@@ -131,79 +157,80 @@ export default function ThreeDPage() {
     [roof_layers],
   );
 
-  const floorAssembly = useMemo(
-    () => calculateAssembly(floor_layers),
-    [floor_layers],
-  );
+  const buildDesignPayload = () => ({
+    location: {
+      name: location.name,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      elevation_m: location.elevation_m,
+      timezone: location.timezone,
+      source: location.source,
+    },
+
+    geometry: {
+      shape,
+      length_m,
+      width_m,
+      height_m,
+    },
+
+    orientation_deg,
+
+    wall_assembly: {
+      layers: wall_layers,
+    },
+
+    roof_assembly: {
+      layers: roof_layers,
+    },
+
+    floor_assembly: {
+      layers: floor_layers,
+    },
+
+    windows,
+
+    doors,
+
+    thermal_mass,
+
+    ventilation: {
+      ach,
+    },
+
+    comfort: {
+      minimum_c: comfort_min_c,
+      maximum_c: comfort_max_c,
+    },
+  });
+
+  async function fetchWeather(): Promise<WeatherPoint[]> {
+    const weatherResponse = await fetch(
+      `${API_BASE}/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`,
+    );
+
+    if (!weatherResponse.ok) {
+      throw new Error("Unable to fetch real weather data.");
+    }
+
+    const weatherData = await weatherResponse.json();
+
+    const weatherPoints: WeatherPoint[] =
+      weatherData.points ?? weatherData.data ?? weatherData;
+
+    if (!Array.isArray(weatherPoints) || weatherPoints.length < 2) {
+      throw new Error("Not enough weather data was returned.");
+    }
+
+    return weatherPoints;
+  }
 
   async function runThermalSimulation() {
     setIsSimulating(true);
     setError("");
 
     try {
-      const weatherResponse = await fetch(
-        `${API_BASE}/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`,
-      );
-
-      if (!weatherResponse.ok) {
-        throw new Error("Unable to fetch real weather data.");
-      }
-
-      const weatherData = await weatherResponse.json();
-
-      const weatherPoints: WeatherPoint[] =
-        weatherData.points ?? weatherData.data ?? weatherData;
-
-      if (!Array.isArray(weatherPoints) || weatherPoints.length < 2) {
-        throw new Error("Not enough weather data was returned.");
-      }
-
-      const designPayload = {
-        location: {
-          name: location.name,
-          latitude: location.latitude,
-          longitude: location.longitude,
-          elevation_m: location.elevation_m,
-          timezone: location.timezone,
-          source: location.source,
-        },
-
-        geometry: {
-          shape,
-          length_m,
-          width_m,
-          height_m,
-        },
-
-        orientation_deg,
-
-        wall_assembly: {
-          layers: wall_layers,
-        },
-
-        roof_assembly: {
-          layers: roof_layers,
-        },
-
-        floor_assembly: {
-          layers: floor_layers,
-        },
-
-        windows,
-
-        doors,
-
-        thermal_mass,
-
-        ventilation: {
-          ach,
-        },
-
-        comfort: {
-          minimum_c: comfort_min_c,
-          maximum_c: comfort_max_c,
-        },
-      };
+      const weatherPoints = await fetchWeather();
 
       const simulationResponse = await fetch(
         `${API_BASE}/api/simulations/run`,
@@ -213,7 +240,7 @@ export default function ThreeDPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            design: designPayload,
+            design: buildDesignPayload(),
             initial_indoor_temperature_c:
               initial_indoor_temperature_c,
             weather: weatherPoints,
@@ -247,6 +274,82 @@ export default function ThreeDPage() {
     }
   }
 
+  async function optimizeShelter() {
+    setIsOptimizing(true);
+    setError("");
+
+    try {
+      const weatherPoints = await fetchWeather();
+
+      const optimizationResponse = await fetch(
+        `${API_BASE}/api/optimization/run`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            design: buildDesignPayload(),
+            weather: weatherPoints,
+            initial_indoor_temperature_c:
+              initial_indoor_temperature_c,
+            internal_heat_gain_w: 0,
+
+            wall_insulation_thicknesses_mm: [
+              50,
+              100,
+              150,
+              200,
+            ],
+
+            roof_insulation_thicknesses_mm: [
+              50,
+              100,
+              150,
+              200,
+            ],
+
+            orientations_deg: [
+              0,
+              90,
+              180,
+              270,
+            ],
+
+            timestep_minutes: 60,
+          }),
+        },
+      );
+
+      if (!optimizationResponse.ok) {
+        const message = await optimizationResponse.text();
+        throw new Error(
+          message || "Shelter optimization failed.",
+        );
+      }
+
+      const result: OptimizationResult =
+        await optimizationResponse.json();
+
+      setOptimizationResult(result);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while optimizing the shelter.",
+      );
+    } finally {
+      setIsOptimizing(false);
+    }
+  }
+
+  const comfortDifference =
+    optimizationResult &&
+    optimizationResult.best_candidate.comfort_percentage -
+      optimizationResult.baseline_comfort_percentage;
+
   return (
     <main className="h-screen overflow-hidden bg-[#07111f] text-white">
       {/* Header */}
@@ -274,7 +377,6 @@ export default function ThreeDPage() {
         </div>
       </header>
 
-      {/* Main screen */}
       <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_360px] gap-3 p-3">
         {/* LEFT SIDE */}
         <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_220px] gap-3">
@@ -462,11 +564,7 @@ export default function ThreeDPage() {
               </span>
 
               <span className="text-[10px] text-slate-400">
-                {wallAssembly.thickness * 1000 > 0
-                  ? `${Math.round(
-                      wallAssembly.thickness * 1000,
-                    )} mm`
-                  : "0 mm"}
+                {Math.round(wallAssembly.thickness * 1000)} mm
               </span>
             </div>
 
@@ -475,14 +573,12 @@ export default function ThreeDPage() {
               min="20"
               max="300"
               step="5"
-              value={
-                Math.round(
-                  (wall_layers.find(
-                    (layer) =>
-                      layer.material_id === "rock_wool",
-                  )?.thickness_m ?? 0.1) * 1000,
-                )
-              }
+              value={Math.round(
+                (wall_layers.find(
+                  (layer) =>
+                    layer.material_id === "rock_wool",
+                )?.thickness_m ?? 0.1) * 1000,
+              )}
               onChange={(event) =>
                 setWallInsulationThicknessMm(
                   Number(event.target.value),
@@ -539,14 +635,12 @@ export default function ThreeDPage() {
               min="20"
               max="300"
               step="5"
-              value={
-                Math.round(
-                  (roof_layers.find(
-                    (layer) =>
-                      layer.material_id === "rock_wool",
-                  )?.thickness_m ?? 0.12) * 1000,
-                )
-              }
+              value={Math.round(
+                (roof_layers.find(
+                  (layer) =>
+                    layer.material_id === "rock_wool",
+                )?.thickness_m ?? 0.12) * 1000,
+              )}
               onChange={(event) =>
                 setRoofInsulationThicknessMm(
                   Number(event.target.value),
@@ -613,16 +707,28 @@ export default function ThreeDPage() {
             />
           </div>
 
-          {/* Run simulation */}
+          {/* Simulation button */}
           <button
             type="button"
             onClick={runThermalSimulation}
-            disabled={isSimulating}
+            disabled={isSimulating || isOptimizing}
             className="mt-5 w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSimulating
               ? "Running Thermal Simulation..."
               : "Run Thermal Simulation"}
+          </button>
+
+          {/* Optimization button */}
+          <button
+            type="button"
+            onClick={optimizeShelter}
+            disabled={isSimulating || isOptimizing}
+            className="mt-2 w-full rounded-xl border border-violet-400/30 bg-violet-400/10 px-4 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isOptimizing
+              ? "Testing Shelter Designs..."
+              : "Optimize Shelter"}
           </button>
 
           {/* Error */}
@@ -632,7 +738,7 @@ export default function ThreeDPage() {
             </div>
           )}
 
-          {/* Results */}
+          {/* Simulation results */}
           {simulationResult && (
             <div className="mt-4">
               <div className="mb-2 text-xs font-semibold text-white">
@@ -722,6 +828,155 @@ export default function ThreeDPage() {
                   <span className="font-medium text-orange-300">
                     {simulationResult.hot_hours.toFixed(1)} h
                   </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Optimization results */}
+          {optimizationResult && (
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-xs font-semibold text-white">
+                  Optimization
+                </div>
+
+                <div className="text-[10px] text-violet-300">
+                  {optimizationResult.total_candidates_tested} tested
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-violet-400/20 bg-violet-400/5 p-3">
+                <div className="text-[9px] uppercase tracking-wide text-violet-300">
+                  Best Tested Candidate
+                </div>
+
+                <div className="mt-1 text-lg font-semibold text-white">
+                  #{optimizationResult.best_candidate.rank}
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Comfort
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-emerald-300">
+                      {optimizationResult.best_candidate.comfort_percentage.toFixed(
+                        1,
+                      )}
+                      %
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Final Indoor
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-cyan-300">
+                      {optimizationResult.best_candidate.final_indoor_temperature_c.toFixed(
+                        1,
+                      )}
+                      °C
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Orientation
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-white">
+                      {optimizationResult.best_candidate.orientation_deg}°
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Wall Insulation
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-white">
+                      {optimizationResult.best_candidate.wall_insulation_thickness_mm.toFixed(
+                        0,
+                      )}{" "}
+                      mm
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Roof Insulation
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-white">
+                      {optimizationResult.best_candidate.roof_insulation_thickness_mm.toFixed(
+                        0,
+                      )}{" "}
+                      mm
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] text-slate-500">
+                      Temperature Range
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-white">
+                      {optimizationResult.best_candidate.minimum_indoor_temperature_c.toFixed(
+                        1,
+                      )}
+                      –
+                      {optimizationResult.best_candidate.maximum_indoor_temperature_c.toFixed(
+                        1,
+                      )}
+                      °C
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 border-t border-white/10 pt-2">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500">
+                      Baseline comfort
+                    </span>
+
+                    <span className="text-slate-300">
+                      {optimizationResult.baseline_comfort_percentage.toFixed(
+                        1,
+                      )}
+                      %
+                    </span>
+                  </div>
+
+                  <div className="mt-1 flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500">
+                      Best tested comfort
+                    </span>
+
+                    <span className="text-emerald-300">
+                      {optimizationResult.best_candidate.comfort_percentage.toFixed(
+                        1,
+                      )}
+                      %
+                    </span>
+                  </div>
+
+                  <div className="mt-1 flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500">
+                      Difference
+                    </span>
+
+                    <span
+                      className={
+                        comfortDifference != null &&
+                        comfortDifference >= 0
+                          ? "text-emerald-300"
+                          : "text-orange-300"
+                      }
+                    >
+                      {comfortDifference != null
+                        ? `${comfortDifference >= 0 ? "+" : ""}${comfortDifference.toFixed(
+                            1,
+                          )} percentage points`
+                        : "—"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

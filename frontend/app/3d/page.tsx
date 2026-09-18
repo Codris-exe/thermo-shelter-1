@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Shelter3D from "@/components/Shelter3D";
 import ThermalResultsChart from "@/components/ThermalResultsChart";
+import WeatherSummaryCard from "@/components/WeatherSummaryCard";
 import { useShelterDesignStore } from "@/stores/shelterDesignStore";
 
 const API_BASE = "/backend-api";
@@ -108,7 +109,6 @@ function calculateAssembly(layers: MaterialLayer[]) {
   }, 0);
 
   const totalR = rInterior + materialResistance + rExterior;
-
   const uValue = totalR > 0 ? 1 / totalR : 0;
 
   const thickness = layers.reduce(
@@ -178,6 +178,10 @@ export default function ThreeDPage() {
     setRoofInsulationThicknessMm,
     setInitialIndoorTemperature,
   } = useShelterDesignStore();
+
+  const [weatherPoints, setWeatherPoints] = useState<
+    WeatherPoint[]
+  >([]);
 
   const [simulationResult, setSimulationResult] =
     useState<SimulationResult | null>(null);
@@ -282,12 +286,14 @@ export default function ThreeDPage() {
       );
     }
 
+    setWeatherPoints(points);
+
     return points;
   }
 
   async function runSimulationForDesign(
     designPayload: ReturnType<typeof buildDesignPayload>,
-    weatherPoints: WeatherPoint[],
+    weatherPointsForSimulation: WeatherPoint[],
   ) {
     const response = await fetch(
       `${API_BASE}/api/simulations/run`,
@@ -300,7 +306,7 @@ export default function ThreeDPage() {
           design: designPayload,
           initial_indoor_temperature_c:
             initial_indoor_temperature_c,
-          weather: weatherPoints,
+          weather: weatherPointsForSimulation,
           internal_heat_gain_w: 0,
           timestep_minutes: 60,
         }),
@@ -323,11 +329,11 @@ export default function ThreeDPage() {
     setError("");
 
     try {
-      const weatherPoints = await fetchWeather();
+      const points = await fetchWeather();
 
       const result = await runSimulationForDesign(
         buildDesignPayload(),
-        weatherPoints,
+        points,
       );
 
       setSimulationResult(result);
@@ -349,7 +355,7 @@ export default function ThreeDPage() {
     setError("");
 
     try {
-      const weatherPoints = await fetchWeather();
+      const points = await fetchWeather();
 
       const response = await fetch(
         `${API_BASE}/api/optimization/run`,
@@ -360,7 +366,7 @@ export default function ThreeDPage() {
           },
           body: JSON.stringify({
             design: buildDesignPayload(),
-            weather: weatherPoints,
+            weather: points,
             initial_indoor_temperature_c:
               initial_indoor_temperature_c,
             internal_heat_gain_w: 0,
@@ -439,10 +445,6 @@ export default function ThreeDPage() {
           best.roof_insulation_thickness_mm,
         );
 
-      /*
-       * Update the shared Zustand design.
-       * Shelter3D and the R/U cards will react immediately.
-       */
       setOrientation(best.orientation_deg);
 
       setWallInsulationThicknessMm(
@@ -453,12 +455,7 @@ export default function ThreeDPage() {
         best.roof_insulation_thickness_mm,
       );
 
-      /*
-       * Run the thermal simulation using the optimized
-       * configuration directly, so the charts immediately
-       * represent the applied design.
-       */
-      const weatherPoints = await fetchWeather();
+      const points = await fetchWeather();
 
       const optimizedDesign = buildDesignPayload({
         orientation_deg: best.orientation_deg,
@@ -469,7 +466,7 @@ export default function ThreeDPage() {
       const optimizedSimulation =
         await runSimulationForDesign(
           optimizedDesign,
-          weatherPoints,
+          points,
         );
 
       setSimulationResult(optimizedSimulation);
@@ -523,6 +520,7 @@ export default function ThreeDPage() {
       <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_360px] gap-3 p-3">
         {/* LEFT */}
         <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_220px] gap-3">
+          {/* 3D */}
           <div className="relative min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0b1728]">
             <div className="absolute left-4 top-4 z-10 rounded-xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-md">
               <div className="text-xs font-semibold text-white">
@@ -554,6 +552,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
+          {/* Charts */}
           <div className="min-h-0">
             <ThermalResultsChart
               points={
@@ -589,7 +588,9 @@ export default function ThreeDPage() {
                 {location.latitude.toFixed(4)},{" "}
                 {location.longitude.toFixed(4)}
                 {location.elevation_m != null
-                  ? ` • ${Math.round(location.elevation_m)} m elevation`
+                  ? ` • ${Math.round(
+                      location.elevation_m,
+                    )} m elevation`
                   : ""}
               </div>
 
@@ -597,6 +598,11 @@ export default function ThreeDPage() {
                 Weather: Open-Meteo
               </div>
             </div>
+          </div>
+
+          {/* Live Weather */}
+          <div className="mt-3">
+            <WeatherSummaryCard points={weatherPoints} />
           </div>
 
           {/* Dimensions */}
@@ -868,7 +874,7 @@ export default function ThreeDPage() {
             />
           </div>
 
-          {/* Main actions */}
+          {/* Simulation */}
           <button
             type="button"
             onClick={runThermalSimulation}
@@ -884,6 +890,7 @@ export default function ThreeDPage() {
               : "Run Thermal Simulation"}
           </button>
 
+          {/* Optimization */}
           <button
             type="button"
             onClick={optimizeShelter}
@@ -906,7 +913,7 @@ export default function ThreeDPage() {
             </div>
           )}
 
-          {/* Simulation results */}
+          {/* Simulation Results */}
           {simulationResult && (
             <div className="mt-4">
               <div className="mb-2 text-xs font-semibold text-white">

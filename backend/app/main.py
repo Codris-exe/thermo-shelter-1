@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.simulation import router as simulation_router
+
+
 app = FastAPI(
     title="Thermo Shelter 1 API",
     description="Backend for passive shelter thermal simulation and optimization.",
     version="0.1.0",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,6 +20,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Register simulation API routes
+app.include_router(simulation_router)
 
 
 @app.get("/")

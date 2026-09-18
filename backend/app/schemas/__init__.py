@@ -23,3 +23,8 @@ __all__ = [
     "VentilationConfig",
     "WindowConfig",
 ]
+from .simulation import (
+    HeatBalanceRequest,
+    HeatBalanceResult,
+    WeatherPoint,
+)

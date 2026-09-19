@@ -54,15 +54,15 @@ export default function ThermalResultsChart({
   }));
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-2 gap-3">
+    <div className="grid h-full min-h-0 grid-cols-2 gap-3 font-mono">
       {/* Temperature chart */}
-      <div className="min-h-0 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="min-h-0 border border-white/15 bg-[#090e1b] p-3 corner-bracket">
         <div className="mb-2">
-          <div className="text-sm font-semibold text-white">
-            Temperature Profile
+          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+            Thermal Temperature Profile
           </div>
-          <div className="text-[11px] text-slate-500">
-            Indoor vs outdoor temperature
+          <div className="text-[10px] text-slate-400">
+            Indoor core (Amber) vs ambient outdoor (Icy Cyan)
           </div>
         </div>
 
@@ -134,8 +134,8 @@ export default function ThermalResultsChart({
               <Line
                 type="monotone"
                 dataKey="indoor"
-                name="Indoor"
-                stroke="#22c55e"
+                name="Indoor Core"
+                stroke="#f59e0b"
                 strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -144,8 +144,8 @@ export default function ThermalResultsChart({
               <Line
                 type="monotone"
                 dataKey="outdoor"
-                name="Outdoor"
-                stroke="#60a5fa"
+                name="Ambient Ext"
+                stroke="#38bdf8"
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -156,13 +156,13 @@ export default function ThermalResultsChart({
       </div>
 
       {/* Energy chart */}
-      <div className="min-h-0 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="min-h-0 border border-white/15 bg-[#090e1b] p-3 corner-bracket">
         <div className="mb-2">
-          <div className="text-sm font-semibold text-white">
-            Thermal Energy Flow
+          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+            Energy Balance Flux
           </div>
-          <div className="text-[11px] text-slate-500">
-            Solar gain vs envelope heat transfer
+          <div className="text-[10px] text-slate-400">
+            Solar radiation gain (Amber) vs total heat loss (Zinc)
           </div>
         </div>
 

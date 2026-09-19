@@ -37,20 +37,20 @@ export default function DemoRunButton({
   }
 
   return (
-    <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3">
+    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white">
-            Hackathon Demo
+          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+            Automated Analysis Run
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-500">
-            Run the complete analysis workflow
+          <div className="mt-0.5 text-[9px] text-slate-400">
+            End-to-end telemetry, simulation &amp; Pareto sweep
           </div>
         </div>
 
-        <div className="rounded-full border border-amber-400/20 bg-amber-400/5 px-2 py-1 text-[8px] text-amber-300">
-          DEMO
+        <div className="border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[8px] text-amber-300 font-bold uppercase">
+          AUTOMATED
         </div>
       </div>
 
@@ -61,16 +61,15 @@ export default function DemoRunButton({
           disabled ||
           isRunning
         }
-        className="mt-3 w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-3 w-full chamfer-btn bg-amber-500 hover:bg-amber-400 px-4 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-slate-950 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
       >
-        {isRunning
-          ? "Running Full Analysis..."
-          : "Run Full Demo"}
+        <span className="w-2 h-2 rounded-full bg-slate-950 status-ping" />
+        <span>{isRunning ? "Executing Pipeline..." : "Execute Automated Workflow"}</span>
+        <span className="text-sm">→</span>
       </button>
 
-      <div className="mt-2 text-[8px] leading-relaxed text-slate-600">
-        Uses the current shelter design, real weather data,
-        thermal simulation and the configured optimization search.
+      <div className="mt-2 text-[9px] leading-relaxed text-slate-400">
+        Executes real climate ingestion, transient forward Euler solver, and combinatorial parameter optimization.
       </div>
 
       {error && (

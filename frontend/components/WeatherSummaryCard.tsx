@@ -49,15 +49,15 @@ export default function WeatherSummaryCard({
   const maximumTemperature = Math.max(...temperatures);
 
   return (
-    <div className="rounded-xl border border-cyan-400/10 bg-cyan-400/[0.03] p-3">
+    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white">
-            Live Weather
+          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+            Live Weather Telemetry
           </div>
 
-          <div className="mt-0.5 text-[9px] text-emerald-400">
-            Real forecast data
+          <div className="mt-0.5 text-[9px] text-amber-400">
+            Open-Meteo Satellite Sync
           </div>
         </div>
 

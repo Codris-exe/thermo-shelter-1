@@ -962,11 +962,10 @@ export default function ReportButton({
       type="button"
       onClick={generateReport}
       disabled={isGenerating}
-      className="w-full rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-full chamfer-btn border border-emerald-400/40 bg-emerald-500/15 hover:bg-emerald-500/25 px-4 py-3 text-xs font-mono font-bold tracking-wider uppercase text-emerald-300 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
     >
-      {isGenerating
-        ? "Generating Report..."
-        : "Export Analysis Report"}
+      <span>{isGenerating ? "Compiling PDF..." : "Export Technical Dossier (PDF)"}</span>
+      <span className="text-sm">↓</span>
     </button>
   );
 }

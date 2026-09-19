@@ -32,21 +32,21 @@ export default function DesignComparisonCard({
   isApplied = false,
 }: DesignComparisonCardProps) {
   return (
-    <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[0.03] p-3">
+    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white">
-            Design Comparison
+          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+            Configuration Comparison
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-500">
-            Baseline configuration vs best tested configuration
+          <div className="mt-0.5 text-[9px] text-slate-400">
+            Baseline envelope vs optimized architectural model
           </div>
         </div>
 
         {isApplied && (
-          <div className="rounded-full border border-emerald-400/20 bg-emerald-400/5 px-2 py-1 text-[9px] text-emerald-300">
-            Applied
+          <div className="border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[9px] text-emerald-300 font-bold uppercase">
+            Active in 3D
           </div>
         )}
       </div>

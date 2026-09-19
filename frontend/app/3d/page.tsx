@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const Shelter3D = dynamic(() => import("@/components/Shelter3D"), {
@@ -1037,49 +1038,67 @@ export default function ThreeDPage() {
     isResetting;
 
   return (
-    <main className="h-screen overflow-hidden bg-[#07111f] text-white">
-      {/* HEADER */}
-      <header className="flex h-[58px] items-center justify-between border-b border-white/10 px-5">
-        <div>
-          <div className="text-lg font-bold tracking-tight">
-            Thermo Shelter 1
-          </div>
+    <main className="h-screen overflow-hidden bg-[#070c16] text-slate-100 font-sans">
+      {/* ARCHITECTURAL HEADER */}
+      <header className="flex h-[58px] items-center justify-between border-b border-white/10 px-6 bg-[#090e1b]">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 text-slate-300 hover:text-white transition-colors"
+          >
+            <div className="w-7 h-7 bg-amber-500/10 border border-amber-500/40 flex items-center justify-center chamfer-btn">
+              <span className="font-mono text-amber-400 font-bold text-[11px]">TS</span>
+            </div>
+            <span className="text-sm font-bold tracking-wider uppercase font-mono text-slate-200">
+              THERMO SHELTER // TS-1
+            </span>
+          </Link>
 
-          <div className="text-[11px] text-slate-500">
-            Passive Shelter Thermal Simulator
-          </div>
+          <span className="hidden sm:inline text-slate-600 font-mono text-xs">/</span>
+
+          <span className="hidden sm:inline text-xs font-mono text-amber-400 font-medium tracking-wide">
+            3D INTERACTIVE SIMULATOR
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/5 px-3 py-1.5 text-[11px] text-emerald-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            3D Model Live
+        <div className="flex items-center gap-3 font-mono text-[11px]">
+          <div className="flex items-center gap-2 border border-white/10 bg-[#060913] px-3 py-1 text-slate-300">
+            <span className="h-2 w-2 rounded-full bg-amber-400 status-ping" />
+            <span>SI UNITS: METRIC</span>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-400/5 px-3 py-1.5 text-[11px] text-blue-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-            Thermal Engine Ready
+          <div className="flex items-center gap-2 border border-white/10 bg-[#060913] px-3 py-1 text-slate-300">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <span>SOLVER: TRANSIENT EULER</span>
           </div>
+
+          <Link
+            href="/"
+            className="chamfer-btn border border-white/20 bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-1 transition-colors uppercase text-[10px] tracking-wider"
+          >
+            ← Mission Spec
+          </Link>
         </div>
       </header>
 
-      <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_360px] gap-3 p-3">
+      <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_390px] gap-3 p-3">
         {/* LEFT */}
         <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_220px] gap-3">
-          <div className="relative min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0b1728]">
-            <div className="absolute left-4 top-4 z-10 rounded-xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-md">
-              <div className="text-xs font-semibold text-white">
-                Shelter Visualization
+          <div className="relative min-h-0 overflow-hidden border border-white/15 bg-[#090e1b] corner-bracket">
+            <div className="absolute left-4 top-4 z-10 border border-white/15 bg-[#060913]/90 px-3 py-2 backdrop-blur-md font-mono">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 status-ping" />
+                <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                  3D Parametric Envelope
+                </span>
               </div>
 
-              <div className="mt-0.5 text-[10px] text-slate-400">
-                {length_m.toFixed(1)}m ×{" "}
-                {width_m.toFixed(1)}m ×{" "}
-                {height_m.toFixed(1)}m
+              <div className="mt-1 text-[10px] text-slate-400">
+                SPAN: {length_m.toFixed(1)}m × {width_m.toFixed(1)}m × {height_m.toFixed(1)}m | ROT: {orientation_deg}°
               </div>
             </div>
 
-            <div className="h-full w-full">
+            <div className="h-full w-full cad-grid-dense">
               <Shelter3D
                 length={length_m}
                 width={width_m}
@@ -1124,11 +1143,11 @@ export default function ThreeDPage() {
         </section>
 
         {/* RIGHT */}
-        <aside className="min-h-0 overflow-y-auto rounded-2xl border border-white/10 bg-[#0b1728] p-4">
+        <aside className="min-h-0 overflow-y-auto border border-white/15 bg-[#090e1b] p-4 corner-bracket">
           {/* LOCATION */}
           <div>
-            <div className="mb-2 text-xs font-semibold text-white">
-              Location
+            <div className="mb-2 text-xs font-semibold text-white font-mono uppercase tracking-wider">
+              Field Station Location
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">

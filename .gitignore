@@ -1,0 +1,8 @@
+/.planning
+__pycache__/
+*.py[cod]
+*$py.class
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+.env*.local

@@ -9,6 +9,7 @@ import DesignComparisonCard from "@/components/DesignComparisonCard";
 import ReportButton from "@/components/ReportButton";
 import ModelAssumptionsCard from "@/components/ModelAssumptionsCard";
 import AnalysisPipelineCard from "@/components/AnalysisPipelineCard";
+import DemoRunButton from "@/components/DemoRunButton";
 import { useShelterDesignStore } from "@/stores/shelterDesignStore";
 
 const API_BASE = "/backend-api";
@@ -228,47 +229,68 @@ export default function ThreeDPage() {
     setInitialIndoorTemperature,
   } = useShelterDesignStore();
 
-  const [weatherPoints, setWeatherPoints] =
-    useState<WeatherPoint[]>([]);
+  const [
+    weatherPoints,
+    setWeatherPoints,
+  ] = useState<WeatherPoint[]>([]);
 
-  const [simulationResult, setSimulationResult] =
-    useState<SimulationResult | null>(
-      null,
-    );
+  const [
+    simulationResult,
+    setSimulationResult,
+  ] = useState<SimulationResult | null>(
+    null,
+  );
 
-  const [optimizationResult, setOptimizationResult] =
-    useState<OptimizationResult | null>(
-      null,
-    );
+  const [
+    optimizationResult,
+    setOptimizationResult,
+  ] = useState<OptimizationResult | null>(
+    null,
+  );
 
-  const [baselineDesign, setBaselineDesign] =
-    useState<DesignSnapshot | null>(
-      null,
-    );
+  const [
+    baselineDesign,
+    setBaselineDesign,
+  ] = useState<DesignSnapshot | null>(
+    null,
+  );
 
-  const [baselineForReset, setBaselineForReset] =
-    useState<{
-      orientation_deg: number;
-      wall_insulation_thickness_mm: number;
-      roof_insulation_thickness_mm: number;
-    } | null>(null);
+  const [
+    baselineForReset,
+    setBaselineForReset,
+  ] = useState<{
+    orientation_deg: number;
+    wall_insulation_thickness_mm: number;
+    roof_insulation_thickness_mm: number;
+  } | null>(null);
 
-  const [isApplied, setIsApplied] =
-    useState(false);
+  const [
+    isApplied,
+    setIsApplied,
+  ] = useState(false);
 
-  const [isSimulating, setIsSimulating] =
-    useState(false);
+  const [
+    isSimulating,
+    setIsSimulating,
+  ] = useState(false);
 
-  const [isOptimizing, setIsOptimizing] =
-    useState(false);
+  const [
+    isOptimizing,
+    setIsOptimizing,
+  ] = useState(false);
 
-  const [isApplyingOptimization, setIsApplyingOptimization] =
-    useState(false);
+  const [
+    isApplyingOptimization,
+    setIsApplyingOptimization,
+  ] = useState(false);
 
-  const [isResetting, setIsResetting] =
-    useState(false);
+  const [
+    isResetting,
+    setIsResetting,
+  ] = useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   const wallAssembly = useMemo(
     () =>
@@ -487,19 +509,13 @@ export default function ThreeDPage() {
 
     const baselineSnapshot: DesignSnapshot = {
       orientation_deg,
-
       wall_insulation_thickness_mm:
         baselineWall,
-
       roof_insulation_thickness_mm:
         baselineRoof,
-
-      comfort_percentage:
-        null,
-
+      comfort_percentage: null,
       minimum_indoor_temperature_c:
         null,
-
       maximum_indoor_temperature_c:
         null,
     };
@@ -546,7 +562,8 @@ export default function ThreeDPage() {
               design:
                 buildDesignPayload(),
 
-              weather: points,
+              weather:
+                points,
 
               initial_indoor_temperature_c:
                 initial_indoor_temperature_c,
@@ -604,17 +621,75 @@ export default function ThreeDPage() {
       setSimulationResult(
         baselineSimulation,
       );
+
+      return result;
     } catch (err) {
       console.error(err);
 
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong while optimizing the shelter.",
-      );
+      throw err;
     } finally {
       setIsOptimizing(false);
     }
+  }
+
+  async function applyOptimizationResult(
+    result: OptimizationResult,
+  ) {
+    const best =
+      result.best_candidate;
+
+    const optimizedWallLayers =
+      updateInsulationLayers(
+        wall_layers,
+        best.wall_insulation_thickness_mm,
+      );
+
+    const optimizedRoofLayers =
+      updateInsulationLayers(
+        roof_layers,
+        best.roof_insulation_thickness_mm,
+      );
+
+    setOrientation(
+      best.orientation_deg,
+    );
+
+    setWallInsulationThicknessMm(
+      best.wall_insulation_thickness_mm,
+    );
+
+    setRoofInsulationThicknessMm(
+      best.roof_insulation_thickness_mm,
+    );
+
+    const points =
+      await fetchWeather();
+
+    const optimizedDesign =
+      buildDesignPayload({
+        orientation_deg:
+          best.orientation_deg,
+
+        wall_layers:
+          optimizedWallLayers,
+
+        roof_layers:
+          optimizedRoofLayers,
+      });
+
+    const optimizedSimulation =
+      await runSimulationForDesign(
+        optimizedDesign,
+        points,
+      );
+
+    setSimulationResult(
+      optimizedSimulation,
+    );
+
+    setIsApplied(true);
+
+    return optimizedSimulation;
   }
 
   async function applyBestDesign() {
@@ -625,63 +700,16 @@ export default function ThreeDPage() {
       return;
     }
 
-    const best =
-      optimizationResult.best_candidate;
+    setIsApplyingOptimization(
+      true,
+    );
 
-    setIsApplyingOptimization(true);
     setError("");
 
     try {
-      const optimizedWallLayers =
-        updateInsulationLayers(
-          wall_layers,
-          best.wall_insulation_thickness_mm,
-        );
-
-      const optimizedRoofLayers =
-        updateInsulationLayers(
-          roof_layers,
-          best.roof_insulation_thickness_mm,
-        );
-
-      setOrientation(
-        best.orientation_deg,
+      await applyOptimizationResult(
+        optimizationResult,
       );
-
-      setWallInsulationThicknessMm(
-        best.wall_insulation_thickness_mm,
-      );
-
-      setRoofInsulationThicknessMm(
-        best.roof_insulation_thickness_mm,
-      );
-
-      const points =
-        await fetchWeather();
-
-      const optimizedDesign =
-        buildDesignPayload({
-          orientation_deg:
-            best.orientation_deg,
-
-          wall_layers:
-            optimizedWallLayers,
-
-          roof_layers:
-            optimizedRoofLayers,
-        });
-
-      const optimizedSimulation =
-        await runSimulationForDesign(
-          optimizedDesign,
-          points,
-        );
-
-      setSimulationResult(
-        optimizedSimulation,
-      );
-
-      setIsApplied(true);
     } catch (err) {
       console.error(err);
 
@@ -694,6 +722,185 @@ export default function ThreeDPage() {
       setIsApplyingOptimization(
         false,
       );
+    }
+  }
+
+  async function runFullDemo() {
+    setError("");
+    setIsApplied(false);
+
+    /*
+     * 1. Capture the current design.
+     */
+    const baselineWall =
+      getInsulationThicknessMm(
+        wall_layers,
+        100,
+      );
+
+    const baselineRoof =
+      getInsulationThicknessMm(
+        roof_layers,
+        120,
+      );
+
+    setBaselineForReset({
+      orientation_deg,
+      wall_insulation_thickness_mm:
+        baselineWall,
+      roof_insulation_thickness_mm:
+        baselineRoof,
+    });
+
+    try {
+      /*
+       * 2. Fetch real weather.
+       */
+      const points =
+        await fetchWeather();
+
+      /*
+       * 3. Run baseline simulation.
+       */
+      setIsSimulating(true);
+
+      const baselineSimulation =
+        await runSimulationForDesign(
+          buildDesignPayload(),
+          points,
+        );
+
+      setSimulationResult(
+        baselineSimulation,
+      );
+
+      const baselineSnapshot: DesignSnapshot =
+        {
+          orientation_deg,
+
+          wall_insulation_thickness_mm:
+            baselineWall,
+
+          roof_insulation_thickness_mm:
+            baselineRoof,
+
+          comfort_percentage:
+            baselineSimulation.comfort_percentage,
+
+          minimum_indoor_temperature_c:
+            baselineSimulation.minimum_indoor_temperature_c,
+
+          maximum_indoor_temperature_c:
+            baselineSimulation.maximum_indoor_temperature_c,
+        };
+
+      setBaselineDesign(
+        baselineSnapshot,
+      );
+
+      setIsSimulating(false);
+
+      /*
+       * 4. Run optimization.
+       */
+      setIsOptimizing(true);
+
+      const response =
+        await fetch(
+          `${API_BASE}/api/optimization/run`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              design:
+                buildDesignPayload(),
+
+              weather:
+                points,
+
+              initial_indoor_temperature_c:
+                initial_indoor_temperature_c,
+
+              internal_heat_gain_w:
+                0,
+
+              wall_insulation_thicknesses_mm:
+                [
+                  50,
+                  100,
+                  150,
+                  200,
+                ],
+
+              roof_insulation_thicknesses_mm:
+                [
+                  50,
+                  100,
+                  150,
+                  200,
+                ],
+
+              orientations_deg:
+                [
+                  0,
+                  90,
+                  180,
+                  270,
+                ],
+
+              timestep_minutes:
+                60,
+            }),
+          },
+        );
+
+      if (!response.ok) {
+        const message =
+          await response.text();
+
+        throw new Error(
+          message ||
+            "Shelter optimization failed.",
+        );
+      }
+
+      const optimization =
+        (await response.json()) as OptimizationResult;
+
+      setOptimizationResult(
+        optimization,
+      );
+
+      setIsOptimizing(false);
+
+      /*
+       * 5. Apply the best tested candidate.
+       */
+      setIsApplyingOptimization(
+        true,
+      );
+
+      await applyOptimizationResult(
+        optimization,
+      );
+
+      setIsApplyingOptimization(
+        false,
+      );
+    } catch (err) {
+      console.error(err);
+
+      setIsSimulating(false);
+      setIsOptimizing(false);
+      setIsApplyingOptimization(
+        false,
+      );
+
+      throw err;
     }
   }
 
@@ -814,9 +1021,15 @@ export default function ThreeDPage() {
   const hasOptimization =
     optimizationResult !== null;
 
+  const anyOperationRunning =
+    isSimulating ||
+    isOptimizing ||
+    isApplyingOptimization ||
+    isResetting;
+
   return (
     <main className="h-screen overflow-hidden bg-[#07111f] text-white">
-      {/* Header */}
+      {/* HEADER */}
       <header className="flex h-[58px] items-center justify-between border-b border-white/10 px-5">
         <div>
           <div className="text-lg font-bold tracking-tight">
@@ -903,7 +1116,7 @@ export default function ThreeDPage() {
 
         {/* RIGHT */}
         <aside className="min-h-0 overflow-y-auto rounded-2xl border border-white/10 bg-[#0b1728] p-4">
-          {/* Location */}
+          {/* LOCATION */}
           <div>
             <div className="mb-2 text-xs font-semibold text-white">
               Location
@@ -918,7 +1131,8 @@ export default function ThreeDPage() {
                 {location.latitude.toFixed(4)},{" "}
                 {location.longitude.toFixed(4)}
 
-                {location.elevation_m != null
+                {location.elevation_m !=
+                null
                   ? ` • ${Math.round(
                       location.elevation_m,
                     )} m elevation`
@@ -931,7 +1145,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
-          {/* Pipeline */}
+          {/* PIPELINE */}
           <div className="mt-3">
             <AnalysisPipelineCard
               hasWeather={
@@ -946,7 +1160,19 @@ export default function ThreeDPage() {
             />
           </div>
 
-          {/* Weather */}
+          {/* DEMO */}
+          <div className="mt-3">
+            <DemoRunButton
+              onRunDemo={
+                runFullDemo
+              }
+              disabled={
+                anyOperationRunning
+              }
+            />
+          </div>
+
+          {/* WEATHER */}
           <div className="mt-3">
             <WeatherSummaryCard
               points={
@@ -955,7 +1181,7 @@ export default function ThreeDPage() {
             />
           </div>
 
-          {/* Dimensions */}
+          {/* DIMENSIONS */}
           <div className="mt-4">
             <div className="mb-2 text-xs font-semibold text-white">
               Shelter Dimensions
@@ -971,12 +1197,17 @@ export default function ThreeDPage() {
                   type="number"
                   min="1"
                   step="0.1"
-                  value={length_m}
-                  onChange={(event) =>
+                  value={
+                    length_m
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     setDimensions({
                       length_m:
                         Number(
-                          event.target.value,
+                          event.target
+                            .value,
                         ),
                     })
                   }
@@ -993,12 +1224,17 @@ export default function ThreeDPage() {
                   type="number"
                   min="1"
                   step="0.1"
-                  value={width_m}
-                  onChange={(event) =>
+                  value={
+                    width_m
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     setDimensions({
                       width_m:
                         Number(
-                          event.target.value,
+                          event.target
+                            .value,
                         ),
                     })
                   }
@@ -1015,12 +1251,17 @@ export default function ThreeDPage() {
                   type="number"
                   min="1"
                   step="0.1"
-                  value={height_m}
-                  onChange={(event) =>
+                  value={
+                    height_m
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     setDimensions({
                       height_m:
                         Number(
-                          event.target.value,
+                          event.target
+                            .value,
                         ),
                     })
                   }
@@ -1030,7 +1271,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
-          {/* Orientation */}
+          {/* ORIENTATION */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-white">
@@ -1047,11 +1288,16 @@ export default function ThreeDPage() {
               min="0"
               max="360"
               step="1"
-              value={orientation_deg}
-              onChange={(event) =>
+              value={
+                orientation_deg
+              }
+              onChange={(
+                event,
+              ) =>
                 setOrientation(
                   Number(
-                    event.target.value,
+                    event.target
+                      .value,
                   ),
                 )
               }
@@ -1067,7 +1313,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
-          {/* Wall */}
+          {/* WALL */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-white">
@@ -1094,10 +1340,13 @@ export default function ThreeDPage() {
                   100,
                 ),
               )}
-              onChange={(event) =>
+              onChange={(
+                event,
+              ) =>
                 setWallInsulationThicknessMm(
                   Number(
-                    event.target.value,
+                    event.target
+                      .value,
                   ),
                 )
               }
@@ -1139,7 +1388,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
-          {/* Roof */}
+          {/* ROOF */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-white">
@@ -1166,10 +1415,13 @@ export default function ThreeDPage() {
                   120,
                 ),
               )}
-              onChange={(event) =>
+              onChange={(
+                event,
+              ) =>
                 setRoofInsulationThicknessMm(
                   Number(
-                    event.target.value,
+                    event.target
+                      .value,
                   ),
                 )
               }
@@ -1211,7 +1463,7 @@ export default function ThreeDPage() {
             </div>
           </div>
 
-          {/* Initial Temperature */}
+          {/* INITIAL TEMPERATURE */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold text-white">
@@ -1234,10 +1486,13 @@ export default function ThreeDPage() {
               value={
                 initial_indoor_temperature_c
               }
-              onChange={(event) =>
+              onChange={(
+                event,
+              ) =>
                 setInitialIndoorTemperature(
                   Number(
-                    event.target.value,
+                    event.target
+                      .value,
                   ),
                 )
               }
@@ -1245,17 +1500,14 @@ export default function ThreeDPage() {
             />
           </div>
 
-          {/* Actions */}
+          {/* STANDARD ACTIONS */}
           <button
             type="button"
             onClick={
               runThermalSimulation
             }
             disabled={
-              isSimulating ||
-              isOptimizing ||
-              isApplyingOptimization ||
-              isResetting
+              anyOperationRunning
             }
             className="mt-5 w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1270,10 +1522,7 @@ export default function ThreeDPage() {
               optimizeShelter
             }
             disabled={
-              isSimulating ||
-              isOptimizing ||
-              isApplyingOptimization ||
-              isResetting
+              anyOperationRunning
             }
             className="mt-2 w-full rounded-xl border border-violet-400/30 bg-violet-400/10 px-4 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1289,10 +1538,7 @@ export default function ThreeDPage() {
                 resetToBaseline
               }
               disabled={
-                isSimulating ||
-                isOptimizing ||
-                isApplyingOptimization ||
-                isResetting
+                anyOperationRunning
               }
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -1302,14 +1548,14 @@ export default function ThreeDPage() {
             </button>
           )}
 
-          {/* Error */}
+          {/* ERROR */}
           {error && (
             <div className="mt-3 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-[11px] leading-relaxed text-red-300">
               {error}
             </div>
           )}
 
-          {/* Simulation Results */}
+          {/* SIMULATION RESULTS */}
           {simulationResult && (
             <div className="mt-4">
               <div className="mb-2 text-xs font-semibold text-white">
@@ -1413,7 +1659,7 @@ export default function ThreeDPage() {
             </div>
           )}
 
-          {/* Optimization */}
+          {/* OPTIMIZATION */}
           {optimizationResult && (
             <div className="mt-4">
               <div className="mb-2 flex items-center justify-between">
@@ -1590,10 +1836,7 @@ export default function ThreeDPage() {
                     applyBestDesign
                   }
                   disabled={
-                    isApplyingOptimization ||
-                    isSimulating ||
-                    isOptimizing ||
-                    isResetting
+                    anyOperationRunning
                   }
                   className="mt-3 w-full rounded-xl bg-violet-500 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -1633,12 +1876,12 @@ export default function ThreeDPage() {
             </div>
           )}
 
-          {/* Scientific scope */}
+          {/* ASSUMPTIONS */}
           <div className="mt-4 border-t border-white/10 pt-4">
             <ModelAssumptionsCard />
           </div>
 
-          {/* PDF report */}
+          {/* REPORT */}
           <div className="mt-4 border-t border-white/10 pt-4">
             <ReportButton
               data={{

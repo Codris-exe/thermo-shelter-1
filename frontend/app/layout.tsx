@@ -28,7 +28,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${nunito.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
+      className={`${nunito.variable} ${jetbrainsMono.variable} dark h-full antialiased scroll-smooth`}
     >
       <head>
         <script

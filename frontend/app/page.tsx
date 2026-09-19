@@ -147,11 +147,8 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-mono">
               <div className="scroll-reveal scroll-delay-1 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-white/50 uppercase tracking-widest">
-                    Internal Stability
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Internal Stability
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-amber-400 mt-3 drop-shadow-[0_0_12px_rgba(251,191,36,0.25)]">
                   +19.5°C
@@ -162,11 +159,8 @@ export default function HomePage() {
               </div>
 
               <div className="scroll-reveal scroll-delay-2 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-white/50 uppercase tracking-widest">
-                    Envelope Rating
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Envelope Rating
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-3 drop-shadow-[0_0_12px_rgba(34,211,238,0.25)]">
                   R-82.4
@@ -177,11 +171,8 @@ export default function HomePage() {
               </div>
 
               <div className="scroll-reveal scroll-delay-3 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-white/50 uppercase tracking-widest">
-                    Thermal Lag
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Thermal Lag
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-emerald-400 mt-3 drop-shadow-[0_0_12px_rgba(52,211,153,0.25)]">
                   11.4h
@@ -192,11 +183,8 @@ export default function HomePage() {
               </div>
 
               <div className="scroll-reveal scroll-delay-4 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-white/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-white/50 uppercase tracking-widest">
-                    Auxiliary Fuel
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Auxiliary Fuel
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-white mt-3 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]">
                   0.0 L
@@ -217,8 +205,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
             <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-amber-400 border border-amber-500/20 bg-amber-500/10 backdrop-blur-md mb-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold mb-2">
                   System Diagram
                 </div>
                 <h2
@@ -466,8 +453,8 @@ export default function HomePage() {
               {/* 3 Step Summary Cards Below Diagram */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8 font-mono">
                 <div className="scroll-reveal scroll-delay-1 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 border border-amber-400/20 mb-3">
-                    01 / SOLAR ABSORPTION
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-2">
+                    01 · Solar Absorption
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
                     Triple-Glazed South Facade
@@ -479,8 +466,8 @@ export default function HomePage() {
                 </div>
 
                 <div className="scroll-reveal scroll-delay-2 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 mb-3">
-                    02 / SENSIBLE STORAGE
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-2">
+                    02 · Sensible Storage
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
                     Phase-Change Trombe Core
@@ -492,8 +479,8 @@ export default function HomePage() {
                 </div>
 
                 <div className="scroll-reveal scroll-delay-3 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 mb-3">
-                    03 / NIGHTTIME RELEASE
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-2">
+                    03 · Nighttime Release
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
                     11.4-Hour Radiant Phase Shift
@@ -531,9 +518,8 @@ export default function HomePage() {
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
             {/* Unboxed Clean Right-Aligned Editorial Typography */}
-            <div className="lg:ml-auto max-w-2xl mb-16 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-cyan-400 border border-cyan-500/30 bg-cyan-950/40 backdrop-blur-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <div className="lg:ml-auto max-w-2xl mb-16 space-y-4">
+              <div className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
                 Night Autonomy & Telemetry
               </div>
               <h2
@@ -630,8 +616,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
             <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-amber-400 border border-amber-500/20 bg-amber-500/10 backdrop-blur-md mb-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold mb-2">
                   Extreme Test Stations
                 </div>
                 <h2
@@ -657,9 +642,8 @@ export default function HomePage() {
                       <h3 className="text-2xl font-bold text-white font-sans mt-1">Siachen Ridge</h3>
                       <div className="text-xs text-white/50 mt-0.5">Karakoram · 5,400m AMSL</div>
                     </div>
-                    <span className="px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[10px] font-bold tracking-wider flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                      ACTIVE
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-amber-400 uppercase">
+                      Active
                     </span>
                   </div>
 
@@ -700,9 +684,8 @@ export default function HomePage() {
                       <h3 className="text-2xl font-bold text-white font-sans mt-1">Spiti Plateau</h3>
                       <div className="text-xs text-white/50 mt-0.5">Himalayas · 4,500m AMSL</div>
                     </div>
-                    <span className="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-[10px] font-bold tracking-wider flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                      ACTIVE
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-cyan-400 uppercase">
+                      Active
                     </span>
                   </div>
 
@@ -743,8 +726,8 @@ export default function HomePage() {
                       <h3 className="text-2xl font-bold text-white font-sans mt-1">High Andes</h3>
                       <div className="text-xs text-white/50 mt-0.5">Ecuador · 5,200m AMSL</div>
                     </div>
-                    <span className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-white/80 text-[10px] font-bold tracking-wider">
-                      VERIFIED
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-400 uppercase">
+                      Verified
                     </span>
                   </div>
 
@@ -779,59 +762,43 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 7. Clean Interactive CTA Banner with Scroll Reveal */}
-        <section className="py-24 relative overflow-hidden">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="scroll-reveal-scale relative rounded-3xl p-12 sm:p-20 border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl shadow-2xl text-center overflow-hidden">
-              {/* Radial ambient glow */}
-              <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/15 rounded-full blur-[100px]" />
-              <div className="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]" />
+        {/* 7. Clean Minimalist CTA Section */}
+        <section className="relative py-28 sm:py-36 border-t border-white/10 bg-[#070b14] overflow-hidden">
+          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center space-y-6">
+            <h2
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              Test and configure your shelter in real time.
+            </h2>
 
-              <div className="relative z-10 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-amber-400 border border-amber-500/20 bg-amber-500/10 backdrop-blur-md">
-                  Real-Time Architectural Simulation
-                </div>
-                <h2
-                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight max-w-2xl mx-auto"
-                  style={{ fontFamily: "var(--font-headline)" }}
-                >
-                  Test and configure your shelter in real time.
-                </h2>
-                <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-sans">
-                  Rotate orientations, adjust aerogel thicknesses, load live weather coordinates, and
-                  inspect the transient energy response instantly.
-                </p>
-                <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4 font-mono">
-                  <Link
-                    href="/3d"
-                    className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-10 sm:px-12 py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl hover:scale-105 inline-flex items-center gap-2"
-                  >
-                    <span>Launch 3D Simulator</span>
-                    <span className="text-base">→</span>
-                  </Link>
-                  <Link
-                    href="/simulate"
-                    className="rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold px-8 sm:px-10 py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-lg backdrop-blur-md inline-flex items-center gap-2"
-                  >
-                    <span>24h Regional Sim</span>
-                  </Link>
-                </div>
-              </div>
+            <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed font-sans">
+              Rotate orientations, adjust aerogel thicknesses, and inspect the thermal equilibrium response instantly.
+            </p>
+
+            <div className="pt-4 flex items-center justify-center font-mono">
+              <Link
+                href="/3d"
+                className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-10 sm:px-12 py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl hover:scale-105 inline-flex items-center gap-2.5"
+              >
+                <span>Launch 3D Simulator</span>
+                <span className="text-base">→</span>
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
-      {/* 8. Clean Minimalist Footer */}
-      <footer className="border-t border-white/10 bg-[#050810]/90 backdrop-blur-xl py-10 px-6 lg:px-12 text-slate-400 font-mono text-xs relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <span className="text-white font-bold tracking-wider">TS-1 // THERMO SHELTER</span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/50">PASSIVE SOLAR ALPINE ARCHITECTURE</span>
+      {/* 8. Clean Minimalist Editorial Footer */}
+      <footer className="border-t border-white/10 bg-[#050810] py-12 px-6 lg:px-12 text-slate-400 font-mono text-xs relative z-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+            <span className="text-white font-bold tracking-widest uppercase">TS-1 // THERMO SHELTER</span>
+            <span className="hidden sm:inline text-white/20">|</span>
+            <span className="text-slate-500 font-sans text-xs">Passive Solar Alpine Architecture</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs">
             <Link href="/3d" className="text-amber-400 hover:text-amber-300 font-semibold transition-colors">
               3D Simulator
             </Link>
@@ -845,8 +812,12 @@ export default function HomePage() {
               Night Autonomy
             </a>
             <a href="#deployments" className="hover:text-white transition-colors">
-              Field Stations
+              Stations
             </a>
+          </div>
+
+          <div className="text-[11px] text-slate-600">
+            © 2025 Thermo Shelter
           </div>
         </div>
       </footer>

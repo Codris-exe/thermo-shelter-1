@@ -199,7 +199,7 @@ export default function HomePage() {
                     strokeWidth="1.5"
                   />
                   <text fill="#64748b" fontFamily="monospace" fontSize="11" x="50" y="365" letterSpacing="1">
-                    FROZEN GLACIER BEDROCK (-45°C)
+                    FROZEN BEDROCK (-45°C)
                   </text>
 
                   {/* Foundation Piers with Aerogel Break */}
@@ -225,8 +225,8 @@ export default function HomePage() {
                   />
                   <rect fill="#38bdf8" height="6" width="38" x="135" y="300" rx="2" filter="url(#neonCyan)" />
                   <rect fill="#38bdf8" height="6" width="38" x="475" y="300" rx="2" filter="url(#neonCyan)" />
-                  <text fill="#38bdf8" fontFamily="monospace" fontSize="9" fontWeight="600" x="185" y="322" letterSpacing="0.5">
-                    AEROGEL THERMAL ISOLATION BREAK (R-40)
+                  <text fill="#38bdf8" fontFamily="monospace" fontSize="9" fontWeight="600" x="210" y="325" letterSpacing="0.5">
+                    AEROGEL THERMAL BREAK
                   </text>
 
                   {/* Shelter Shell Boundary */}
@@ -265,21 +265,21 @@ export default function HomePage() {
                     fontFamily="monospace"
                     fontSize="11"
                     fontWeight="700"
-                    x="422"
+                    x="420"
                     y="222"
                     letterSpacing="1"
                   >
-                    TROMBE
+                    THERMAL
                   </text>
-                  <text fill="#fbbf24" fontFamily="monospace" fontSize="9" x="422" y="238" letterSpacing="0.5">
-                    HEAT CORE
+                  <text fill="#fbbf24" fontFamily="monospace" fontSize="9" x="420" y="238" letterSpacing="0.5">
+                    MASS CORE
                   </text>
                   <text
                     fill="#fef08a"
                     fontFamily="monospace"
                     fontSize="11"
                     fontWeight="700"
-                    x="422"
+                    x="420"
                     y="260"
                   >
                     +24.5°C
@@ -304,10 +304,10 @@ export default function HomePage() {
                     fontSize="13"
                     fontWeight="700"
                     x="180"
-                    y="215"
+                    y="220"
                     letterSpacing="0.5"
                   >
-                    HABITATION CORE
+                    LIVING HABITAT
                   </text>
                   <text
                     fill="#fbbf24"
@@ -315,12 +315,9 @@ export default function HomePage() {
                     fontSize="12"
                     fontWeight="700"
                     x="180"
-                    y="240"
+                    y="245"
                   >
                     STABLE: +19.5°C
-                  </text>
-                  <text fill="#94a3b8" fontFamily="monospace" fontSize="9" x="180" y="260">
-                    RELATIVE HUMIDITY: 42%
                   </text>
 
                   {/* Incident Solar Rays */}
@@ -352,14 +349,14 @@ export default function HomePage() {
                       fontFamily="monospace"
                       fontSize="11"
                       fontWeight="700"
-                      x="505"
+                      x="500"
                       y="45"
                       letterSpacing="0.5"
                     >
-                      45° WINTER SUN VECTOR
+                      WINTER SUNLIGHT
                     </text>
-                    <text fill="#fef08a" fontFamily="monospace" fontSize="9" x="505" y="60">
-                      1,120 W/m² HIGH-ALTITUDE FLUX
+                    <text fill="#fef08a" fontFamily="monospace" fontSize="9" x="500" y="60">
+                      DIRECT SOLAR GAIN
                     </text>
                   </g>
 
@@ -372,7 +369,7 @@ export default function HomePage() {
                   />
                   <polygon fill="#fbbf24" points="270,170 274,160 281,166" />
                   <text fill="#fbbf24" fontFamily="monospace" fontSize="8" fontWeight="600" x="320" y="140" letterSpacing="0.5">
-                    WARM CONVECTIVE AIRFLOW
+                    NATURAL CONVECTIVE AIRFLOW
                   </text>
 
                   <path
@@ -382,50 +379,44 @@ export default function HomePage() {
                     strokeWidth="1.5"
                   />
                   <polygon fill="#38bdf8" points="430,295 422,301 423,291" />
-                  <text fill="#38bdf8" fontFamily="monospace" fontSize="8" fontWeight="600" x="250" y="325" letterSpacing="0.5">
-                    SUB-FLOOR RECOVERY PLENUM
-                  </text>
                 </svg>
               </div>
 
               {/* 3 Step Summary Cards Below Diagram */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8 font-mono">
-                <div className="scroll-reveal scroll-delay-1 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-2">
                     01 · Solar Absorption
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
-                    Triple-Glazed South Facade
+                    South-Facing Glazing
                   </div>
-                  <div className="text-xs text-white/60 font-sans leading-relaxed">
-                    Captures up to 14.8 kWh/m² daily solar radiation directly through low-iron
-                    high-transmittance glazing.
+                  <div className="text-xs text-white/70 font-sans leading-relaxed">
+                    Captures direct winter sunlight through multi-layer low-iron glass, warming the living core during daylight hours.
                   </div>
                 </div>
 
-                <div className="scroll-reveal scroll-delay-2 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-2">
-                    02 · Sensible Storage
+                    02 · Heat Storage
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
-                    Phase-Change Trombe Core
+                    Thermal Mass Core
                   </div>
-                  <div className="text-xs text-white/60 font-sans leading-relaxed">
-                    3,200 kg paraffin-basalt matrix locks latent thermal energy at 21°C, preventing
-                    daytime overheating.
+                  <div className="text-xs text-white/70 font-sans leading-relaxed">
+                    Dense internal storage absorbs excess daytime heat, preventing overheating and storing energy for the night.
                   </div>
                 </div>
 
-                <div className="scroll-reveal scroll-delay-3 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-2">
                     03 · Nighttime Release
                   </div>
                   <div className="text-base font-semibold text-white mb-2 font-sans">
-                    11.4-Hour Radiant Phase Shift
+                    Overnight Radiant Warmth
                   </div>
-                  <div className="text-xs text-white/60 font-sans leading-relaxed">
-                    Releases warm radiant heat between 02:00 and 06:00 during peak sub-zero
-                    temperatures.
+                  <div className="text-xs text-white/70 font-sans leading-relaxed">
+                    Slowly releases banked heat back into the shelter overnight, keeping temperatures comfortable until sunrise.
                   </div>
                 </div>
               </div>
@@ -469,10 +460,7 @@ export default function HomePage() {
                 Zero Active Generators.
               </h2>
               <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-sans drop-shadow-md">
-                When the sun dips below the Himalayan ridges, ambient temperatures plummet to
-                deadly sub-zero levels. Thermo Shelter maintains thermal equilibrium through its
-                11.4-hour calibrated thermal lag, slowly radiating daytime solar warmth through the
-                living core.
+                When outside temperatures plunge to -50°C, the shelter maintains a warm, stable interior using solar energy stored during the day — with zero fuel or generators.
               </p>
             </div>
 
@@ -486,15 +474,13 @@ export default function HomePage() {
                     Calibrated Radiant Lag
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
-                    Heat gathered during daylight hours takes exactly 11.4 hours to conduct through the
-                    Trombe core, peaking radiation right during the coldest pre-dawn hours (03:00 to
-                    06:00).
+                    Solar warmth stored in the thermal core conducts slowly over 11 hours, radiating steady heat throughout sub-zero nights.
                   </p>
                 </div>
                 <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
-                  <span className="text-white/50">Core Temp Drop:</span>
+                  <span className="text-white/50">Nighttime Temp Drop:</span>
                   <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">
-                    &lt; 1.8°C / 12h
+                    &lt; 2°C / 12h
                   </span>
                 </div>
               </div>
@@ -505,18 +491,16 @@ export default function HomePage() {
                     R-82
                   </div>
                   <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
-                    Aerogel Vacuum Shell
+                    Aerogel Insulation Shell
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
-                    Multi-layer insulation sandwich combining silica aerogel (k=0.014 W/mK) and
-                    reflective radiation barriers completely halts conductive, convective, and
-                    infrared heat loss.
+                    Advanced aerogel panels seal the building envelope, blocking intense alpine cold and stopping heat from escaping.
                   </p>
                 </div>
                 <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
-                  <span className="text-white/50">Thermal Transmittance:</span>
+                  <span className="text-white/50">Thermal Insulation:</span>
                   <span className="text-cyan-400 font-bold drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
-                    0.012 W/m²K
+                    Zero Cold Bridges
                   </span>
                 </div>
               </div>
@@ -530,15 +514,13 @@ export default function HomePage() {
                     100% Passive Autonomy
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
-                    Eliminates catastrophic dependency on supply lines for kerosene or diesel in
-                    inaccessible alpine zones, preventing carbon monoxide poisoning and mechanical
-                    freezing failures.
+                    Operates completely off-grid without diesel, kerosene, or moving parts, eliminating fuel logistics and carbon monoxide hazards.
                   </p>
                 </div>
                 <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
-                  <span className="text-white/50">Expedition Fuel Saved:</span>
+                  <span className="text-white/50">Heating Fuel Burn:</span>
                   <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">
-                    1,800 L / winter
+                    0.0 Liters / day
                   </span>
                 </div>
               </div>

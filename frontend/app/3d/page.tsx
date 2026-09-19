@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 const Shelter3D = dynamic(() => import("@/components/Shelter3D"), {
@@ -20,6 +20,10 @@ import ModelAssumptionsCard from "@/components/ModelAssumptionsCard";
 import AnalysisPipelineCard from "@/components/AnalysisPipelineCard";
 import DemoRunButton from "@/components/DemoRunButton";
 import { useShelterDesignStore } from "@/stores/shelterDesignStore";
+import ClimateModeCard from "@/components/ClimateModeCard";
+import { useClimateSimulationStore } from "@/stores/climateSimulationStore";
+import { useHistoricalClimateStore } from "@/stores/historicalClimateStore";
+import { historicalClimateToSimulationWeather } from "@/lib/historicalWeatherAdapter";
 
 const API_BASE = "/backend-api";
 
@@ -213,6 +217,35 @@ function updateInsulationLayers(
   return updated;
 }
 
+function getTimezoneOffsetHours(timezone: string | null | undefined, month: number | null | undefined) {
+  if (!timezone) return 0;
+
+  const safeMonth = month && month >= 1 && month <= 12 ? month : 6;
+  const sampleDate = new Date(Date.UTC(2025, safeMonth - 1, 15, 12, 0, 0));
+
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      timeZoneName: "longOffset",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(sampleDate);
+
+    const offsetPart = parts.find((part) => part.type === "timeZoneName")?.value ?? "GMT";
+    const match = offsetPart.match(/^GMT([+-])(\d{2})(?::(\d{2}))?$/);
+
+    if (!match) return 0;
+
+    const sign = match[1] === "-" ? -1 : 1;
+    const hours = Number(match[2]);
+    const minutes = Number(match[3] ?? "0");
+    return sign * (hours + minutes / 60);
+  } catch {
+    return 0;
+  }
+}
+
 export default function ThreeDPage() {
   const {
     location,
@@ -238,10 +271,33 @@ export default function ThreeDPage() {
     setInitialIndoorTemperature,
   } = useShelterDesignStore();
 
+  const climateMode = useClimateSimulationStore(
+    (state) => state.mode,
+  );
+
+  const historicalClimate = useHistoricalClimateStore(
+    (state) => state.result,
+  );
+
+  const setHistoricalClimateResult =
+    useHistoricalClimateStore(
+      (state) => state.setResult,
+    );
+
   const [
     weatherPoints,
     setWeatherPoints,
   ] = useState<WeatherPoint[]>([]);
+
+  const [
+    climateHourIndex,
+    setClimateHourIndex,
+  ] = useState(0);
+
+  const [
+    isClimatePlaying,
+    setIsClimatePlaying,
+  ] = useState(false);
 
   const [
     simulationResult,
@@ -301,6 +357,35 @@ export default function ThreeDPage() {
   const [error, setError] =
     useState("");
 
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(
+        "thermo-shelter-historical-climate",
+      );
+
+      if (!stored || historicalClimate) {
+        return;
+      }
+
+      const parsed = JSON.parse(stored);
+
+      if (
+        parsed &&
+        Array.isArray(parsed.climate_profile)
+      ) {
+        setHistoricalClimateResult(parsed);
+      }
+    } catch (storageError) {
+      console.warn(
+        "Historical climate hydration notice:",
+        storageError,
+      );
+    }
+  }, [
+    historicalClimate,
+    setHistoricalClimateResult,
+  ]);
+
   const wallAssembly = useMemo(
     () =>
       calculateAssembly(
@@ -316,6 +401,155 @@ export default function ThreeDPage() {
       ),
     [roof_layers],
   );
+
+  /*
+   * Historical mode now drives the 3D scene one representative hour at
+   * a time. The selected hourly climate profile point controls the
+   * visible outdoor temperature, irradiance, wind and sun position.
+   *
+   * The 3D playback is visualization only; the thermal simulation still
+   * uses the complete 24-hour climate series.
+   */
+  const selectedClimatePoint = useMemo(() => {
+    if (weatherPoints.length === 0) {
+      return null as WeatherPoint | null;
+    }
+
+    const safeIndex = Math.min(
+      Math.max(climateHourIndex, 0),
+      weatherPoints.length - 1,
+    );
+
+    return weatherPoints[safeIndex] ?? weatherPoints[0];
+  }, [
+    climateHourIndex,
+    weatherPoints,
+  ]);
+
+  const climateVisualPoint = useMemo(() => {
+    if (!selectedClimatePoint) {
+      return {
+        outdoorTemperatureC: null as number | null,
+        solarIrradianceWm2: 0,
+        windSpeedMs: 0,
+        isDay: false,
+        timestamp: null as string | null,
+        climateHour: 12,
+      };
+    }
+
+    const solar =
+      selectedClimatePoint.solar_irradiance_w_m2 ??
+      0;
+
+    const climateHour =
+      new Date(
+        selectedClimatePoint.timestamp,
+      ).getUTCHours();
+
+    return {
+      outdoorTemperatureC:
+        selectedClimatePoint.outdoor_temperature_c,
+
+      solarIrradianceWm2:
+        solar,
+
+      windSpeedMs:
+        selectedClimatePoint.wind_speed_m_s ??
+        0,
+
+      isDay:
+        selectedClimatePoint.is_day ??
+        solar > 5,
+
+      timestamp:
+        selectedClimatePoint.timestamp,
+
+      climateHour,
+    };
+  }, [
+    selectedClimatePoint,
+  ]);
+
+  const solarClimateMonth =
+    historicalClimate?.selected_month ?? 6;
+
+  const solarTimezoneOffsetHours =
+    getTimezoneOffsetHours(
+      location.timezone,
+      solarClimateMonth,
+    );
+
+  function formatClimateHour(
+    hour: number,
+  ) {
+    const normalized =
+      ((hour % 24) + 24) % 24;
+
+    return `${normalized
+      .toString()
+      .padStart(2, "0")}:00`;
+  }
+
+  function moveClimateHour(
+    direction: number,
+  ) {
+    if (weatherPoints.length < 2) {
+      return;
+    }
+
+    setClimateHourIndex(
+      (current) =>
+        (current +
+          direction +
+          weatherPoints.length) %
+        weatherPoints.length,
+    );
+  }
+
+  /*
+   * Reset playback to the first historical hour whenever the climate
+   * source/profile changes.
+   */
+  useEffect(() => {
+    setClimateHourIndex(0);
+    setIsClimatePlaying(false);
+  }, [
+    climateMode,
+    historicalClimate?.selected_month,
+    historicalClimate?.profile_type,
+    weatherPoints.length,
+  ]);
+
+  /*
+   * Advance one hour at a time while playback is enabled.
+   */
+  useEffect(() => {
+    if (
+      !isClimatePlaying ||
+      climateMode !== "historical" ||
+      weatherPoints.length < 2
+    ) {
+      return;
+    }
+
+    const timer =
+      window.setInterval(() => {
+        setClimateHourIndex(
+          (current) =>
+            (current + 1) %
+            weatherPoints.length,
+        );
+      }, 900);
+
+    return () =>
+      window.clearInterval(timer);
+  }, [
+    climateMode,
+    isClimatePlaying,
+    weatherPoints.length,
+  ]);
+
 
   function buildDesignPayload(
     overrides?: {
@@ -381,6 +615,29 @@ export default function ThreeDPage() {
   async function fetchWeather(): Promise<
     WeatherPoint[]
   > {
+    if (climateMode === "historical") {
+      if (!historicalClimate) {
+        throw new Error(
+          "Historical climate is not loaded. Return to the Location page and load a historical climate profile first.",
+        );
+      }
+
+      const points =
+        historicalClimateToSimulationWeather(
+          historicalClimate,
+        );
+
+      if (points.length < 2) {
+        throw new Error(
+          "The historical climate profile does not contain enough hourly points for simulation.",
+        );
+      }
+
+      setWeatherPoints(points);
+
+      return points;
+    }
+
     const response =
       await fetch(
         `${API_BASE}/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`,
@@ -1077,6 +1334,37 @@ export default function ThreeDPage() {
                 {width_m.toFixed(1)}m ×{" "}
                 {height_m.toFixed(1)}m
               </div>
+
+              <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
+                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-cyan-300">
+                  {climateMode === "historical"
+                    ? "Historical Climate"
+                    : "Live Weather"}
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-300">
+                  {climateVisualPoint.outdoorTemperatureC !==
+                  null
+                    ? `${climateVisualPoint.outdoorTemperatureC.toFixed(1)}°C`
+                    : "—"}
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-300">
+                  {Math.round(
+                    climateVisualPoint.solarIrradianceWm2,
+                  )}{" "}
+                  W/m²
+                </span>
+
+                {climateMode === "historical" &&
+                  weatherPoints.length > 0 && (
+                    <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-1 text-amber-300">
+                      {formatClimateHour(
+                        climateVisualPoint.climateHour,
+                      )}
+                    </span>
+                  )}
+              </div>
             </div>
 
             <div className="h-full w-full">
@@ -1093,8 +1381,103 @@ export default function ThreeDPage() {
                   roofAssembly.thickness,
                   0.05,
                 )}
+                outdoorTemperatureC={
+                  climateVisualPoint.outdoorTemperatureC
+                }
+                solarIrradianceWm2={
+                  climateVisualPoint.solarIrradianceWm2
+                }
+                windSpeedMs={
+                  climateVisualPoint.windSpeedMs
+                }
+                isDay={
+                  climateVisualPoint.isDay
+                }
+                climateHour={
+                  climateVisualPoint.climateHour
+                }
+                latitude={location.latitude}
+                longitude={location.longitude}
+                climateMonth={solarClimateMonth}
+                timezoneOffsetHours={
+                  solarTimezoneOffsetHours
+                }
               />
             </div>
+
+            {climateMode === "historical" &&
+              weatherPoints.length > 1 && (
+                <div className="absolute bottom-4 left-4 z-10 w-[min(430px,calc(100%-2rem))] rounded-2xl border border-white/10 bg-black/35 p-3 backdrop-blur-md">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-semibold text-white">
+                        24-Hour Historical Climate + Solar Playback
+                      </div>
+
+                      <div className="mt-0.5 text-[10px] text-slate-400">
+                        Visualization follows the historical hourly
+                        climate profile.
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-2.5 py-1.5 text-sm font-semibold text-amber-300">
+                      {formatClimateHour(
+                        climateVisualPoint.climateHour,
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        moveClimateHour(-1)
+                      }
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-slate-200 transition hover:bg-white/10"
+                    >
+                      ◀ Previous
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIsClimatePlaying(
+                          (playing) => !playing,
+                        )
+                      }
+                      className="flex-1 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-semibold text-cyan-300 transition hover:bg-cyan-400/15"
+                    >
+                      {isClimatePlaying
+                        ? "⏸ Pause 24h"
+                        : "▶ Play 24h"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        moveClimateHour(1)
+                      }
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-slate-200 transition hover:bg-white/10"
+                    >
+                      Next ▶
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+                    <span>
+                      Hour {climateHourIndex + 1} of{" "}
+                      {weatherPoints.length}
+                    </span>
+
+                    <span>
+                      {Math.round(
+                        climateVisualPoint.solarIrradianceWm2,
+                      )}{" "}
+                      W/m² solar
+                    </span>
+                  </div>
+                </div>
+              )}
           </div>
 
           <div className="min-h-0">
@@ -1149,7 +1532,9 @@ export default function ThreeDPage() {
               </div>
 
               <div className="mt-2 text-[10px] text-emerald-400">
-                Weather: Open-Meteo
+                {climateMode === "historical"
+                  ? "Climate: Historical ERA5 profile"
+                  : "Weather: Open-Meteo forecast"}
               </div>
             </div>
           </div>
@@ -1167,6 +1552,11 @@ export default function ThreeDPage() {
                 hasOptimization
               }
             />
+          </div>
+
+          {/* CLIMATE MODE */}
+          <div className="mt-3">
+            <ClimateModeCard />
           </div>
 
           {/* DEMO */}

@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 from app.schemas.design import MaterialLayer, ShelterDesign
-from app.schemas.simulation import SimulationRequest, WeatherPoint
 from app.schemas.optimization import (
     OptimizationCandidate,
     OptimizationRequest,
     OptimizationResult,
 )
+from app.schemas.simulation import SimulationRequest, WeatherPoint
 from app.thermal.simulation import run_transient_simulation
 
 
-INSULATION_MATERIALS = {"rock_wool", "eps", "xps"}
+INSULATION_MATERIALS = {
+    "rock_wool",
+    "eps",
+    "xps",
+}
 
 
 def _update_insulation_layers(
@@ -21,8 +25,7 @@ def _update_insulation_layers(
     Update the first recognised insulation layer.
 
     If the assembly does not already contain an insulation layer,
-    rock wool is added as a new layer so the requested optimisation
-    variable remains explicit.
+    a rock-wool layer is added.
     """
     thickness_m = thickness_mm / 1000.0
 
@@ -53,21 +56,24 @@ def _build_candidate_design(
     roof_insulation_thickness_mm: float,
 ) -> ShelterDesign:
     """
-    Create an independent candidate design without mutating the
-    shared/base design.
+    Create an independent candidate design.
     """
     candidate = base_design.model_copy(deep=True)
 
     candidate.orientation_deg = orientation_deg
 
-    candidate.wall_assembly.layers = _update_insulation_layers(
-        candidate.wall_assembly.layers,
-        wall_insulation_thickness_mm,
+    candidate.wall_assembly.layers = (
+        _update_insulation_layers(
+            candidate.wall_assembly.layers,
+            wall_insulation_thickness_mm,
+        )
     )
 
-    candidate.roof_assembly.layers = _update_insulation_layers(
-        candidate.roof_assembly.layers,
-        roof_insulation_thickness_mm,
+    candidate.roof_assembly.layers = (
+        _update_insulation_layers(
+            candidate.roof_assembly.layers,
+            roof_insulation_thickness_mm,
+        )
     )
 
     return candidate
@@ -82,13 +88,17 @@ def _run_candidate(
 ) -> OptimizationCandidate:
     simulation_request = SimulationRequest(
         design=design,
-        initial_indoor_temperature_c=initial_indoor_temperature_c,
+        initial_indoor_temperature_c=(
+            initial_indoor_temperature_c
+        ),
         weather=weather,
         internal_heat_gain_w=internal_heat_gain_w,
         timestep_minutes=timestep_minutes,
     )
 
-    result = run_transient_simulation(simulation_request)
+    result = run_transient_simulation(
+        simulation_request
+    )
 
     wall_insulation = next(
         (
@@ -115,9 +125,15 @@ def _run_candidate(
         roof_insulation_thickness_mm=roof_insulation,
         comfort_percentage=result.comfort_percentage,
         comfort_hours=result.comfort_hours,
-        minimum_indoor_temperature_c=result.minimum_indoor_temperature_c,
-        maximum_indoor_temperature_c=result.maximum_indoor_temperature_c,
-        final_indoor_temperature_c=result.final_indoor_temperature_c,
+        minimum_indoor_temperature_c=(
+            result.minimum_indoor_temperature_c
+        ),
+        maximum_indoor_temperature_c=(
+            result.maximum_indoor_temperature_c
+        ),
+        final_indoor_temperature_c=(
+            result.final_indoor_temperature_c
+        ),
     )
 
 
@@ -125,21 +141,18 @@ def _sort_candidates(
     candidates: list[OptimizationCandidate],
 ) -> list[OptimizationCandidate]:
     """
-    Primary objective:
-        Maximise comfort percentage.
+    Rank candidates using the following deterministic objective:
 
-    Tie-breaker:
-        Maximise comfort hours.
-
-    Final tie-breaker:
-        Minimise indoor temperature range.
+    1. Maximise comfort percentage.
+    2. Maximise comfort hours.
+    3. Minimise indoor temperature range.
     """
     return sorted(
         candidates,
         key=lambda candidate: (
             -candidate.comfort_percentage,
             -candidate.comfort_hours,
-            -(
+            (
                 candidate.maximum_indoor_temperature_c
                 - candidate.minimum_indoor_temperature_c
             ),
@@ -166,52 +179,74 @@ def run_optimization(
         )
 
     # ---------------------------------------------------------
-    # Baseline
+    # Baseline simulation
     # ---------------------------------------------------------
-    baseline_simulation_request = SimulationRequest(
+    baseline_request = SimulationRequest(
         design=request.design,
-        initial_indoor_temperature_c=request.initial_indoor_temperature_c,
+        initial_indoor_temperature_c=(
+            request.initial_indoor_temperature_c
+        ),
         weather=request.weather,
         internal_heat_gain_w=request.internal_heat_gain_w,
         timestep_minutes=request.timestep_minutes,
     )
 
     baseline_result = run_transient_simulation(
-        baseline_simulation_request
+        baseline_request
     )
 
     # ---------------------------------------------------------
-    # Candidate generation + simulation
+    # Candidate simulations
     # ---------------------------------------------------------
     candidates: list[OptimizationCandidate] = []
 
     for orientation_deg in request.orientations_deg:
-        for wall_thickness_mm in request.wall_insulation_thicknesses_mm:
-            for roof_thickness_mm in request.roof_insulation_thicknesses_mm:
-
-                candidate_design = _build_candidate_design(
-                    base_design=request.design,
-                    orientation_deg=orientation_deg,
-                    wall_insulation_thickness_mm=wall_thickness_mm,
-                    roof_insulation_thickness_mm=roof_thickness_mm,
+        for wall_thickness_mm in (
+            request.wall_insulation_thicknesses_mm
+        ):
+            for roof_thickness_mm in (
+                request.roof_insulation_thicknesses_mm
+            ):
+                candidate_design = (
+                    _build_candidate_design(
+                        base_design=request.design,
+                        orientation_deg=orientation_deg,
+                        wall_insulation_thickness_mm=(
+                            wall_thickness_mm
+                        ),
+                        roof_insulation_thickness_mm=(
+                            roof_thickness_mm
+                        ),
+                    )
                 )
 
-                candidate_result = _run_candidate(
+                candidate = _run_candidate(
                     design=candidate_design,
                     weather=request.weather,
                     initial_indoor_temperature_c=(
                         request.initial_indoor_temperature_c
                     ),
-                    internal_heat_gain_w=request.internal_heat_gain_w,
-                    timestep_minutes=request.timestep_minutes,
+                    internal_heat_gain_w=(
+                        request.internal_heat_gain_w
+                    ),
+                    timestep_minutes=(
+                        request.timestep_minutes
+                    ),
                 )
 
-                candidates.append(candidate_result)
+                candidates.append(candidate)
+
+    if not candidates:
+        raise ValueError(
+            "Optimization produced no candidate designs."
+        )
 
     # ---------------------------------------------------------
     # Ranking
     # ---------------------------------------------------------
-    ranked_candidates = _sort_candidates(candidates)
+    ranked_candidates = _sort_candidates(
+        candidates
+    )
 
     ranked_candidates = [
         candidate.model_copy(
@@ -223,13 +258,10 @@ def run_optimization(
         )
     ]
 
-    if not ranked_candidates:
-        raise ValueError(
-            "Optimization produced no candidate designs."
-        )
-
     return OptimizationResult(
-        total_candidates_tested=len(ranked_candidates),
+        total_candidates_tested=len(
+            ranked_candidates
+        ),
         baseline_comfort_percentage=(
             baseline_result.comfort_percentage
         ),

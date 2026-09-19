@@ -2,34 +2,18 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import ThemeToggle from "@/components/ThemeToggle";
 
-export default function HomePage() {
+const Hero3DScene = dynamic(() => import("@/components/Hero3DScene"), {
+  ssr: false,
+});
 
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
-      {/* 1. Ultra-clean Top Micro Status Bar */}
-      <div className="border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#050810] px-6 lg:px-12 py-2 text-[11px] font-mono tracking-wider text-slate-500 dark:text-slate-400 flex justify-between items-center relative z-20">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-2 text-amber-700 dark:text-amber-400 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-amber-500 status-ping" />
-            <span>TS-1 RESEARCH INITIATIVE</span>
-          </span>
-          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">/</span>
-          <span className="hidden sm:inline text-slate-600 dark:text-slate-400">
-            HIGH-ALTITUDE PASSIVE CLIMATE SYSTEMS
-          </span>
-        </div>
-        <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-[10px]">
-          <span className="hidden md:inline">TRL-9 VERIFIED SPEC</span>
-          <span className="px-2 py-0.5 border border-emerald-600/30 bg-emerald-50 dark:border-emerald-400/30 dark:bg-emerald-400/10 text-emerald-800 dark:text-emerald-300 font-medium">
-            FIELD READY
-          </span>
-        </div>
-      </div>
-
-      {/* 2. Top Navigation */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#070b14]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-200">
+      {/* 1. Top Navigation */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#070b14]/80 backdrop-blur-md border-b border-slate-200/70 dark:border-white/10 shadow-sm transition-colors duration-200">
         <div className="flex justify-between items-center max-w-7xl mx-auto px-6 lg:px-12 h-16">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-mono font-bold text-amber-700 dark:text-amber-400 text-xs">
@@ -78,97 +62,58 @@ export default function HomePage() {
       </header>
 
       <main>
-        {/* 3. Hero Section with Real High-Altitude Photography */}
+        {/* 2. Hero Section - Ultra-clean First Page Area with 1 Central Title & 3D Interactive Animation */}
         <section
           id="hero"
-          className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center py-16 lg:py-24 border-b border-slate-200 dark:border-white/10 overflow-hidden"
+          className="relative h-[calc(100vh-64px)] min-h-[640px] flex flex-col items-center justify-center border-b border-slate-200 dark:border-white/10 overflow-hidden select-none"
         >
-          {/* Real Generated Cinematic Background Photo */}
-          <div className="absolute inset-0 z-0">
+          {/* Alpine Mountain Photography Backdrop */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/images/hero-alpine-shelter.jpg"
               alt="Extreme-altitude passive solar alpine shelter on Himalayan ridge"
               fill
               priority
-              className="object-cover object-center opacity-85"
+              className="object-cover object-center opacity-65 dark:opacity-55"
             />
-            {/* Subtle wash to ensure text readability on the left while keeping mountain photo vibrant */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f8fafc]/95 via-[#f8fafc]/60 to-transparent dark:from-[#070b14]/95 dark:via-[#070b14]/75 dark:to-transparent lg:w-3/4 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/30 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/40 pointer-events-none" />
-            <div className="absolute inset-0 cad-grid opacity-20 pointer-events-none" />
+            {/* Subtle atmospheric vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/50 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/60" />
+            <div className="absolute inset-0 cad-grid opacity-20" />
           </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
-            <div className="max-w-3xl space-y-6">
-              {/* Architectural badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-600/30 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 font-mono text-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 status-ping" />
-                <span>Passive Solar Architecture</span>
-                <span className="text-slate-400 dark:text-slate-500">•</span>
-                <span>Zero Fuel Burn</span>
-              </div>
+          {/* 3D Interactive Floating Architecture & Particle Scene */}
+          <Hero3DScene />
 
-              {/* Main Headline */}
-              <h1
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 dark:text-white leading-[1.1]"
-                style={{ fontFamily: "var(--font-headline)" }}
-              >
-                Engineered for <span className="text-sky-600 dark:text-cyan-400">-50°C</span>.
-                <br />
-                Powered entirely by the sun.
-              </h1>
+          {/* Centerpiece: Only 1 Single Title in the Middle */}
+          <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pointer-events-none">
+            <h1
+              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-slate-950 dark:text-white uppercase drop-shadow-md"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              THERMO SHELTER 1
+            </h1>
+          </div>
 
-              {/* Lead Paragraph */}
-              <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-2xl">
-                Thermo Shelter 1 captures low-angle winter sunlight on high-altitude peaks,
-                storing it within a 3,200 kg phase-change Trombe matrix. It maintains a stable{" "}
-                <strong className="text-amber-700 dark:text-amber-400 font-semibold">+19.5°C</strong> interior through
-                11.4 hours of darkness without kerosene or diesel generators.
-              </p>
+          {/* Clean Scroll to Explore Indicator */}
+          <a
+            href="#telemetry"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer"
+          >
+            <span>Scroll</span>
+            <span className="w-5 h-8 rounded-full border border-slate-400/50 dark:border-white/20 flex items-start justify-center p-1">
+              <span className="w-1.5 h-2 rounded-full bg-amber-500 animate-bounce" />
+            </span>
+          </a>
+        </section>
 
-              {/* Actions */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <Link
-                  href="/3d"
-                  className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold text-xs px-7 py-4 tracking-wider uppercase transition-colors inline-flex items-center gap-3 shadow-md"
-                >
-                  <span>Launch 3D Thermal Simulator</span>
-                  <span>→</span>
-                </Link>
-
-                <a
-                  href="#how-it-works"
-                  className="chamfer-btn border border-slate-300 dark:border-white/20 bg-white hover:bg-slate-50 dark:bg-[#090e1b]/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-xs px-6 py-4 tracking-wider uppercase transition-colors shadow-sm"
-                >
-                  Heat Flow Diagram ↓
-                </a>
-              </div>
-
-              {/* Quick HUD Metrics */}
-              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 dark:border-white/10 font-mono text-[11px] max-w-xl">
-                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Internal Core</div>
-                  <div className="text-base font-bold text-amber-700 dark:text-amber-400 mt-0.5">+19.5°C</div>
-                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">Autonomous</div>
-                </div>
-
-                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Insulation Barrier</div>
-                  <div className="text-base font-bold text-sky-700 dark:text-cyan-400 mt-0.5">R-82.4</div>
-                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">Aerogel Core</div>
-                </div>
-
-                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Aux Fuel</div>
-                  <div className="text-base font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">0.0 L</div>
-                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">100% Solar</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 4 Clean Big Telemetry Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 pt-8 border-t border-slate-200 dark:border-white/10 font-mono">
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+        {/* 3. Quick Telemetry Readout Strip */}
+        <section
+          id="telemetry"
+          className="py-10 border-b border-slate-200 dark:border-white/10 bg-white/70 dark:bg-[#070b14]/70 backdrop-blur-sm"
+        >
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Internal Stability
                 </div>
@@ -176,7 +121,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Constant core comfort zone</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Envelope Rating
                 </div>
@@ -184,7 +129,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">m²·K/W combined barrier</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Thermal Lag
                 </div>
@@ -192,7 +137,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Nighttime radiant release</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Auxiliary Fuel
                 </div>

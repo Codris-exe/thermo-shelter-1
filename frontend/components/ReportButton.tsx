@@ -948,8 +948,8 @@ export default function ReportButton({
         }.pdf`,
       );
     } catch (error) {
-      console.error(
-        "Report generation failed:",
+      console.warn(
+        "Report generation notice:",
         error,
       );
     } finally {

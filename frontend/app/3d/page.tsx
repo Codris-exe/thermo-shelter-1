@@ -486,7 +486,7 @@ export default function ThreeDPage() {
         result,
       );
     } catch (err) {
-      console.error(err);
+      console.warn("Thermal simulation notice:", err);
 
       setError(
         err instanceof Error
@@ -648,7 +648,7 @@ export default function ThreeDPage() {
         baselineSimulation,
       );
     } catch (err) {
-      console.error(err);
+      console.warn("Optimize shelter notice:", err);
 
       setError(
         err instanceof Error
@@ -726,7 +726,7 @@ export default function ThreeDPage() {
 
       setIsApplied(true);
     } catch (err) {
-      console.error(err);
+      console.warn("Apply optimization notice:", err);
 
       setError(
         err instanceof Error
@@ -805,7 +805,7 @@ export default function ThreeDPage() {
 
       setIsApplied(false);
     } catch (err) {
-      console.error(err);
+      console.warn("Restore baseline notice:", err);
 
       setError(
         err instanceof Error

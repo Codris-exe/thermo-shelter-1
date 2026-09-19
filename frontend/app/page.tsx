@@ -120,8 +120,8 @@ export default function Home() {
       const data = await response.json();
 
       setLocations(data.results ?? []);
-    } catch (searchError) {
-      console.error(searchError);
+    } catch (searchError: any) {
+      console.warn("Location search notice:", searchError?.message || searchError);
 
       setError(
         "Unable to search for the location.",
@@ -145,20 +145,25 @@ export default function Home() {
       );
 
       if (!response.ok) {
-        throw new Error(
-          "Weather request failed.",
-        );
+        let detail = "Weather request failed.";
+        try {
+          const errJson = await response.json();
+          if (errJson?.detail) detail = errJson.detail;
+        } catch {
+          // ignore
+        }
+        throw new Error(detail);
       }
 
       const data: WeatherResponse =
         await response.json();
 
       setWeather(data);
-    } catch (weatherError) {
-      console.error(weatherError);
+    } catch (weatherError: any) {
+      console.warn("Weather load notice:", weatherError?.message || weatherError);
 
       setError(
-        "Unable to retrieve real weather data.",
+        weatherError?.message || "Unable to retrieve real weather data.",
       );
     } finally {
       setIsLoadingWeather(false);
@@ -448,13 +453,14 @@ export default function Home() {
 
       setResult(data);
       setError("");
-    } catch (simulationError) {
-      console.error(
-        simulationError,
+    } catch (simulationError: any) {
+      console.warn(
+        "Simulation notice:",
+        simulationError?.message || simulationError,
       );
 
       setError(
-        "Simulation failed. Check the FastAPI terminal.",
+        "Simulation failed: " + (simulationError?.message || "Please check FastAPI server logs."),
       );
     } finally {
       setIsLoadingSimulation(false);

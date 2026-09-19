@@ -61,19 +61,28 @@ def get_forecast(
         "timezone": "auto",
     }
 
-    try:
-        with httpx.Client(timeout=20.0) as client:
-            response = client.get(
-                OPEN_METEO_FORECAST_URL,
-                params=params,
-            )
+    import time
 
-            response.raise_for_status()
+    last_error: Exception | None = None
+    response = None
+    for attempt in range(3):
+        try:
+            with httpx.Client(timeout=15.0) as client:
+                response = client.get(
+                    OPEN_METEO_FORECAST_URL,
+                    params=params,
+                )
+                response.raise_for_status()
+                break
+        except httpx.HTTPError as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(0.6)
 
-    except httpx.HTTPError as exc:
+    if response is None or last_error and not response.is_success:
         raise WeatherServiceError(
-            "Unable to retrieve weather data."
-        ) from exc
+            f"Unable to retrieve weather data: {last_error}"
+        ) from last_error
 
     data = response.json()
 

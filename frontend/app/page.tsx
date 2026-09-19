@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Shelter3D = dynamic(() => import("@/components/Shelter3D"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center font-mono text-xs text-amber-700">
+    <div className="flex h-full w-full items-center justify-center font-mono text-xs text-amber-700 dark:text-amber-400">
       <span className="w-2 h-2 rounded-full bg-amber-500 status-ping mr-2" />
       INITIALIZING 3D ENGINE...
     </div>
@@ -61,69 +62,73 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-amber-500 selection:text-white antialiased font-sans">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
       {/* 1. Ultra-clean Top Micro Status Bar */}
-      <div className="border-b border-slate-200 bg-white/95 px-6 lg:px-12 py-2 text-[11px] font-mono tracking-wider text-slate-500 flex justify-between items-center relative z-20">
+      <div className="border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#050810] px-6 lg:px-12 py-2 text-[11px] font-mono tracking-wider text-slate-500 dark:text-slate-400 flex justify-between items-center relative z-20">
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-2 text-amber-700 font-semibold">
+          <span className="inline-flex items-center gap-2 text-amber-700 dark:text-amber-400 font-semibold">
             <span className="w-2 h-2 rounded-full bg-amber-500 status-ping" />
             <span>TS-1 RESEARCH INITIATIVE</span>
           </span>
-          <span className="hidden sm:inline text-slate-300">/</span>
-          <span className="hidden sm:inline text-slate-600">
+          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">/</span>
+          <span className="hidden sm:inline text-slate-600 dark:text-slate-400">
             HIGH-ALTITUDE PASSIVE CLIMATE SYSTEMS
           </span>
         </div>
-        <div className="flex items-center gap-4 text-slate-500 text-[10px]">
+        <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-[10px]">
           <span className="hidden md:inline">TRL-9 VERIFIED SPEC</span>
-          <span className="px-2 py-0.5 border border-emerald-600/30 bg-emerald-50 text-emerald-800 font-medium">
+          <span className="px-2 py-0.5 border border-emerald-600/30 bg-emerald-50 dark:border-emerald-400/30 dark:bg-emerald-400/10 text-emerald-800 dark:text-emerald-300 font-medium">
             FIELD READY
           </span>
         </div>
       </div>
 
       {/* 2. Top Navigation */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#070b14]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-200">
         <div className="flex justify-between items-center max-w-7xl mx-auto px-6 lg:px-12 h-16">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-mono font-bold text-amber-700 text-xs">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-mono font-bold text-amber-700 dark:text-amber-400 text-xs">
               TS
             </div>
             <div>
               <div
-                className="text-sm font-bold tracking-tight text-slate-900 group-hover:text-amber-700 transition-colors"
+                className="text-sm font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors"
                 style={{ fontFamily: "var(--font-headline)" }}
               >
                 THERMO SHELTER 1
               </div>
-              <div className="text-[10px] font-mono tracking-wider text-slate-500">
+              <div className="text-[10px] font-mono tracking-wider text-slate-500 dark:text-slate-400">
                 PASSIVE ALPINE LAB
               </div>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-600">
-            <a href="#hero-3d" className="hover:text-slate-950 transition-colors">
+          <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            <a href="#hero-3d" className="hover:text-slate-950 dark:hover:text-white transition-colors">
               3D Model
             </a>
-            <a href="#how-it-works" className="hover:text-slate-950 transition-colors">
+            <a href="#how-it-works" className="hover:text-slate-950 dark:hover:text-white transition-colors">
               Heat Flow
             </a>
-            <a href="#night-autonomy" className="hover:text-slate-950 transition-colors">
+            <a href="#night-autonomy" className="hover:text-slate-950 dark:hover:text-white transition-colors">
               Night Thermal
             </a>
-            <a href="#deployments" className="hover:text-slate-950 transition-colors">
+            <a href="#deployments" className="hover:text-slate-950 dark:hover:text-white transition-colors">
               Deployments
             </a>
           </nav>
 
-          <Link
-            href="/3d"
-            className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <span>Launch Simulator</span>
-            <span>→</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+
+            <Link
+              href="/3d"
+              className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <span>Launch Simulator</span>
+              <span>→</span>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -131,7 +136,7 @@ export default function HomePage() {
         {/* 3. Hero Section with Real High-Altitude Photography & Live 3D Parametric Viewer */}
         <section
           id="hero-3d"
-          className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center py-16 lg:py-24 border-b border-slate-200 overflow-hidden"
+          className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center py-16 lg:py-24 border-b border-slate-200 dark:border-white/10 overflow-hidden"
         >
           {/* Real Generated Cinematic Background Photo */}
           <div className="absolute inset-0 z-0">
@@ -142,9 +147,9 @@ export default function HomePage() {
               priority
               className="object-cover object-center opacity-85"
             />
-            {/* Subtle light wash to ensure text readability on the left while keeping mountain photo vibrant */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f8fafc]/95 via-[#f8fafc]/60 to-transparent lg:w-3/4 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/30 pointer-events-none" />
+            {/* Subtle wash to ensure text readability on the left while keeping mountain photo vibrant */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#f8fafc]/95 via-[#f8fafc]/60 to-transparent dark:from-[#070b14]/95 dark:via-[#070b14]/75 dark:to-transparent lg:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/30 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/40 pointer-events-none" />
             <div className="absolute inset-0 cad-grid opacity-20 pointer-events-none" />
           </div>
 
@@ -152,26 +157,26 @@ export default function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               {/* Left Column: Mission Overview & Architectural Headline */}
               <div className="lg:col-span-6 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-600/30 bg-amber-50 text-amber-800 font-mono text-xs">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-600/30 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 font-mono text-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 status-ping" />
                   <span>Passive Solar Architecture</span>
-                  <span className="text-slate-400">•</span>
+                  <span className="text-slate-400 dark:text-slate-500">•</span>
                   <span>Zero Fuel Burn</span>
                 </div>
 
                 <h1
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 leading-[1.1]"
+                  className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 dark:text-white leading-[1.1]"
                   style={{ fontFamily: "var(--font-headline)" }}
                 >
-                  Engineered for <span className="text-sky-600">-50°C</span>.
+                  Engineered for <span className="text-sky-600 dark:text-cyan-400">-50°C</span>.
                   <br />
                   Powered entirely by the sun.
                 </h1>
 
-                <p className="text-slate-600 text-base sm:text-lg font-normal leading-relaxed max-w-xl">
+                <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-xl">
                   Thermo Shelter 1 captures low-angle winter sunlight on high-altitude peaks,
                   storing it within a 3,200 kg phase-change Trombe matrix. It maintains a stable{" "}
-                  <strong className="text-amber-700 font-semibold">+19.5°C</strong> interior through
+                  <strong className="text-amber-700 dark:text-amber-400 font-semibold">+19.5°C</strong> interior through
                   11.4 hours of darkness without kerosene or diesel generators.
                 </p>
 
@@ -186,67 +191,67 @@ export default function HomePage() {
 
                   <a
                     href="#how-it-works"
-                    className="chamfer-btn border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-mono text-xs px-6 py-4 tracking-wider uppercase transition-colors shadow-sm"
+                    className="chamfer-btn border border-slate-300 dark:border-white/20 bg-white hover:bg-slate-50 dark:bg-[#090e1b]/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-xs px-6 py-4 tracking-wider uppercase transition-colors shadow-sm"
                   >
                     Heat Flow Diagram ↓
                   </a>
                 </div>
 
                 {/* Quick HUD Metrics */}
-                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 font-mono text-[11px]">
-                  <div className="border border-slate-200 bg-white/90 p-3 rounded-lg shadow-sm">
-                    <div className="text-slate-500 uppercase text-[9px]">Internal Core</div>
-                    <div className="text-base font-bold text-amber-700 mt-0.5">+19.5°C</div>
-                    <div className="text-slate-500 text-[9px]">Autonomous</div>
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 dark:border-white/10 font-mono text-[11px]">
+                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Internal Core</div>
+                    <div className="text-base font-bold text-amber-700 dark:text-amber-400 mt-0.5">+19.5°C</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">Autonomous</div>
                   </div>
 
-                  <div className="border border-slate-200 bg-white/90 p-3 rounded-lg shadow-sm">
-                    <div className="text-slate-500 uppercase text-[9px]">Insulation Barrier</div>
-                    <div className="text-base font-bold text-sky-700 mt-0.5">R-82.4</div>
-                    <div className="text-slate-500 text-[9px]">Aerogel Core</div>
+                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Insulation Barrier</div>
+                    <div className="text-base font-bold text-sky-700 dark:text-cyan-400 mt-0.5">R-82.4</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">Aerogel Core</div>
                   </div>
 
-                  <div className="border border-slate-200 bg-white/90 p-3 rounded-lg shadow-sm">
-                    <div className="text-slate-500 uppercase text-[9px]">Aux Fuel</div>
-                    <div className="text-base font-bold text-emerald-700 mt-0.5">0.0 L</div>
-                    <div className="text-slate-500 text-[9px]">100% Solar</div>
+                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Aux Fuel</div>
+                    <div className="text-base font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">0.0 L</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">100% Solar</div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Interactive 3D Model Viewport */}
               <div className="lg:col-span-6">
-                <div className="border border-slate-200 bg-white shadow-xl rounded-2xl overflow-hidden corner-bracket">
+                <div className="border border-slate-200 dark:border-white/20 bg-white dark:bg-[#090e1b]/90 shadow-xl rounded-2xl overflow-hidden corner-bracket">
                   {/* 3D Viewport Header */}
-                  <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060913]/90 px-4 py-3 font-mono text-xs">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 status-ping" />
-                      <span className="font-bold text-slate-900 uppercase tracking-wider">
+                      <span className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                         Interactive 3D Envelope
                       </span>
                     </div>
 
-                    <div className="text-[10px] text-slate-500">
-                      ORBIT: <span className="text-sky-700 font-bold">DRAG 360°</span>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                      ORBIT: <span className="text-sky-700 dark:text-cyan-400 font-bold">DRAG 360°</span>
                     </div>
                   </div>
 
                   {/* 3D WebGL Canvas */}
-                  <div className="relative h-[340px] sm:h-[380px] w-full cad-grid-dense bg-slate-100">
+                  <div className="relative h-[340px] sm:h-[380px] w-full cad-grid-dense bg-slate-100 dark:bg-[#050810]">
                     {/* Live CAD Floating Telemetry */}
-                    <div className="absolute left-3 top-3 z-10 font-mono text-[10px] space-y-1 bg-white/95 border border-slate-200 p-2.5 rounded shadow-sm pointer-events-none">
-                      <div className="text-slate-500">
+                    <div className="absolute left-3 top-3 z-10 font-mono text-[10px] space-y-1 bg-white/95 dark:bg-[#060913]/85 border border-slate-200 dark:border-white/10 p-2.5 rounded shadow-sm backdrop-blur-sm pointer-events-none">
+                      <div className="text-slate-500 dark:text-slate-400">
                         SPAN:{" "}
-                        <span className="text-slate-900 font-bold">
+                        <span className="text-slate-900 dark:text-white font-bold">
                           {currentPreset.length}m × {currentPreset.width}m × {currentPreset.height}m
                         </span>
                       </div>
-                      <div className="text-slate-500">
-                        AZIMUTH: <span className="text-amber-700 font-bold">{orientation}°</span>
+                      <div className="text-slate-500 dark:text-slate-400">
+                        AZIMUTH: <span className="text-amber-700 dark:text-amber-400 font-bold">{orientation}°</span>
                       </div>
-                      <div className="text-slate-500">
+                      <div className="text-slate-500 dark:text-slate-400">
                         SOLAR EFFICIENCY:{" "}
-                        <span className="text-emerald-700 font-bold">{solarCaptureEff}%</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-bold">{solarCaptureEff}%</span>
                       </div>
                     </div>
 
@@ -261,10 +266,10 @@ export default function HomePage() {
                   </div>
 
                   {/* Interactive Controls Bar */}
-                  <div className="p-4 border-t border-slate-200 bg-white space-y-3 font-mono text-xs">
+                  <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#070c17] space-y-3 font-mono text-xs">
                     {/* Presets */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider shrink-0">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
                         Preset:
                       </span>
                       <div className="grid grid-cols-3 gap-1.5 w-full">
@@ -275,8 +280,8 @@ export default function HomePage() {
                             onClick={() => setSelectedPreset(key)}
                             className={`py-1.5 px-2 rounded text-[10px] uppercase font-semibold border transition-all truncate ${
                               selectedPreset === key
-                                ? "border-amber-600 bg-amber-50 text-amber-900 font-bold shadow-xs"
-                                : "border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                                ? "border-amber-600 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-400/20 dark:text-amber-300 font-bold shadow-xs"
+                                : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                             }`}
                           >
                             {p.name.split(" ")[0]}
@@ -288,8 +293,8 @@ export default function HomePage() {
                     {/* Azimuth / Orientation Slider */}
                     <div className="space-y-1">
                       <div className="flex justify-between items-center text-[10px]">
-                        <span className="text-slate-500 uppercase">Orientation Azimuth:</span>
-                        <span className="text-sky-700 font-bold">{orientation}°</span>
+                        <span className="text-slate-500 dark:text-slate-400 uppercase">Orientation Azimuth:</span>
+                        <span className="text-sky-700 dark:text-cyan-400 font-bold">{orientation}°</span>
                       </div>
                       <input
                         type="range"
@@ -298,12 +303,12 @@ export default function HomePage() {
                         step="5"
                         value={orientation}
                         onChange={(e) => setOrientation(Number(e.target.value))}
-                        className="w-full accent-sky-600"
+                        className="w-full accent-sky-600 dark:accent-cyan-400"
                       />
-                      <div className="flex justify-between text-[9px] text-slate-500 pt-0.5">
+                      <div className="flex justify-between text-[9px] text-slate-500 dark:text-slate-400 pt-0.5">
                         <span>N (0°)</span>
                         <span>E (90°)</span>
-                        <span className="text-amber-700 font-bold">S (180° Optimal)</span>
+                        <span className="text-amber-700 dark:text-amber-400 font-bold">S (180° Optimal)</span>
                         <span>W (270°)</span>
                         <span>N (360°)</span>
                       </div>
@@ -313,7 +318,7 @@ export default function HomePage() {
                     <div className="pt-1">
                       <Link
                         href="/3d"
-                        className="chamfer-btn w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 text-center text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-sm"
+                        className="chamfer-btn w-full bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-bold py-2.5 text-center text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-sm"
                       >
                         <span>Configure in Full 3D Thermal Simulator</span>
                         <span>→</span>
@@ -325,66 +330,66 @@ export default function HomePage() {
             </div>
 
             {/* 4 Clean Big Telemetry Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 pt-8 border-t border-slate-200 font-mono">
-              <div className="p-5 border border-slate-200 bg-white rounded-xl shadow-sm">
-                <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 pt-8 border-t border-slate-200 dark:border-white/10 font-mono">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Internal Stability
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-amber-700 mt-2">+19.5°C</div>
-                <div className="text-xs text-slate-500 mt-1">Constant core comfort zone</div>
+                <div className="text-2xl sm:text-3xl font-bold text-amber-700 dark:text-amber-400 mt-2">+19.5°C</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Constant core comfort zone</div>
               </div>
 
-              <div className="p-5 border border-slate-200 bg-white rounded-xl shadow-sm">
-                <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Envelope Rating
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-sky-700 mt-2">R-82.4</div>
-                <div className="text-xs text-slate-500 mt-1">m²·K/W combined barrier</div>
+                <div className="text-2xl sm:text-3xl font-bold text-sky-700 dark:text-cyan-400 mt-2">R-82.4</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">m²·K/W combined barrier</div>
               </div>
 
-              <div className="p-5 border border-slate-200 bg-white rounded-xl shadow-sm">
-                <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Thermal Lag
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-emerald-700 mt-2">11.4h</div>
-                <div className="text-xs text-slate-500 mt-1">Nighttime radiant release</div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400 mt-2">11.4h</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Nighttime radiant release</div>
               </div>
 
-              <div className="p-5 border border-slate-200 bg-white rounded-xl shadow-sm">
-                <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm backdrop-blur-sm">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Auxiliary Fuel
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">0.0 L</div>
-                <div className="text-xs text-slate-500 mt-1">100% passive solar autonomy</div>
+                <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-2">0.0 L</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">100% passive solar autonomy</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* 4. Visual Cross-Section & How It Works */}
-        <section className="py-20 border-b border-slate-200" id="how-it-works">
+        <section className="py-20 border-b border-slate-200 dark:border-white/10" id="how-it-works">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
-                <div className="text-xs font-mono uppercase tracking-widest text-amber-700 mb-2">
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-2 font-semibold">
                   System Diagram
                 </div>
                 <h2
-                  className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight"
+                  className="text-3xl sm:text-4xl font-bold text-slate-950 dark:text-white tracking-tight"
                   style={{ fontFamily: "var(--font-headline)" }}
                 >
                   Passive Solar Heat Flow Architecture
                 </h2>
               </div>
-              <p className="text-slate-600 text-sm max-w-md leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md leading-relaxed">
                 How low-angle winter sunlight is gathered, stored in high-density phase-change
                 materials, and circulated continuously through natural gravity convection.
               </p>
             </div>
 
             {/* Clean SVG Cross-Section Illustration */}
-            <div className="border border-slate-200 bg-white shadow-md rounded-2xl overflow-hidden p-6 sm:p-8">
-              <div className="relative w-full aspect-[16/9] max-h-[460px] bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center cad-grid-dense">
+            <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-md rounded-2xl overflow-hidden p-6 sm:p-8">
+              <div className="relative w-full aspect-[16/9] max-h-[460px] bg-slate-50 dark:bg-[#050810] border border-slate-200 dark:border-white/5 rounded-xl p-4 flex items-center justify-center cad-grid-dense">
                 <svg
                   className="w-full h-full"
                   fill="none"
@@ -584,40 +589,40 @@ export default function HomePage() {
 
               {/* 3 Step Summary Cards Below Diagram */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 font-mono">
-                <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl">
-                  <div className="text-amber-700 font-bold text-xs uppercase mb-1">
+                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                  <div className="text-amber-700 dark:text-amber-400 font-bold text-xs uppercase mb-1">
                     01 / SOLAR ABSORPTION
                   </div>
-                  <div className="text-sm font-semibold text-slate-900 mb-2">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Triple-Glazed South Facade
                   </div>
-                  <div className="text-xs text-slate-600 leading-relaxed">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     Captures up to 14.8 kWh/m² daily solar radiation directly through low-iron
                     high-transmittance glazing.
                   </div>
                 </div>
 
-                <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl">
-                  <div className="text-sky-700 font-bold text-xs uppercase mb-1">
+                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                  <div className="text-sky-700 dark:text-cyan-400 font-bold text-xs uppercase mb-1">
                     02 / SENSIBLE STORAGE
                   </div>
-                  <div className="text-sm font-semibold text-slate-900 mb-2">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Phase-Change Trombe Core
                   </div>
-                  <div className="text-xs text-slate-600 leading-relaxed">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     3,200 kg paraffin-basalt matrix locks latent thermal energy at 21°C, preventing
                     daytime overheating.
                   </div>
                 </div>
 
-                <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl">
-                  <div className="text-emerald-700 font-bold text-xs uppercase mb-1">
+                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                  <div className="text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase mb-1">
                     03 / NIGHTTIME RELEASE
                   </div>
-                  <div className="text-sm font-semibold text-slate-900 mb-2">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     11.4-Hour Radiant Phase Shift
                   </div>
-                  <div className="text-xs text-slate-600 leading-relaxed">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     Releases warm radiant heat between 02:00 and 06:00 during peak sub-zero
                     temperatures.
                   </div>
@@ -630,7 +635,7 @@ export default function HomePage() {
         {/* 5. Immersive Night Thermal Autonomy Section with Real Background Photo */}
         <section
           id="night-autonomy"
-          className="relative py-24 lg:py-32 border-b border-slate-200 overflow-hidden"
+          className="relative py-24 lg:py-32 border-b border-slate-200 dark:border-white/10 overflow-hidden"
         >
           {/* Real Generated Night Photo with Milky Way and Glowing Shelter */}
           <div className="absolute inset-0 z-0">
@@ -640,25 +645,25 @@ export default function HomePage() {
               fill
               className="object-cover object-center opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-white/50 to-[#f8fafc] pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent lg:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-white/50 to-[#f8fafc] dark:from-[#070b14] dark:via-[#070b14]/70 dark:to-[#070b14] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent dark:from-[#070b14]/90 dark:via-[#070b14]/60 dark:to-transparent lg:w-3/4 pointer-events-none" />
             <div className="absolute inset-0 cad-grid opacity-20 pointer-events-none" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
             <div className="max-w-2xl space-y-4 mb-16">
-              <div className="text-xs font-mono uppercase tracking-widest text-amber-700 font-semibold">
+              <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-semibold">
                 Night Autonomy & Telemetry
               </div>
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight leading-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 dark:text-white tracking-tight leading-tight"
                 style={{ fontFamily: "var(--font-headline)" }}
               >
-                Surviving the <span className="text-sky-700">-50°C</span> Alpine Night.
+                Surviving the <span className="text-sky-700 dark:text-cyan-400">-50°C</span> Alpine Night.
                 <br />
                 Zero Active Generators.
               </h2>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
                 When the sun dips below the Himalayan ridges, ambient temperatures plummet to
                 deadly sub-zero levels. Thermo Shelter 1 maintains thermal equilibrium through its
                 11.4-hour calibrated thermal lag, slowly radiating daytime solar warmth through the
@@ -667,57 +672,57 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-              <div className="border border-slate-200 bg-white/95 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
-                <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 font-bold text-sm mb-4">
+              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+                <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 font-bold text-sm mb-4">
                   11.4h
                 </div>
-                <h3 className="text-base font-bold text-slate-900 uppercase mb-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase mb-2">
                   Calibrated Radiant Lag
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   Heat gathered during daylight hours takes exactly 11.4 hours to conduct through the
                   Trombe core, peaking radiation right during the coldest pre-dawn hours (03:00 to
                   06:00).
                 </p>
-                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-[11px]">
-                  <span className="text-slate-500">Core Temp Drop:</span>
-                  <span className="text-emerald-700 font-bold">&lt; 1.8°C / 12h</span>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">Core Temp Drop:</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">&lt; 1.8°C / 12h</span>
                 </div>
               </div>
 
-              <div className="border border-slate-200 bg-white/95 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
-                <div className="w-9 h-9 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 font-bold text-sm mb-4">
+              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+                <div className="w-9 h-9 rounded-lg bg-sky-50 dark:bg-cyan-500/10 border border-sky-200 dark:border-cyan-500/30 flex items-center justify-center text-sky-700 dark:text-cyan-400 font-bold text-sm mb-4">
                   R-82
                 </div>
-                <h3 className="text-base font-bold text-slate-900 uppercase mb-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase mb-2">
                   Aerogel Vacuum Shell
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   Multi-layer insulation sandwich combining silica aerogel (k=0.014 W/mK) and
                   reflective radiation barriers completely halts conductive, convective, and
                   infrared heat loss.
                 </p>
-                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-[11px]">
-                  <span className="text-slate-500">Thermal Transmittance:</span>
-                  <span className="text-sky-700 font-bold">0.012 W/m²K</span>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">Thermal Transmittance:</span>
+                  <span className="text-sky-700 dark:text-cyan-400 font-bold">0.012 W/m²K</span>
                 </div>
               </div>
 
-              <div className="border border-slate-200 bg-white/95 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-sm mb-4">
+              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm mb-4">
                   0.0L
                 </div>
-                <h3 className="text-base font-bold text-slate-900 uppercase mb-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase mb-2">
                   100% Passive Autonomy
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   Eliminates catastrophic dependency on supply lines for kerosene or diesel in
                   inaccessible alpine zones, preventing carbon monoxide poisoning and mechanical
                   freezing failures.
                 </p>
-                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-[11px]">
-                  <span className="text-slate-500">Expedition Fuel Saved:</span>
-                  <span className="text-emerald-700 font-bold">1,800 L / winter</span>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">Expedition Fuel Saved:</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">1,800 L / winter</span>
                 </div>
               </div>
             </div>
@@ -725,21 +730,21 @@ export default function HomePage() {
         </section>
 
         {/* 6. Proven Field Deployments */}
-        <section className="py-20 border-b border-slate-200" id="deployments">
+        <section className="py-20 border-b border-slate-200 dark:border-white/10" id="deployments">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
-                <div className="text-xs font-mono uppercase tracking-widest text-amber-700 font-semibold mb-2">
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-semibold mb-2">
                   Extreme Test Stations
                 </div>
                 <h2
-                  className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight"
+                  className="text-3xl sm:text-4xl font-bold text-slate-950 dark:text-white tracking-tight"
                   style={{ fontFamily: "var(--font-headline)" }}
                 >
                   Validated in the World&apos;s Harshest Climates
                 </h2>
               </div>
-              <p className="text-slate-600 text-sm max-w-md leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md leading-relaxed">
                 Tested and verified across glaciated ridges, cold desert plateaus, and equatorial
                 alpine summits.
               </p>
@@ -747,126 +752,126 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
               {/* Siachen */}
-              <div className="border border-slate-200 bg-white shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="text-amber-700 text-xs font-bold uppercase">Station 01</div>
-                      <h3 className="text-xl font-bold text-slate-900 mt-1">Siachen Ridge</h3>
-                      <div className="text-xs text-slate-500">Karakoram · 5,400m AMSL</div>
+                      <div className="text-amber-700 dark:text-amber-400 text-xs font-bold uppercase">Station 01</div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">Siachen Ridge</h3>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Karakoram · 5,400m AMSL</div>
                     </div>
-                    <span className="px-2 py-0.5 border border-amber-300 bg-amber-50 text-amber-800 text-[10px] font-bold">
+                    <span className="px-2 py-0.5 border border-amber-300 dark:border-amber-400/30 bg-amber-50 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
                       ACTIVE
                     </span>
                   </div>
 
-                  <div className="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
+                  <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-4 border-t border-slate-100 dark:border-white/10">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Record Ambient:</span>
-                      <span className="font-semibold text-sky-700">-54.8°C</span>
+                      <span className="text-slate-500 dark:text-slate-400">Record Ambient:</span>
+                      <span className="font-semibold text-sky-700 dark:text-cyan-400">-54.8°C</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Interior Stable:</span>
-                      <span className="font-semibold text-amber-700">+19.2°C</span>
+                      <span className="text-slate-500 dark:text-slate-400">Interior Stable:</span>
+                      <span className="font-semibold text-amber-700 dark:text-amber-400">+19.2°C</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Katabatic Wind:</span>
-                      <span className="text-slate-800">280 km/h</span>
+                      <span className="text-slate-500 dark:text-slate-400">Katabatic Wind:</span>
+                      <span className="text-slate-800 dark:text-slate-200">280 km/h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Fuel Burn:</span>
-                      <span className="text-emerald-700 font-bold">0.0 Liters</span>
+                      <span className="text-slate-500 dark:text-slate-400">Fuel Burn:</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">0.0 Liters</span>
                     </div>
                   </div>
                 </div>
 
                 <Link
                   href="/3d"
-                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 hover:border-amber-600 bg-slate-50 hover:bg-white text-slate-700 hover:text-amber-700 py-2.5 text-xs font-bold uppercase transition-colors"
+                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 dark:border-white/20 hover:border-amber-600 dark:hover:border-amber-400 bg-slate-50 dark:bg-transparent hover:bg-white dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400 py-2.5 text-xs font-bold uppercase transition-colors"
                 >
                   Simulate Siachen
                 </Link>
               </div>
 
               {/* Spiti */}
-              <div className="border border-slate-200 bg-white shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="text-sky-700 text-xs font-bold uppercase">Station 02</div>
-                      <h3 className="text-xl font-bold text-slate-900 mt-1">Spiti Plateau</h3>
-                      <div className="text-xs text-slate-500">Himalayas · 4,500m AMSL</div>
+                      <div className="text-sky-700 dark:text-cyan-400 text-xs font-bold uppercase">Station 02</div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">Spiti Plateau</h3>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Himalayas · 4,500m AMSL</div>
                     </div>
-                    <span className="px-2 py-0.5 border border-sky-300 bg-sky-50 text-sky-800 text-[10px] font-bold">
+                    <span className="px-2 py-0.5 border border-sky-300 dark:border-cyan-400/30 bg-sky-50 dark:bg-cyan-400/10 text-sky-800 dark:text-cyan-300 text-[10px] font-bold">
                       ACTIVE
                     </span>
                   </div>
 
-                  <div className="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
+                  <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-4 border-t border-slate-100 dark:border-white/10">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Annual Solar Flux:</span>
-                      <span className="font-semibold text-amber-700">2,140 kWh/m²</span>
+                      <span className="text-slate-500 dark:text-slate-400">Annual Solar Flux:</span>
+                      <span className="font-semibold text-amber-700 dark:text-amber-400">2,140 kWh/m²</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Glazing SHGC:</span>
-                      <span className="font-semibold text-slate-900">0.68</span>
+                      <span className="text-slate-500 dark:text-slate-400">Glazing SHGC:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">0.68</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Seismic Zone:</span>
-                      <span className="text-slate-800">Zone V (M8.2)</span>
+                      <span className="text-slate-500 dark:text-slate-400">Seismic Zone:</span>
+                      <span className="text-slate-800 dark:text-slate-200">Zone V (M8.2)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Autonomy:</span>
-                      <span className="text-emerald-700 font-bold">100% Year-Round</span>
+                      <span className="text-slate-500 dark:text-slate-400">Autonomy:</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Year-Round</span>
                     </div>
                   </div>
                 </div>
 
                 <Link
                   href="/3d"
-                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 hover:border-sky-600 bg-slate-50 hover:bg-white text-slate-700 hover:text-sky-700 py-2.5 text-xs font-bold uppercase transition-colors"
+                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 dark:border-white/20 hover:border-sky-600 dark:hover:border-cyan-400 bg-slate-50 dark:bg-transparent hover:bg-white dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-sky-700 dark:hover:text-cyan-400 py-2.5 text-xs font-bold uppercase transition-colors"
                 >
                   Simulate Spiti
                 </Link>
               </div>
 
               {/* Andes */}
-              <div className="border border-slate-200 bg-white shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="text-slate-500 text-xs font-bold uppercase">Station 03</div>
-                      <h3 className="text-xl font-bold text-slate-900 mt-1">High Andes</h3>
-                      <div className="text-xs text-slate-500">Ecuador · 5,200m AMSL</div>
+                      <div className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase">Station 03</div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">High Andes</h3>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Ecuador · 5,200m AMSL</div>
                     </div>
-                    <span className="px-2 py-0.5 border border-slate-300 bg-slate-50 text-slate-700 text-[10px] font-bold">
+                    <span className="px-2 py-0.5 border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
                       VERIFIED
                     </span>
                   </div>
 
-                  <div className="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
+                  <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-4 border-t border-slate-100 dark:border-white/10">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Solar UV Index:</span>
-                      <span className="font-semibold text-amber-700">Index 22 (Extreme)</span>
+                      <span className="text-slate-500 dark:text-slate-400">Solar UV Index:</span>
+                      <span className="font-semibold text-amber-700 dark:text-amber-400">Index 22 (Extreme)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Interior Temp:</span>
-                      <span className="font-semibold text-slate-800">+18.8°C</span>
+                      <span className="text-slate-500 dark:text-slate-400">Interior Temp:</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">+18.8°C</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Assembly Time:</span>
-                      <span className="text-slate-800">72 Hours</span>
+                      <span className="text-slate-500 dark:text-slate-400">Assembly Time:</span>
+                      <span className="text-slate-800 dark:text-slate-200">72 Hours</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Autonomy Record:</span>
-                      <span className="text-emerald-700 font-bold">99.4%</span>
+                      <span className="text-slate-500 dark:text-slate-400">Autonomy Record:</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">99.4%</span>
                     </div>
                   </div>
                 </div>
 
                 <Link
                   href="/3d"
-                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-white text-slate-700 hover:text-slate-900 py-2.5 text-xs font-bold uppercase transition-colors"
+                  className="mt-6 w-full text-center chamfer-btn border border-slate-300 dark:border-white/20 hover:border-slate-500 dark:hover:border-white bg-slate-50 dark:bg-transparent hover:bg-white dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white py-2.5 text-xs font-bold uppercase transition-colors"
                 >
                   Simulate Andes
                 </Link>
@@ -876,15 +881,15 @@ export default function HomePage() {
         </section>
 
         {/* 7. Clean Interactive CTA Banner */}
-        <section className="py-20 bg-slate-100 border-b border-slate-200">
+        <section className="py-20 bg-slate-100 dark:bg-gradient-to-b dark:from-[#070b14] dark:to-[#090e1b] border-b border-slate-200 dark:border-white/10">
           <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
             <h2
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 dark:text-white tracking-tight"
               style={{ fontFamily: "var(--font-headline)" }}
             >
               Test and configure your shelter in real time.
             </h2>
-            <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
               Rotate orientations, adjust aerogel thicknesses, load live weather coordinates, and
               inspect the transient energy response instantly.
             </p>
@@ -902,24 +907,24 @@ export default function HomePage() {
       </main>
 
       {/* 8. Clean Minimalist Footer */}
-      <footer className="border-t border-slate-200 bg-white py-8 px-6 lg:px-12 text-slate-500 font-mono text-xs">
+      <footer className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#050810] py-8 px-6 lg:px-12 text-slate-500 dark:text-slate-400 font-mono text-xs">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <span className="text-slate-800 font-bold mr-2">TS-1 // THERMO SHELTER</span>
+            <span className="text-slate-800 dark:text-white font-bold mr-2">TS-1 // THERMO SHELTER</span>
             <span>© 2025 PASSIVE SOLAR ALPINE ARCHITECTURE</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/3d" className="text-amber-700 hover:text-amber-800 font-semibold transition-colors">
+            <Link href="/3d" className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-semibold transition-colors">
               3D Simulator
             </Link>
-            <a href="#how-it-works" className="hover:text-slate-800 transition-colors">
+            <a href="#how-it-works" className="hover:text-slate-800 dark:hover:text-white transition-colors">
               Heat Flow
             </a>
-            <a href="#night-autonomy" className="hover:text-slate-800 transition-colors">
+            <a href="#night-autonomy" className="hover:text-slate-800 dark:hover:text-white transition-colors">
               Night Autonomy
             </a>
-            <a href="#deployments" className="hover:text-slate-800 transition-colors">
+            <a href="#deployments" className="hover:text-slate-800 dark:hover:text-white transition-colors">
               Field Stations
             </a>
           </div>

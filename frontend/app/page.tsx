@@ -237,7 +237,7 @@ export default function Home() {
             )} m accuracy.`,
           );
         } catch (locationError) {
-          console.error(locationError);
+          console.warn("Weather fetch notice:", locationError);
 
           setError(
             "Your location was detected, but weather data could not be retrieved.",
@@ -248,7 +248,7 @@ export default function Home() {
       },
 
       (locationError) => {
-        console.error(locationError);
+        console.warn("Geolocation notice:", locationError?.message || locationError);
 
         let message =
           "Unable to access your current location.";
@@ -872,16 +872,10 @@ export default function Home() {
                               }
                               className="border-b border-slate-800/60"
                             >
-                              <td className="px-3 py-3">
-                                {new Date(
-                                  point.timestamp,
-                                ).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
+                              <td className="px-3 py-3 font-mono text-xs">
+                                {point.timestamp.includes("T")
+                                  ? point.timestamp.split("T")[1].slice(0, 5)
+                                  : point.timestamp}
                               </td>
 
                               <td className="px-3 py-3">

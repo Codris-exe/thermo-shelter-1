@@ -15,10 +15,10 @@ interface WeatherSummaryCardProps {
 }
 
 function formatTime(timestamp: string) {
-  return new Date(timestamp).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (timestamp.includes("T")) {
+    return timestamp.split("T")[1].slice(0, 5);
+  }
+  return timestamp;
 }
 
 export default function WeatherSummaryCard({

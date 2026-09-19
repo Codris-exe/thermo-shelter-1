@@ -18,8 +18,6 @@ import {
   useRef,
 } from "react";
 
-import { useTheme } from "@/context/ThemeContext";
-
 import type {
   OrbitControls as OrbitControlsImpl,
 } from "three-stdlib";
@@ -570,11 +568,9 @@ export default function Shelter3D({
   wallThickness = 0.312,
   roofThickness = 0.22,
 }: Shelter3DProps) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-[#050810]">
+    <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-950">
 
       <Canvas
         shadows
@@ -596,13 +592,13 @@ export default function Shelter3D({
         <color
           attach="background"
           args={[
-            isDark ? "#070b14" : "#f1f5f9",
+            "#020617",
           ]}
         />
 
 
         <ambientLight
-          intensity={isDark ? 1.0 : 1.3}
+          intensity={1.2}
         />
 
 
@@ -616,10 +612,10 @@ export default function Shelter3D({
           ]}
           cellSize={1}
           cellThickness={0.6}
-          cellColor={isDark ? "#1e293b" : "#cbd5e1"}
+          cellColor="#334155"
           sectionSize={5}
           sectionThickness={1}
-          sectionColor={isDark ? "#334155" : "#94a3b8"}
+          sectionColor="#64748b"
           fadeDistance={30}
           fadeStrength={1}
         />

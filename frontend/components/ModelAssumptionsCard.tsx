@@ -29,20 +29,20 @@ const assumptions = [
 
 export default function ModelAssumptionsCard() {
   return (
-    <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm p-3 corner-bracket font-mono">
+    <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.03] p-3">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
-            Physics &amp; Solver Scope
+          <div className="text-xs font-semibold text-white">
+            Model Assumptions
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-500 dark:text-slate-400">
-            Governing equations &amp; boundary assumptions
+          <div className="mt-0.5 text-[9px] text-slate-500">
+            Scientific scope of the current prototype
           </div>
         </div>
 
-        <div className="border border-amber-600/30 bg-amber-50 dark:bg-amber-400/10 px-2 py-0.5 text-[8px] text-amber-800 dark:text-amber-300 font-bold uppercase rounded">
-          EULER SOLVER
+        <div className="rounded-full border border-amber-400/20 bg-amber-400/5 px-2 py-1 text-[9px] text-amber-300">
+          Prototype Model
         </div>
       </div>
 
@@ -50,25 +50,25 @@ export default function ModelAssumptionsCard() {
         {assumptions.map((item) => (
           <div
             key={item.title}
-            className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060913] p-2"
+            className="rounded-lg border border-white/5 bg-white/[0.02] p-2"
           >
-            <div className="text-[10px] font-bold text-slate-800 dark:text-slate-200">
+            <div className="text-[10px] font-semibold text-slate-300">
               {item.title}
             </div>
 
-            <div className="mt-0.5 text-[9px] leading-relaxed text-slate-600 dark:text-slate-400">
+            <div className="mt-0.5 text-[9px] leading-relaxed text-slate-500">
               {item.text}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-50/70 dark:bg-amber-400/10 p-2.5">
-        <div className="text-[9px] font-bold text-amber-800 dark:text-amber-300">
-          Important Disclaimer
+      <div className="mt-3 rounded-lg border border-white/5 bg-white/[0.02] p-2">
+        <div className="text-[9px] font-semibold text-amber-300">
+          Important
         </div>
 
-        <div className="mt-1 text-[9px] leading-relaxed text-slate-600 dark:text-slate-300">
+        <div className="mt-1 text-[9px] leading-relaxed text-slate-500">
           Results are model-based estimates for design exploration.
           They are not a substitute for detailed CFD, finite-element
           analysis, building-code calculations, or professional

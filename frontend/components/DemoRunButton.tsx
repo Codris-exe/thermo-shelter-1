@@ -37,20 +37,20 @@ export default function DemoRunButton({
   }
 
   return (
-    <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm p-3 corner-bracket font-mono">
+    <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.04] p-3">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
-            Automated Analysis Run
+          <div className="text-xs font-semibold text-white">
+            Hackathon Demo
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-500 dark:text-slate-400">
-            End-to-end telemetry, simulation &amp; Pareto sweep
+          <div className="mt-0.5 text-[9px] text-slate-500">
+            Run the complete analysis workflow
           </div>
         </div>
 
-        <div className="border border-amber-600/30 bg-amber-50 dark:bg-amber-400/10 px-2 py-0.5 text-[8px] text-amber-800 dark:text-amber-300 font-bold uppercase rounded">
-          AUTOMATED
+        <div className="rounded-full border border-amber-400/20 bg-amber-400/5 px-2 py-1 text-[8px] text-amber-300">
+          DEMO
         </div>
       </div>
 
@@ -61,19 +61,20 @@ export default function DemoRunButton({
           disabled ||
           isRunning
         }
-        className="mt-3 w-full chamfer-btn bg-amber-500 hover:bg-amber-400 px-4 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-slate-950 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+        className="mt-3 w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className="w-2 h-2 rounded-full bg-slate-950 status-ping" />
-        <span>{isRunning ? "Executing Pipeline..." : "Execute Automated Workflow"}</span>
-        <span className="text-sm">→</span>
+        {isRunning
+          ? "Running Full Analysis..."
+          : "Run Full Demo"}
       </button>
 
-      <div className="mt-2 text-[9px] leading-relaxed text-slate-500 dark:text-slate-400">
-        Executes real climate ingestion, transient forward Euler solver, and combinatorial parameter optimization.
+      <div className="mt-2 text-[8px] leading-relaxed text-slate-600">
+        Uses the current shelter design, real weather data,
+        thermal simulation and the configured optimization search.
       </div>
 
       {error && (
-        <div className="mt-2 rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-2 text-[9px] leading-relaxed text-red-700 dark:text-red-300">
+        <div className="mt-2 rounded-lg border border-red-400/20 bg-red-400/5 p-2 text-[9px] leading-relaxed text-red-300">
           {error}
         </div>
       )}

@@ -1,956 +1,826 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+export default function HomePage() {
+  const [heroOpacity, setHeroOpacity] = useState(1);
+  const [heroTranslateY, setHeroTranslateY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeDistance = 420;
+      const opacity = Math.max(0, 1 - scrollY / fadeDistance);
+      const translateY = scrollY * 0.35;
+      setHeroOpacity(opacity);
+      setHeroTranslateY(translateY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-interface WeatherPoint {
-  timestamp: string;
-  outdoor_temperature_c: number;
-  wind_speed_m_s: number;
-  solar_irradiance_w_m2: number;
-  solar_gain_w: number;
-  direct_radiation_w_m2: number;
-  diffuse_radiation_w_m2: number;
-  direct_normal_irradiance_w_m2: number;
-  cloud_cover_pct: number | null;
-  is_day: boolean;
-  relative_humidity_pct: number | null;
-  ground_temperature_c: number | null;
-}
 
-interface WeatherResponse {
-  latitude: number;
-  longitude: number;
-  elevation_m: number;
-  timezone: string;
-  source: string;
-  points: WeatherPoint[];
-}
-
-interface SimulationPoint {
-  timestamp: string;
-  indoor_temperature_c: number;
-  thermal_mass_temperature_c: number;
-  outdoor_temperature_c: number;
-  solar_irradiance_w_m2: number;
-  solar_gain_w: number;
-  wall_heat_transfer_w: number;
-  roof_heat_transfer_w: number;
-  floor_heat_transfer_w: number;
-  window_heat_transfer_w: number;
-  door_heat_transfer_w: number;
-  ventilation_heat_transfer_w: number;
-  thermal_mass_heat_transfer_w: number;
-  total_heat_loss_w: number;
-  net_heat_gain_w: number;
-}
-
-interface SimulationResult {
-  initial_indoor_temperature_c: number;
-  final_indoor_temperature_c: number;
-  minimum_indoor_temperature_c: number;
-  maximum_indoor_temperature_c: number;
-  initial_thermal_mass_temperature_c: number | null;
-  final_thermal_mass_temperature_c: number | null;
-  minimum_thermal_mass_temperature_c: number | null;
-  maximum_thermal_mass_temperature_c: number | null;
-  comfort_hours: number;
-  cold_hours: number;
-  hot_hours: number;
-  comfort_percentage: number;
-  points: SimulationPoint[];
-}
-
-interface LocationResult {
-  name: string;
-  country: string | null;
-  country_code: string | null;
-  region: string | null;
-  latitude: number;
-  longitude: number;
-  elevation_m: number | null;
-  timezone: string | null;
-}
-
-export default function Home() {
-  const [locationQuery, setLocationQuery] = useState("Leh");
-
-  const [locations, setLocations] = useState<LocationResult[]>([]);
-
-  const [selectedLocation, setSelectedLocation] =
-    useState<LocationResult | null>(null);
-
-  const [weather, setWeather] =
-    useState<WeatherResponse | null>(null);
-
-  const [initialTemperature, setInitialTemperature] =
-    useState(18);
-
-  const [isSearchingLocation, setIsSearchingLocation] =
-    useState(false);
-
-  const [isGettingLocation, setIsGettingLocation] =
-    useState(false);
-
-  const [isLoadingWeather, setIsLoadingWeather] =
-    useState(false);
-
-  const [isLoadingSimulation, setIsLoadingSimulation] =
-    useState(false);
-
-  const [result, setResult] =
-    useState<SimulationResult | null>(null);
-
-  const [error, setError] = useState("");
-
-  async function searchLocation() {
-    setIsSearchingLocation(true);
-    setError("");
-
-    try {
-      const response = await fetch(
-        `/backend-api/api/location/search?q=${encodeURIComponent(
-          locationQuery,
-        )}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Location search failed.");
-      }
-
-      const data = await response.json();
-
-      setLocations(data.results ?? []);
-    } catch (searchError) {
-      console.error(searchError);
-
-      setError(
-        "Unable to search for the location.",
-      );
-    } finally {
-      setIsSearchingLocation(false);
-    }
-  }
-
-  async function loadWeather(
-    location: LocationResult,
-  ) {
-    setSelectedLocation(location);
-    setIsLoadingWeather(true);
-    setError("");
-    setResult(null);
-
-    try {
-      const response = await fetch(
-        `/backend-api/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`,
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Weather request failed.",
-        );
-      }
-
-      const data: WeatherResponse =
-        await response.json();
-
-      setWeather(data);
-    } catch (weatherError) {
-      console.error(weatherError);
-
-      setError(
-        "Unable to retrieve real weather data.",
-      );
-    } finally {
-      setIsLoadingWeather(false);
-    }
-  }
-
-  async function useMyLocation() {
-    setIsGettingLocation(true);
-    setError("");
-    setResult(null);
-
-    if (!navigator.geolocation) {
-      setError(
-        "Geolocation is not supported by this browser.",
-      );
-
-      setIsGettingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const latitude =
-            position.coords.latitude;
-
-          const longitude =
-            position.coords.longitude;
-
-          const accuracy =
-            position.coords.accuracy;
-
-          const currentLocation: LocationResult =
-            {
-              name: "Current Location",
-              country: null,
-              country_code: null,
-              region: null,
-              latitude,
-              longitude,
-              elevation_m: null,
-              timezone: null,
-            };
-
-          setSelectedLocation(
-            currentLocation,
-          );
-
-          setLocations([]);
-
-          const weatherResponse =
-            await fetch(
-              `/backend-api/api/weather/forecast?latitude=${latitude}&longitude=${longitude}&hours=24`,
-            );
-
-          if (!weatherResponse.ok) {
-            throw new Error(
-              "Weather request failed.",
-            );
-          }
-
-          const weatherData: WeatherResponse =
-            await weatherResponse.json();
-
-          setWeather(weatherData);
-
-          setLocationQuery(
-            `${latitude.toFixed(
-              4,
-            )}, ${longitude.toFixed(4)}`,
-          );
-
-          setError(
-            `Location detected with approximately ${Math.round(
-              accuracy,
-            )} m accuracy.`,
-          );
-        } catch (locationError) {
-          console.error(locationError);
-
-          setError(
-            "Your location was detected, but weather data could not be retrieved.",
-          );
-        } finally {
-          setIsGettingLocation(false);
-        }
-      },
-
-      (locationError) => {
-        console.error(locationError);
-
-        let message =
-          "Unable to access your current location.";
-
-        if (
-          locationError.code ===
-          locationError.PERMISSION_DENIED
-        ) {
-          message =
-            "Location permission was denied. Please allow location access in your browser.";
-        }
-
-        if (
-          locationError.code ===
-          locationError.POSITION_UNAVAILABLE
-        ) {
-          message =
-            "Your current location could not be determined.";
-        }
-
-        if (
-          locationError.code ===
-          locationError.TIMEOUT
-        ) {
-          message =
-            "Location request timed out. Please try again.";
-        }
-
-        setError(message);
-        setIsGettingLocation(false);
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 300000,
-      },
-    );
-  }
-
-  async function runSimulation() {
-    if (!selectedLocation || !weather) {
-      setError(
-        "Select a location and load weather before running the simulation.",
-      );
-
-      return;
-    }
-
-    setIsLoadingSimulation(true);
-    setError("");
-
-    try {
-      const payload = {
-        design: {
-          location: {
-            name:
-              selectedLocation.name,
-
-            latitude:
-              selectedLocation.latitude,
-
-            longitude:
-              selectedLocation.longitude,
-
-            elevation_m:
-              selectedLocation.elevation_m,
-
-            timezone:
-              weather.timezone,
-
-            source:
-              selectedLocation.name ===
-              "Current Location"
-                ? "gps"
-                : "search",
-          },
-
-          geometry: {
-            shape: "rectangular",
-            length_m: 5,
-            width_m: 4,
-            height_m: 3,
-          },
-
-          orientation_deg: 180,
-
-          wall_assembly: {
-            layers: [
-              {
-                material_id: "brick",
-                thickness_m: 0.2,
-              },
-              {
-                material_id: "rock_wool",
-                thickness_m: 0.1,
-              },
-              {
-                material_id: "gypsum",
-                thickness_m: 0.012,
-              },
-            ],
-          },
-
-          roof_assembly: {
-            layers: [
-              {
-                material_id: "concrete",
-                thickness_m: 0.1,
-              },
-              {
-                material_id: "rock_wool",
-                thickness_m: 0.12,
-              },
-            ],
-          },
-
-          floor_assembly: {
-            layers: [
-              {
-                material_id: "concrete",
-                thickness_m: 0.12,
-              },
-            ],
-          },
-
-          windows: [
-            {
-              wall: "south",
-              width_m: 1.5,
-              height_m: 1.2,
-              u_value_w_m2k: 2.7,
-              solar_transmittance: 0.65,
-            },
-          ],
-
-          doors: [
-            {
-              wall: "north",
-              width_m: 0.9,
-              height_m: 2.1,
-              u_value_w_m2k: 1.8,
-            },
-          ],
-
-          thermal_mass: {
-            material_id: "stone",
-            mass_kg: 1000,
-            specific_heat_j_kgk: 800,
-            initial_temperature_c: 12,
-            coupling_w_per_k: 5,
-          },
-
-          ventilation: {
-            ach: 0.5,
-          },
-
-          comfort: {
-            minimum_c: 18,
-            maximum_c: 26,
-          },
-        },
-
-        initial_indoor_temperature_c:
-          initialTemperature,
-
-        weather: weather.points,
-
-        internal_heat_gain_w: 200,
-
-        timestep_minutes: 60,
-      };
-
-      const response = await fetch(
-        "/backend-api/api/simulations/run",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify(
-            payload,
-          ),
-        },
-      );
-
-      if (!response.ok) {
-        const message =
-          await response.text();
-
-        throw new Error(message);
-      }
-
-      const data: SimulationResult =
-        await response.json();
-
-      setResult(data);
-      setError("");
-    } catch (simulationError) {
-      console.error(
-        simulationError,
-      );
-
-      setError(
-        "Simulation failed. Check the FastAPI terminal.",
-      );
-    } finally {
-      setIsLoadingSimulation(false);
-    }
-  }
-
-  const latestPoint =
-    result?.points[
-      result.points.length - 1
-    ];
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl px-6 py-10">
-        <header className="mb-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">
-            Passive Shelter Engineering
-          </p>
+    <div className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans">
+      {/* 1. Transparent Floating Navigation */}
+      <header className="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6 flex items-center justify-between">
+        <div className="w-20 hidden md:block" />
 
-          <h1 className="mt-3 text-5xl font-bold">
-            Thermo Shelter 1
-          </h1>
+        <nav className="flex items-center gap-5 sm:gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm mx-auto md:mx-0">
+          <Link href="/3d" className="hover:text-white transition-colors">
+            3D Simulator
+          </Link>
+          <Link href="/simulate" className="hover:text-white transition-colors">
+            24h Regional Sim
+          </Link>
+          <a href="#how-it-works" className="hover:text-white transition-colors">
+            Heat Flow
+          </a>
+          <a href="#night-autonomy" className="hover:text-white transition-colors">
+            Autonomy
+          </a>
+          <a href="#deployments" className="hover:text-white transition-colors">
+            Stations
+          </a>
+        </nav>
 
-          <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            Real-location weather +
-            physics-based passive shelter
-            thermal simulation.
-          </p>
-        </header>
+        <div className="flex items-center">
+          <Link
+            href="/3d"
+            className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md"
+          >
+            Launch Simulator
+          </Link>
+        </div>
+      </header>
 
-        <section className="grid gap-6 lg:grid-cols-[340px_1fr]">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">
-              Location & Weather
-            </h2>
-
-            <div className="mt-6 flex gap-2">
-              <input
-                value={locationQuery}
-                onChange={(event) =>
-                  setLocationQuery(
-                    event.target.value,
-                  )
-                }
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter"
-                  ) {
-                    searchLocation();
-                  }
-                }}
-                placeholder="Search location"
-                className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none focus:border-cyan-400"
-              />
-
-              <button
-                onClick={
-                  searchLocation
-                }
-                disabled={
-                  isSearchingLocation
-                }
-                className="rounded-lg bg-slate-700 px-4 py-3 text-sm font-semibold hover:bg-slate-600 disabled:opacity-50"
-              >
-                {isSearchingLocation
-                  ? "..."
-                  : "Search"}
-              </button>
-            </div>
-
-            <button
-              onClick={
-                useMyLocation
-              }
-              disabled={
-                isGettingLocation
-              }
-              className="mt-3 w-full rounded-lg border border-cyan-700 bg-cyan-950/40 px-4 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950 disabled:opacity-50"
-            >
-              {isGettingLocation
-                ? "Detecting Location..."
-                : "Use My Current Location"}
-            </button>
-
-            {locations.length >
-              0 && (
-              <div className="mt-3 space-y-2">
-                {locations.map(
-                  (location) => (
-                    <button
-                      key={`${location.latitude}-${location.longitude}-${location.name}`}
-                      onClick={() =>
-                        loadWeather(
-                          location,
-                        )
-                      }
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-left hover:border-cyan-500"
-                    >
-                      <p className="font-medium">
-                        {location.name}
-                      </p>
-
-                      <p className="text-xs text-slate-400">
-                        {location.region
-                          ? `${location.region}, `
-                          : ""}
-                        {
-                          location.country
-                        }
-                      </p>
-
-                      <p className="mt-1 text-xs text-slate-500">
-                        {location.latitude.toFixed(
-                          4,
-                        )}
-                        °
-                        {" "}
-                        {location.longitude.toFixed(
-                          4,
-                        )}
-                        °
-                      </p>
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
-
-            {selectedLocation && (
-              <div className="mt-5 rounded-xl border border-cyan-900 bg-cyan-950/20 p-4">
-                <p className="font-semibold text-cyan-300">
-                  Selected Location
-                </p>
-
-                <p className="mt-2">
-                  {selectedLocation.name}
-                </p>
-
-                {selectedLocation.region && (
-                  <p className="text-sm text-slate-400">
-                    {
-                      selectedLocation.region
-                    }
-                    {selectedLocation.country
-                      ? `, ${selectedLocation.country}`
-                      : ""}
-                  </p>
-                )}
-
-                <p className="mt-2 text-xs text-slate-500">
-                  Latitude:{" "}
-                  {selectedLocation.latitude.toFixed(
-                    5,
-                  )}
-
-                  <br />
-
-                  Longitude:{" "}
-                  {selectedLocation.longitude.toFixed(
-                    5,
-                  )}
-                </p>
-              </div>
-            )}
-
-            {weather && (
-              <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950 p-4">
-                <p className="font-semibold">
-                  Real Weather Data
-                </p>
-
-                <div className="mt-3 space-y-2 text-sm text-slate-400">
-                  <p>
-                    Source:{" "}
-                    <span className="text-white">
-                      {weather.source}
-                    </span>
-                  </p>
-
-                  <p>
-                    Timezone:{" "}
-                    <span className="text-white">
-                      {weather.timezone}
-                    </span>
-                  </p>
-
-                  <p>
-                    Elevation:{" "}
-                    <span className="text-white">
-                      {weather.elevation_m?.toFixed(
-                        0,
-                      )}{" "}
-                      m
-                    </span>
-                  </p>
-
-                  <p>
-                    Hourly points:{" "}
-                    <span className="text-white">
-                      {
-                        weather.points
-                          .length
-                      }
-                    </span>
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6">
-              <label className="text-sm text-slate-300">
-                Initial Indoor Temperature °C
-              </label>
-
-              <input
-                type="number"
-                value={
-                  initialTemperature
-                }
-                onChange={(event) =>
-                  setInitialTemperature(
-                    Number(
-                      event.target.value,
-                    ),
-                  )
-                }
-                className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-              />
-            </div>
-
-            <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <p className="font-medium">
-                Shelter Configuration
-              </p>
-
-              <div className="mt-3 space-y-2 text-sm text-slate-400">
-                <p>
-                  Dimensions: 5 × 4 × 3 m
-                </p>
-
-                <p>
-                  Orientation: South
-                </p>
-
-                <p>
-                  Wall: Brick + Rock Wool
-                </p>
-
-                <p>
-                  Window: 1.5 × 1.2 m
-                </p>
-
-                <p>
-                  Thermal Mass: 1000 kg Stone
-                </p>
-
-                <p>
-                  Ventilation: 0.5 ACH
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={
-                runSimulation
-              }
-              disabled={
-                isLoadingSimulation ||
-                !weather
-              }
-              className="mt-8 w-full rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoadingSimulation
-                ? "Running Simulation..."
-                : "Run Real-Weather Simulation"}
-            </button>
-
-            {error && (
-              <div className="mt-5 rounded-xl border border-amber-900 bg-amber-950/30 p-4 text-sm text-amber-300">
-                {error}
-              </div>
-            )}
+      <main>
+        {/* 2. Fullscreen Panoramic Alpine Hero Section */}
+        <section
+          id="hero"
+          className="relative h-screen min-h-[720px] flex flex-col justify-between items-center pt-28 pb-12 sm:pb-16 px-6 overflow-hidden select-none"
+        >
+          {/* Real Full-bleed High-Resolution Alpine Photography */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <Image
+              src="/images/hero-alpine-shelter.jpg"
+              alt="Extreme-altitude passive solar alpine shelter on Himalayan ridge"
+              fill
+              priority
+              className="object-cover object-center"
+            />
+            {/* Elegant cinematic contrast gradients matching Frostbound reference */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65" />
           </div>
 
-          <div className="space-y-6">
-            {!result && (
-              <div className="flex min-h-[600px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-900">
-                <div className="max-w-lg text-center">
-                  <div className="text-6xl">
-                    ☀️🏠❄️
-                  </div>
+          {/* Upper Title: Giant Justified Letters Across the Whole Page */}
+          <div
+            className="relative z-10 w-full px-4 sm:px-8 lg:px-12 mt-2 sm:mt-6 transition-transform duration-75 ease-out"
+            style={{
+              opacity: heroOpacity,
+              transform: `translateY(${heroTranslateY}px)`,
+              willChange: "opacity, transform",
+            }}
+          >
+            <h1
+              className="text-white text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[12rem] font-light uppercase select-none drop-shadow-2xl flex justify-between items-center w-full leading-none"
+              style={{ fontFamily: "var(--font-headline)" }}
+              aria-label="THERMO SHELTER"
+            >
+              {"THERMO SHELTER".split("").map((char, index) => (
+                <span
+                  key={index}
+                  className={
+                    char === " "
+                      ? "w-8 sm:w-12 md:w-16 lg:w-24 shrink-0 inline-block text-center"
+                      : "inline-block text-center flex-1"
+                  }
+                  aria-hidden="true"
+                >
+                  {char}
+                </span>
+              ))}
+            </h1>
+          </div>
 
-                  <h2 className="mt-5 text-2xl font-semibold">
-                    Real-Weather Thermal Simulation
-                  </h2>
+          {/* Bottom Area: Main 3D Simulation Button & Clean Scroll Prompt */}
+          <div
+            className="relative z-10 flex flex-col items-center gap-5 sm:gap-6 pb-2 transition-transform duration-75 ease-out"
+            style={{
+              opacity: heroOpacity,
+              transform: `translateY(${heroTranslateY * 0.4}px)`,
+              willChange: "opacity, transform",
+            }}
+          >
+            <Link
+              href="/3d"
+              className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-9 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
+            >
+              Launch 3D Simulator
+            </Link>
 
-                  <p className="mt-3 text-slate-400">
-                    Search for a location or
-                    use your current location,
-                    load real weather data,
-                    and run the shelter
-                    simulation.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {result && (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricCard
-                    title="Final Indoor"
-                    value={`${result.final_indoor_temperature_c.toFixed(
-                      1,
-                    )} °C`}
-                  />
-
-                  <MetricCard
-                    title="Minimum Indoor"
-                    value={`${result.minimum_indoor_temperature_c.toFixed(
-                      1,
-                    )} °C`}
-                  />
-
-                  <MetricCard
-                    title="Maximum Indoor"
-                    value={`${result.maximum_indoor_temperature_c.toFixed(
-                      1,
-                    )} °C`}
-                  />
-
-                  <MetricCard
-                    title="Comfort"
-                    value={`${result.comfort_percentage.toFixed(
-                      1,
-                    )} %`}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <MetricCard
-                    title="Final Thermal Mass"
-                    value={
-                      result.final_thermal_mass_temperature_c !==
-                      null
-                        ? `${result.final_thermal_mass_temperature_c.toFixed(
-                            1,
-                          )} °C`
-                        : "Not configured"
-                    }
-                  />
-
-                  <MetricCard
-                    title="Cold Hours"
-                    value={`${result.cold_hours.toFixed(
-                      1,
-                    )} h`}
-                  />
-                </div>
-
-                <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        Real-Weather Simulation
-                      </h2>
-
-                      <p className="mt-1 text-sm text-slate-400">
-                        Weather source:{" "}
-                        {weather?.source}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 overflow-x-auto">
-                    <table className="w-full min-w-[1100px] text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-slate-800 text-slate-400">
-                          <th className="px-3 py-3">
-                            Time
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Outdoor °C
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Indoor °C
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Mass °C
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Solar W
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Heat Loss W
-                          </th>
-
-                          <th className="px-3 py-3">
-                            Mass Flow W
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {result.points.map(
-                          (point) => (
-                            <tr
-                              key={
-                                point.timestamp
-                              }
-                              className="border-b border-slate-800/60"
-                            >
-                              <td className="px-3 py-3">
-                                {new Date(
-                                  point.timestamp,
-                                ).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3">
-                                {point.outdoor_temperature_c.toFixed(
-                                  1,
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3 font-semibold text-cyan-300">
-                                {point.indoor_temperature_c.toFixed(
-                                  1,
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3 text-amber-300">
-                                {point.thermal_mass_temperature_c.toFixed(
-                                  1,
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3">
-                                {point.solar_gain_w.toFixed(
-                                  0,
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3">
-                                {point.total_heat_loss_w.toFixed(
-                                  0,
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3">
-                                {point.thermal_mass_heat_transfer_w.toFixed(
-                                  0,
-                                )}
-                              </td>
-                            </tr>
-                          ),
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
+            <a
+              href="#telemetry"
+              className="flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer drop-shadow-md"
+            >
+              <span>Explore Telemetry</span>
+              <span className="w-4 h-7 rounded-full border border-white/40 flex items-start justify-center p-1">
+                <span className="w-1 h-2 rounded-full bg-white animate-bounce" />
+              </span>
+            </a>
           </div>
         </section>
-      </div>
-    </main>
-  );
-}
 
-function MetricCard({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <p className="text-sm text-slate-400">
-        {title}
-      </p>
+        {/* 3. Quick Telemetry Readout Strip with Scroll Reveal */}
+        <section
+          id="telemetry"
+          className="relative py-16 border-y border-white/10 bg-[#070b14]/70 backdrop-blur-2xl overflow-hidden"
+        >
+          {/* Subtle Ambient Lighting Orbs */}
+          <div className="pointer-events-none absolute -top-20 left-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
 
-      <p className="mt-3 text-2xl font-bold">
-        {value}
-      </p>
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-mono">
+              <div className="scroll-reveal scroll-delay-1 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Internal Stability
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-amber-400 mt-3 drop-shadow-[0_0_12px_rgba(251,191,36,0.25)]">
+                  +19.5°C
+                </div>
+                <div className="text-xs text-white/60 font-sans mt-2">
+                  Constant core comfort zone
+                </div>
+              </div>
+
+              <div className="scroll-reveal scroll-delay-2 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Envelope Rating
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-3 drop-shadow-[0_0_12px_rgba(34,211,238,0.25)]">
+                  R-82.4
+                </div>
+                <div className="text-xs text-white/60 font-sans mt-2">
+                  m²·K/W combined barrier
+                </div>
+              </div>
+
+              <div className="scroll-reveal scroll-delay-3 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Thermal Lag
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-emerald-400 mt-3 drop-shadow-[0_0_12px_rgba(52,211,153,0.25)]">
+                  11.4h
+                </div>
+                <div className="text-xs text-white/60 font-sans mt-2">
+                  Nighttime radiant release
+                </div>
+              </div>
+
+              <div className="scroll-reveal scroll-delay-4 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-white/30 hover:bg-white/[0.05] transition-all duration-300 group">
+                <div className="text-[11px] text-white/50 uppercase tracking-widest">
+                  Auxiliary Fuel
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-white mt-3 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]">
+                  0.0 L
+                </div>
+                <div className="text-xs text-white/60 font-sans mt-2">
+                  100% passive solar autonomy
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Visual Cross-Section & How It Works with Scroll Reveal */}
+        <section className="py-24 border-b border-white/10 relative overflow-hidden" id="how-it-works">
+          {/* Subtle glow background */}
+          <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[120px]" />
+
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+            <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+              <div>
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold mb-2">
+                  System Diagram
+                </div>
+                <h2
+                  className="text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight"
+                  style={{ fontFamily: "var(--font-headline)" }}
+                >
+                  Passive Solar Heat Flow Architecture
+                </h2>
+              </div>
+              <p className="text-slate-300 text-sm sm:text-base max-w-md leading-relaxed">
+                How low-angle winter sunlight is gathered, stored in high-density phase-change
+                materials, and circulated continuously through natural gravity convection.
+              </p>
+            </div>
+
+            {/* Frostbound Glass Cross-Section Illustration */}
+            <div className="scroll-reveal-scale rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-2xl shadow-2xl p-6 sm:p-8 overflow-hidden">
+              <div className="relative w-full aspect-[16/9] max-h-[480px] bg-[#050813] border border-white/10 rounded-2xl p-4 flex items-center justify-center cad-grid-dense overflow-hidden shadow-inner">
+                <svg
+                  className="w-full h-full"
+                  fill="none"
+                  viewBox="0 0 700 400"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient id="solarGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#d97706" stopOpacity="0.1" />
+                    </linearGradient>
+                    <linearGradient id="coreGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#b45309" stopOpacity="0.15" />
+                    </linearGradient>
+                    <linearGradient id="habGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#0284c7" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#0f172a" stopOpacity="0.6" />
+                    </linearGradient>
+                    <filter id="neonAmber" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                    <filter id="neonCyan" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+
+                  {/* Permafrost Ground */}
+                  <path
+                    d="M40 340 L660 340"
+                    stroke="#334155"
+                    strokeDasharray="4 4"
+                    strokeWidth="1.5"
+                  />
+                  <text fill="#64748b" fontFamily="monospace" fontSize="11" x="50" y="365" letterSpacing="1">
+                    FROZEN GLACIER BEDROCK (-45°C)
+                  </text>
+
+                  {/* Foundation Piers with Aerogel Break */}
+                  <rect
+                    fill="#0f172a"
+                    height="35"
+                    stroke="#334155"
+                    strokeWidth="1.5"
+                    width="28"
+                    x="140"
+                    y="305"
+                    rx="4"
+                  />
+                  <rect
+                    fill="#0f172a"
+                    height="35"
+                    stroke="#334155"
+                    strokeWidth="1.5"
+                    width="28"
+                    x="480"
+                    y="305"
+                    rx="4"
+                  />
+                  <rect fill="#38bdf8" height="6" width="38" x="135" y="300" rx="2" filter="url(#neonCyan)" />
+                  <rect fill="#38bdf8" height="6" width="38" x="475" y="300" rx="2" filter="url(#neonCyan)" />
+                  <text fill="#38bdf8" fontFamily="monospace" fontSize="9" fontWeight="600" x="185" y="322" letterSpacing="0.5">
+                    AEROGEL THERMAL ISOLATION BREAK (R-40)
+                  </text>
+
+                  {/* Shelter Shell Boundary */}
+                  <polygon
+                    fill="#0a0f1d"
+                    fillOpacity="0.9"
+                    points="120,300 540,300 540,160 360,90 120,160"
+                    stroke="#38bdf8"
+                    strokeOpacity="0.5"
+                    strokeWidth="2"
+                  />
+
+                  {/* South Solar Aperture (Amber Glazing) */}
+                  <polygon
+                    fill="url(#solarGlow)"
+                    points="360,90 540,160 540,300 515,300 515,170 355,105"
+                    stroke="#fbbf24"
+                    strokeWidth="2"
+                    filter="url(#neonAmber)"
+                  />
+
+                  {/* Thermal Mass Storage Core */}
+                  <rect
+                    fill="url(#coreGlow)"
+                    height="120"
+                    stroke="#fbbf24"
+                    strokeDasharray="4 4"
+                    strokeWidth="1.5"
+                    width="85"
+                    x="410"
+                    y="175"
+                    rx="8"
+                  />
+                  <text
+                    fill="#fbbf24"
+                    fontFamily="monospace"
+                    fontSize="11"
+                    fontWeight="700"
+                    x="422"
+                    y="222"
+                    letterSpacing="1"
+                  >
+                    TROMBE
+                  </text>
+                  <text fill="#fbbf24" fontFamily="monospace" fontSize="9" x="422" y="238" letterSpacing="0.5">
+                    HEAT CORE
+                  </text>
+                  <text
+                    fill="#fef08a"
+                    fontFamily="monospace"
+                    fontSize="11"
+                    fontWeight="700"
+                    x="422"
+                    y="260"
+                  >
+                    +24.5°C
+                  </text>
+
+                  {/* Main Living Pod */}
+                  <rect
+                    fill="url(#habGlow)"
+                    height="120"
+                    stroke="#38bdf8"
+                    strokeOpacity="0.6"
+                    strokeDasharray="4 2"
+                    strokeWidth="1.5"
+                    width="220"
+                    x="160"
+                    y="175"
+                    rx="8"
+                  />
+                  <text
+                    fill="#ffffff"
+                    fontFamily="sans-serif"
+                    fontSize="13"
+                    fontWeight="700"
+                    x="180"
+                    y="215"
+                    letterSpacing="0.5"
+                  >
+                    HABITATION CORE
+                  </text>
+                  <text
+                    fill="#fbbf24"
+                    fontFamily="monospace"
+                    fontSize="12"
+                    fontWeight="700"
+                    x="180"
+                    y="240"
+                  >
+                    STABLE: +19.5°C
+                  </text>
+                  <text fill="#94a3b8" fontFamily="monospace" fontSize="9" x="180" y="260">
+                    RELATIVE HUMIDITY: 42%
+                  </text>
+
+                  {/* Incident Solar Rays */}
+                  <g>
+                    <line
+                      stroke="#fbbf24"
+                      strokeDasharray="6 4"
+                      strokeWidth="2"
+                      x1="560"
+                      x2="440"
+                      y1="30"
+                      y2="135"
+                    />
+                    <polygon fill="#fbbf24" points="440,135 448,127 437,130" />
+
+                    <line
+                      stroke="#fbbf24"
+                      strokeDasharray="6 4"
+                      strokeWidth="2"
+                      x1="600"
+                      x2="480"
+                      y1="70"
+                      y2="175"
+                    />
+                    <polygon fill="#fbbf24" points="480,175 488,167 477,170" />
+
+                    <text
+                      fill="#fbbf24"
+                      fontFamily="monospace"
+                      fontSize="11"
+                      fontWeight="700"
+                      x="505"
+                      y="45"
+                      letterSpacing="0.5"
+                    >
+                      45° WINTER SUN VECTOR
+                    </text>
+                    <text fill="#fef08a" fontFamily="monospace" fontSize="9" x="505" y="60">
+                      1,120 W/m² HIGH-ALTITUDE FLUX
+                    </text>
+                  </g>
+
+                  {/* Convection Air Loops */}
+                  <path
+                    d="M 495 180 C 470 145, 300 145, 270 170"
+                    stroke="#fbbf24"
+                    strokeDasharray="4 3"
+                    strokeWidth="1.5"
+                  />
+                  <polygon fill="#fbbf24" points="270,170 274,160 281,166" />
+                  <text fill="#fbbf24" fontFamily="monospace" fontSize="8" fontWeight="600" x="320" y="140" letterSpacing="0.5">
+                    WARM CONVECTIVE AIRFLOW
+                  </text>
+
+                  <path
+                    d="M 200 295 C 230 315, 370 315, 430 295"
+                    stroke="#38bdf8"
+                    strokeDasharray="4 3"
+                    strokeWidth="1.5"
+                  />
+                  <polygon fill="#38bdf8" points="430,295 422,301 423,291" />
+                  <text fill="#38bdf8" fontFamily="monospace" fontSize="8" fontWeight="600" x="250" y="325" letterSpacing="0.5">
+                    SUB-FLOOR RECOVERY PLENUM
+                  </text>
+                </svg>
+              </div>
+
+              {/* 3 Step Summary Cards Below Diagram */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8 font-mono">
+                <div className="scroll-reveal scroll-delay-1 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-2">
+                    01 · Solar Absorption
+                  </div>
+                  <div className="text-base font-semibold text-white mb-2 font-sans">
+                    Triple-Glazed South Facade
+                  </div>
+                  <div className="text-xs text-white/60 font-sans leading-relaxed">
+                    Captures up to 14.8 kWh/m² daily solar radiation directly through low-iron
+                    high-transmittance glazing.
+                  </div>
+                </div>
+
+                <div className="scroll-reveal scroll-delay-2 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-2">
+                    02 · Sensible Storage
+                  </div>
+                  <div className="text-base font-semibold text-white mb-2 font-sans">
+                    Phase-Change Trombe Core
+                  </div>
+                  <div className="text-xs text-white/60 font-sans leading-relaxed">
+                    3,200 kg paraffin-basalt matrix locks latent thermal energy at 21°C, preventing
+                    daytime overheating.
+                  </div>
+                </div>
+
+                <div className="scroll-reveal scroll-delay-3 p-6 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-2">
+                    03 · Nighttime Release
+                  </div>
+                  <div className="text-base font-semibold text-white mb-2 font-sans">
+                    11.4-Hour Radiant Phase Shift
+                  </div>
+                  <div className="text-xs text-white/60 font-sans leading-relaxed">
+                    Releases warm radiant heat between 02:00 and 06:00 during peak sub-zero
+                    temperatures.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Immersive Night Thermal Autonomy Section with Scroll Reveal */}
+        <section
+          id="night-autonomy"
+          className="relative py-28 lg:py-36 border-b border-white/10 overflow-hidden"
+        >
+          {/* Real Generated Night Photo with Milky Way and Glowing Shelter */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <Image
+              src="/images/night-thermal-shelter.jpg"
+              alt="Himalayan research station shelter under the Milky Way with glowing thermal core"
+              fill
+              className="object-cover object-center"
+              priority
+            />
+            {/* Subtle edge fades to blend into background seamlessly without hiding the shelter */}
+            <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-[#070b14] to-transparent" />
+            <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#070b14] to-transparent" />
+            {/* Subtle soft dark vignette on the right to keep unboxed typography readable against the sky */}
+            <div className="absolute inset-y-0 right-0 w-full lg:w-3/5 bg-gradient-to-l from-[#070b14]/70 via-[#070b14]/30 to-transparent pointer-events-none" />
+          </div>
+
+          <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+            {/* Unboxed Clean Right-Aligned Editorial Typography */}
+            <div className="lg:ml-auto max-w-2xl mb-16 space-y-4">
+              <div className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
+                Night Autonomy & Telemetry
+              </div>
+              <h2
+                className="text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-lg"
+                style={{ fontFamily: "var(--font-headline)" }}
+              >
+                Surviving the <span className="text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"> -50°C</span> Alpine Night.
+                <br />
+                Zero Active Generators.
+              </h2>
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-sans drop-shadow-md">
+                When the sun dips below the Himalayan ridges, ambient temperatures plummet to
+                deadly sub-zero levels. Thermo Shelter maintains thermal equilibrium through its
+                11.4-hour calibrated thermal lag, slowly radiating daytime solar warmth through the
+                living core.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-amber-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+                    11.4h
+                  </div>
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
+                    Calibrated Radiant Lag
+                  </h3>
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
+                    Heat gathered during daylight hours takes exactly 11.4 hours to conduct through the
+                    Trombe core, peaking radiation right during the coldest pre-dawn hours (03:00 to
+                    06:00).
+                  </p>
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
+                  <span className="text-white/50">Core Temp Drop:</span>
+                  <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">
+                    &lt; 1.8°C / 12h
+                  </span>
+                </div>
+              </div>
+
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-cyan-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+                    R-82
+                  </div>
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
+                    Aerogel Vacuum Shell
+                  </h3>
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
+                    Multi-layer insulation sandwich combining silica aerogel (k=0.014 W/mK) and
+                    reflective radiation barriers completely halts conductive, convective, and
+                    infrared heat loss.
+                  </p>
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
+                  <span className="text-white/50">Thermal Transmittance:</span>
+                  <span className="text-cyan-400 font-bold drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+                    0.012 W/m²K
+                  </span>
+                </div>
+              </div>
+
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-emerald-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(52,211,153,0.15)]">
+                    0.0L
+                  </div>
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
+                    100% Passive Autonomy
+                  </h3>
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
+                    Eliminates catastrophic dependency on supply lines for kerosene or diesel in
+                    inaccessible alpine zones, preventing carbon monoxide poisoning and mechanical
+                    freezing failures.
+                  </p>
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center text-xs">
+                  <span className="text-white/50">Expedition Fuel Saved:</span>
+                  <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">
+                    1,800 L / winter
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Proven Field Deployments with Scroll Reveal */}
+        <section className="py-24 border-b border-white/10 relative overflow-hidden" id="deployments">
+          {/* Subtle Ambient Lighting Orb */}
+          <div className="pointer-events-none absolute -bottom-24 right-10 w-96 h-96 bg-cyan-500/5 rounded-full blur-[100px]" />
+
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+            <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+              <div>
+                <div className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold mb-2">
+                  Extreme Test Stations
+                </div>
+                <h2
+                  className="text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-tight"
+                  style={{ fontFamily: "var(--font-headline)" }}
+                >
+                  Validated in the World&apos;s Harshest Climates
+                </h2>
+              </div>
+              <p className="text-slate-300 text-sm sm:text-base max-w-md leading-relaxed font-sans">
+                Tested and verified across glaciated ridges, cold desert plateaus, and equatorial
+                alpine summits.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
+              {/* Siachen */}
+              <div className="scroll-reveal scroll-delay-1 border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-amber-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <div className="text-amber-400 text-xs font-bold uppercase tracking-wider">Station 01</div>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">Siachen Ridge</h3>
+                      <div className="text-xs text-white/50 mt-0.5">Karakoram · 5,400m AMSL</div>
+                    </div>
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-amber-400 uppercase">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 text-xs pt-5 border-t border-white/10">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-white/50">Record Ambient:</span>
+                      <span className="font-semibold text-cyan-400 font-mono text-sm">-54.8°C</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Interior Stable:</span>
+                      <span className="font-semibold text-amber-400 font-mono text-sm">+19.2°C</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Katabatic Wind:</span>
+                      <span className="text-white font-mono">280 km/h</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Fuel Burn:</span>
+                      <span className="text-emerald-400 font-bold font-mono">0.0 Liters</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  href="/3d"
+                  className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
+                >
+                  Simulate Siachen →
+                </Link>
+              </div>
+
+              {/* Spiti */}
+              <div className="scroll-reveal scroll-delay-2 border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-cyan-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider">Station 02</div>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">Spiti Plateau</h3>
+                      <div className="text-xs text-white/50 mt-0.5">Himalayas · 4,500m AMSL</div>
+                    </div>
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-cyan-400 uppercase">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 text-xs pt-5 border-t border-white/10">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-white/50">Annual Solar Flux:</span>
+                      <span className="font-semibold text-amber-400 font-mono text-sm">2,140 kWh/m²</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Glazing SHGC:</span>
+                      <span className="font-semibold text-white font-mono">0.68</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Seismic Zone:</span>
+                      <span className="text-white font-mono">Zone V (M8.2)</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Autonomy:</span>
+                      <span className="text-emerald-400 font-bold font-mono">100% Year-Round</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  href="/3d"
+                  className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
+                >
+                  Simulate Spiti →
+                </Link>
+              </div>
+
+              {/* Andes */}
+              <div className="scroll-reveal scroll-delay-3 border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-emerald-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <div className="text-white/60 text-xs font-bold uppercase tracking-wider">Station 03</div>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">High Andes</h3>
+                      <div className="text-xs text-white/50 mt-0.5">Ecuador · 5,200m AMSL</div>
+                    </div>
+                    <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-400 uppercase">
+                      Verified
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 text-xs pt-5 border-t border-white/10">
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-white/50">Solar UV Index:</span>
+                      <span className="font-semibold text-amber-400 font-mono text-sm">Index 22 (Extreme)</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Interior Temp:</span>
+                      <span className="font-semibold text-white font-mono">+18.8°C</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Assembly Time:</span>
+                      <span className="text-white font-mono">72 Hours</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-t border-white/5">
+                      <span className="text-white/50">Autonomy Record:</span>
+                      <span className="text-emerald-400 font-bold font-mono">99.4%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  href="/3d"
+                  className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
+                >
+                  Simulate Andes →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. Clean Minimalist CTA Section */}
+        <section className="relative py-28 sm:py-36 border-t border-white/10 bg-[#070b14] overflow-hidden">
+          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center space-y-6">
+            <h2
+              className="text-4xl sm:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-tight"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              Test and configure your shelter in real time.
+            </h2>
+
+            <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed font-sans">
+              Rotate orientations, adjust aerogel thicknesses, and inspect the thermal equilibrium response instantly.
+            </p>
+
+            <div className="pt-4 flex items-center justify-center font-mono">
+              <Link
+                href="/3d"
+                className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-10 sm:px-12 py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl hover:scale-105 inline-flex items-center gap-2.5"
+              >
+                <span>Launch 3D Simulator</span>
+                <span className="text-base">→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* 8. Clean Minimalist Editorial Footer */}
+      <footer className="border-t border-white/10 bg-[#050810] py-12 px-6 lg:px-12 text-slate-400 font-mono text-xs relative z-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+            <span className="text-white font-bold tracking-widest uppercase">TS-1 // THERMO SHELTER</span>
+            <span className="hidden sm:inline text-white/20">|</span>
+            <span className="text-slate-500 font-sans text-xs">Passive Solar Alpine Architecture</span>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs">
+            <Link href="/3d" className="text-amber-400 hover:text-amber-300 font-semibold transition-colors">
+              3D Simulator
+            </Link>
+            <Link href="/simulate" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+              24h Regional Sim
+            </Link>
+            <a href="#how-it-works" className="hover:text-white transition-colors">
+              Heat Flow
+            </a>
+            <a href="#night-autonomy" className="hover:text-white transition-colors">
+              Night Autonomy
+            </a>
+            <a href="#deployments" className="hover:text-white transition-colors">
+              Stations
+            </a>
+          </div>
+
+          <div className="text-[11px] text-slate-600">
+            © 2025 Thermo Shelter
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

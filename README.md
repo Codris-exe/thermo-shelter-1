@@ -52,3 +52,36 @@ The system combines:
                     │ Thermal Mass         │
                     │ Solar Radiation      │
                     └──────────────────────┘
+```
+
+---
+
+## 2. Quick Start
+
+### Windows
+
+You can use either the Command Prompt batch script or PowerShell:
+
+**Option A (Double-Click or CMD):**
+```cmd
+start.bat
+```
+
+**Option B (PowerShell):**
+```powershell
+.\start.ps1
+```
+
+### Linux / macOS
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+The script automatically sets up the Python virtual environment (`.venv`), installs dependencies, ensures frontend packages are installed, and launches both services:
+
+- **Landing Page**: [http://localhost:3000](http://localhost:3000)
+- **3D Interactive Simulator**: [http://localhost:3000/3d](http://localhost:3000/3d)
+- **FastAPI Backend**: [http://localhost:8000](http://localhost:8000)
+- **Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)

@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Ensure the backend directory is in sys.path when invoked directly
+BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -51,3 +59,8 @@ def health():
     return {
         "status": "healthy",
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

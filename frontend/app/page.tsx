@@ -1,11 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import ThemeToggle from "@/components/ThemeToggle";
 
 export default function HomePage() {
+  const [heroOpacity, setHeroOpacity] = useState(1);
+  const [heroTranslateY, setHeroTranslateY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeDistance = 420;
+      const opacity = Math.max(0, 1 - scrollY / fadeDistance);
+      const translateY = scrollY * 0.35;
+      setHeroOpacity(opacity);
+      setHeroTranslateY(translateY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     const elements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-scale");
     if (!elements.length) return;
@@ -15,6 +31,8 @@ export default function HomePage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-revealed");
+          } else {
+            entry.target.classList.remove("is-revealed");
           }
         });
       },
@@ -30,29 +48,17 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
-      {/* 1. Transparent Floating Navigation (Matches Reference) */}
+    <div className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans">
+      {/* 1. Transparent Floating Navigation */}
       <header className="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            aria-label="Thermo Shelter Home"
-            className="w-10 h-10 rounded-full bg-black/35 hover:bg-black/50 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all shadow-md"
-          >
-            <span className="text-sm font-bold font-mono">TS</span>
-          </Link>
-          <Link
-            href="/"
-            className="text-lg font-black tracking-wider text-white uppercase drop-shadow-md hover:text-white/90 transition-colors"
-            style={{ fontFamily: "var(--font-headline)" }}
-          >
-            THERMO SHELTER
-          </Link>
-        </div>
+        <div className="w-20 hidden md:block" />
 
-        <nav className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm">
+        <nav className="flex items-center gap-5 sm:gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm mx-auto md:mx-0">
           <Link href="/3d" className="hover:text-white transition-colors">
             3D Simulator
+          </Link>
+          <Link href="/simulate" className="hover:text-white transition-colors">
+            24h Regional Sim
           </Link>
           <a href="#how-it-works" className="hover:text-white transition-colors">
             Heat Flow
@@ -65,26 +71,13 @@ export default function HomePage() {
           </a>
         </nav>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/20 p-1">
-            <ThemeToggle />
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2">
-            <Link
-              href="/3d"
-              className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md"
-            >
-              Start Here
-            </Link>
-            <Link
-              href="/3d"
-              aria-label="Start Simulator"
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md flex items-center justify-center text-xs font-bold transition shadow-md"
-            >
-              ↗
-            </Link>
-          </div>
+        <div className="flex items-center">
+          <Link
+            href="/3d"
+            className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md"
+          >
+            Launch Simulator
+          </Link>
         </div>
       </header>
 
@@ -107,33 +100,51 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65" />
           </div>
 
-          {/* Upper Title: Giant Tracked Letters Across the Sky */}
-          <div className="relative z-10 w-full flex justify-center items-center mt-4 sm:mt-8">
+          {/* Upper Title: Giant Justified Letters Across the Whole Page */}
+          <div
+            className="relative z-10 w-full px-4 sm:px-8 lg:px-12 mt-2 sm:mt-6 transition-transform duration-75 ease-out"
+            style={{
+              opacity: heroOpacity,
+              transform: `translateY(${heroTranslateY}px)`,
+              willChange: "opacity, transform",
+            }}
+          >
             <h1
-              className="text-white text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[9.5rem] font-light tracking-[0.14em] sm:tracking-[0.2em] uppercase select-none drop-shadow-2xl text-center pl-[0.14em] sm:pl-[0.2em] leading-none"
+              className="text-white text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[12rem] font-light uppercase select-none drop-shadow-2xl flex justify-between items-center w-full leading-none"
               style={{ fontFamily: "var(--font-headline)" }}
+              aria-label="THERMO SHELTER"
             >
-              THERMO SHELTER
+              {"THERMO SHELTER".split("").map((char, index) => (
+                <span
+                  key={index}
+                  className={
+                    char === " "
+                      ? "w-8 sm:w-12 md:w-16 lg:w-24 shrink-0 inline-block text-center"
+                      : "inline-block text-center flex-1"
+                  }
+                  aria-hidden="true"
+                >
+                  {char}
+                </span>
+              ))}
             </h1>
           </div>
 
-          {/* Bottom Area: 3D Simulation Button Pair & Clean Scroll Prompt */}
-          <div className="relative z-10 flex flex-col items-center gap-5 sm:gap-6 pb-2">
-            <div className="flex items-center gap-2">
-              <Link
-                href="/3d"
-                className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm tracking-wide uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
-              >
-                Launch 3D Simulator
-              </Link>
-              <Link
-                href="/3d"
-                aria-label="Launch 3D Simulator"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white hover:bg-slate-100 text-slate-950 flex items-center justify-center font-bold text-lg sm:text-xl transition-all shadow-2xl transform hover:scale-[1.05]"
-              >
-                ↗
-              </Link>
-            </div>
+          {/* Bottom Area: Main 3D Simulation Button & Clean Scroll Prompt */}
+          <div
+            className="relative z-10 flex flex-col items-center gap-5 sm:gap-6 pb-2 transition-transform duration-75 ease-out"
+            style={{
+              opacity: heroOpacity,
+              transform: `translateY(${heroTranslateY * 0.4}px)`,
+              willChange: "opacity, transform",
+            }}
+          >
+            <Link
+              href="/3d"
+              className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-9 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
+            >
+              Launch 3D Simulator
+            </Link>
 
             <a
               href="#telemetry"
@@ -738,16 +749,19 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/3d" className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-semibold transition-colors">
+            <Link href="/3d" className="text-amber-400 hover:text-amber-300 font-semibold transition-colors">
               3D Simulator
             </Link>
-            <a href="#how-it-works" className="hover:text-slate-800 dark:hover:text-white transition-colors">
+            <Link href="/simulate" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+              24h Regional Sim
+            </Link>
+            <a href="#how-it-works" className="hover:text-white transition-colors">
               Heat Flow
             </a>
-            <a href="#night-autonomy" className="hover:text-slate-800 dark:hover:text-white transition-colors">
+            <a href="#night-autonomy" className="hover:text-white transition-colors">
               Night Autonomy
             </a>
-            <a href="#deployments" className="hover:text-slate-800 dark:hover:text-white transition-colors">
+            <a href="#deployments" className="hover:text-white transition-colors">
               Field Stations
             </a>
           </div>

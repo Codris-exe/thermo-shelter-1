@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Nunito, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -29,7 +28,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${nunito.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${nunito.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
     >
       <head>
         <script
@@ -63,53 +62,36 @@ export default function RootLayout({
     }
   }
 
-  var observer = new MutationObserver(function(mutations) {
-    for (var i = 0; i < mutations.length; i++) {
-      var m = mutations[i];
-      if (m.type === 'attributes' && m.attributeName === 'bis_skin_checked') {
-        m.target.removeAttribute('bis_skin_checked');
-      } else if (m.type === 'childList') {
-        for (var j = 0; j < m.addedNodes.length; j++) {
-          clean(m.addedNodes[j]);
+  if (typeof document !== 'undefined') {
+    clean(document.documentElement);
+    clean(document.body);
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.type === 'attributes' && m.attributeName === 'bis_skin_checked' && m.target) {
+          m.target.removeAttribute('bis_skin_checked');
+        }
+        if (m.addedNodes) {
+          for (var j = 0; j < m.addedNodes.length; j++) {
+            clean(m.addedNodes[j]);
+          }
         }
       }
-    }
-  });
-
-  if (document.documentElement) {
+    });
     observer.observe(document.documentElement, {
       attributes: true,
-      subtree: true,
       attributeFilter: ['bis_skin_checked'],
-      childList: true
+      childList: true,
+      subtree: true
     });
   }
-})();
-
-(function() {
-  try {
-    var stored = localStorage.getItem('ts_theme');
-    var isDark = false;
-    if (stored === 'dark') {
-      isDark = true;
-    } else if (stored === 'light') {
-      isDark = false;
-    } else {
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  } catch (e) {}
 })();
             `,
           }}
         />
       </head>
-      <body suppressHydrationWarning className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#070b14] text-white">
+        {children}
       </body>
     </html>
   );

@@ -17,6 +17,7 @@
   --color-foreground: var(--foreground);
   --font-headline: var(--font-nunito), "Nunito", sans-serif;
   --font-body: var(--font-nunito), "Nunito", sans-serif;
+  --font-sans: var(--font-nunito), "Nunito", sans-serif;
   --font-mono: var(--font-mono), "JetBrains Mono", monospace;
 }
 

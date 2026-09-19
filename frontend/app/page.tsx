@@ -209,7 +209,7 @@ export default function HomePage() {
                   System Diagram
                 </div>
                 <h2
-                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight"
+                  className="text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight"
                   style={{ fontFamily: "var(--font-headline)" }}
                 >
                   Passive Solar Heat Flow Architecture
@@ -523,7 +523,7 @@ export default function HomePage() {
                 Night Autonomy & Telemetry
               </div>
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-lg"
+                className="text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-lg"
                 style={{ fontFamily: "var(--font-headline)" }}
               >
                 Surviving the <span className="text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"> -50°C</span> Alpine Night.
@@ -544,7 +544,7 @@ export default function HomePage() {
                   <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(251,191,36,0.15)]">
                     11.4h
                   </div>
-                  <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
                     Calibrated Radiant Lag
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
@@ -566,7 +566,7 @@ export default function HomePage() {
                   <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
                     R-82
                   </div>
-                  <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
                     Aerogel Vacuum Shell
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
@@ -588,7 +588,7 @@ export default function HomePage() {
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(52,211,153,0.15)]">
                     0.0L
                   </div>
-                  <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
+                  <h3 className="text-lg font-normal text-white font-sans uppercase mb-2">
                     100% Passive Autonomy
                   </h3>
                   <p className="text-xs text-white/70 font-sans leading-relaxed">
@@ -620,7 +620,7 @@ export default function HomePage() {
                   Extreme Test Stations
                 </div>
                 <h2
-                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight"
+                  className="text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-tight"
                   style={{ fontFamily: "var(--font-headline)" }}
                 >
                   Validated in the World&apos;s Harshest Climates
@@ -639,7 +639,7 @@ export default function HomePage() {
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <div className="text-amber-400 text-xs font-bold uppercase tracking-wider">Station 01</div>
-                      <h3 className="text-2xl font-bold text-white font-sans mt-1">Siachen Ridge</h3>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">Siachen Ridge</h3>
                       <div className="text-xs text-white/50 mt-0.5">Karakoram · 5,400m AMSL</div>
                     </div>
                     <span className="text-[11px] font-mono font-semibold tracking-wider text-amber-400 uppercase">
@@ -681,7 +681,7 @@ export default function HomePage() {
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider">Station 02</div>
-                      <h3 className="text-2xl font-bold text-white font-sans mt-1">Spiti Plateau</h3>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">Spiti Plateau</h3>
                       <div className="text-xs text-white/50 mt-0.5">Himalayas · 4,500m AMSL</div>
                     </div>
                     <span className="text-[11px] font-mono font-semibold tracking-wider text-cyan-400 uppercase">
@@ -723,7 +723,7 @@ export default function HomePage() {
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <div className="text-white/60 text-xs font-bold uppercase tracking-wider">Station 03</div>
-                      <h3 className="text-2xl font-bold text-white font-sans mt-1">High Andes</h3>
+                      <h3 className="text-2xl font-normal text-white font-sans mt-1">High Andes</h3>
                       <div className="text-xs text-white/50 mt-0.5">Ecuador · 5,200m AMSL</div>
                     </div>
                     <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-400 uppercase">
@@ -766,7 +766,7 @@ export default function HomePage() {
         <section className="relative py-28 sm:py-36 border-t border-white/10 bg-[#070b14] overflow-hidden">
           <div className="relative z-10 max-w-3xl mx-auto px-6 text-center space-y-6">
             <h2
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
+              className="text-4xl sm:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-tight"
               style={{ fontFamily: "var(--font-headline)" }}
             >
               Test and configure your shelter in real time.

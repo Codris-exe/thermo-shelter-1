@@ -13,3 +13,4 @@ backend/venv/
 AGENTS.md
 CLAUDE.md
 
+.env

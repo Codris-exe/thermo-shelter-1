@@ -35,6 +35,39 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
 (function() {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('error', function(event) {
+      var filename = event.filename || '';
+      var msg = event.message || '';
+      var stack = (event.error && event.error.stack) || '';
+      if (
+        filename.indexOf('chrome-extension://') !== -1 ||
+        filename.indexOf('moz-extension://') !== -1 ||
+        stack.indexOf('chrome-extension://') !== -1 ||
+        stack.indexOf('moz-extension://') !== -1 ||
+        msg.indexOf('M_ID') !== -1
+      ) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        return true;
+      }
+    }, true);
+
+    window.addEventListener('unhandledrejection', function(event) {
+      var reason = event.reason;
+      var stack = (reason && reason.stack) || '';
+      var msg = (reason && reason.message) || String(reason || '');
+      if (
+        stack.indexOf('chrome-extension://') !== -1 ||
+        stack.indexOf('moz-extension://') !== -1 ||
+        msg.indexOf('M_ID') !== -1
+      ) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+      }
+    }, true);
+  }
+
   var origError = console.error;
   console.error = function() {
     var args = Array.prototype.slice.call(arguments);
@@ -46,7 +79,12 @@ export default function RootLayout({
       }
     }).join(' ');
 
-    if (str.indexOf('bis_skin_checked') !== -1 || (str.indexOf('hydrated') !== -1 && str.indexOf('didn') !== -1 && str.indexOf('attributes') !== -1)) {
+    if (
+      str.indexOf('bis_skin_checked') !== -1 ||
+      str.indexOf('M_ID') !== -1 ||
+      str.indexOf('chrome-extension://') !== -1 ||
+      (str.indexOf('hydrated') !== -1 && str.indexOf('didn') !== -1 && str.indexOf('attributes') !== -1)
+    ) {
       return;
     }
     origError.apply(console, args);

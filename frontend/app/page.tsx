@@ -124,10 +124,10 @@ export default function HomePage() {
             </Link>
 
             <a
-              href="#telemetry"
+              href="#how-it-works"
               className="flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer drop-shadow-md"
             >
-              <span>Explore Telemetry</span>
+              <span>Explore Architecture</span>
               <span className="w-4 h-7 rounded-full border border-white/40 flex items-start justify-center p-1">
                 <span className="w-1 h-2 rounded-full bg-white animate-bounce" />
               </span>
@@ -135,69 +135,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 3. Quick Telemetry Readout Strip with Scroll Reveal */}
-        <section
-          id="telemetry"
-          className="relative py-16 border-y border-white/10 bg-[#070b14]/70 backdrop-blur-2xl overflow-hidden"
-        >
-          {/* Subtle Ambient Lighting Orbs */}
-          <div className="pointer-events-none absolute -top-20 left-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
-
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-mono">
-              <div className="scroll-reveal scroll-delay-1 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="text-[11px] text-white/50 uppercase tracking-widest">
-                  Internal Stability
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-amber-400 mt-3 drop-shadow-[0_0_12px_rgba(251,191,36,0.25)]">
-                  +19.5°C
-                </div>
-                <div className="text-xs text-white/60 font-sans mt-2">
-                  Constant core comfort zone
-                </div>
-              </div>
-
-              <div className="scroll-reveal scroll-delay-2 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-cyan-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="text-[11px] text-white/50 uppercase tracking-widest">
-                  Envelope Rating
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-3 drop-shadow-[0_0_12px_rgba(34,211,238,0.25)]">
-                  R-82.4
-                </div>
-                <div className="text-xs text-white/60 font-sans mt-2">
-                  m²·K/W combined barrier
-                </div>
-              </div>
-
-              <div className="scroll-reveal scroll-delay-3 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-emerald-500/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="text-[11px] text-white/50 uppercase tracking-widest">
-                  Thermal Lag
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-emerald-400 mt-3 drop-shadow-[0_0_12px_rgba(52,211,153,0.25)]">
-                  11.4h
-                </div>
-                <div className="text-xs text-white/60 font-sans mt-2">
-                  Nighttime radiant release
-                </div>
-              </div>
-
-              <div className="scroll-reveal scroll-delay-4 p-6 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl hover:border-white/30 hover:bg-white/[0.05] transition-all duration-300 group">
-                <div className="text-[11px] text-white/50 uppercase tracking-widest">
-                  Auxiliary Fuel
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-white mt-3 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]">
-                  0.0 L
-                </div>
-                <div className="text-xs text-white/60 font-sans mt-2">
-                  100% passive solar autonomy
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Visual Cross-Section & How It Works with Scroll Reveal */}
+        {/* 3. Visual Cross-Section & How It Works with Scroll Reveal */}
         <section className="py-24 border-b border-white/10 relative overflow-hidden" id="how-it-works">
           {/* Subtle glow background */}
           <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[120px]" />

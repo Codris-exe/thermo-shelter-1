@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { historicalClimateToSimulationWeather } from "../../lib/historicalWeatherAdapter";
-import { useHistoricalClimateStore } from "../../stores/historicalClimateStore";
+import {
+  useHistoricalClimateStore,
+  type HistoricalClimateProfilePoint,
+  type HistoricalClimateResult,
+} from "../../stores/historicalClimateStore";
 
 interface WeatherPoint {
   timestamp: string;
@@ -36,36 +40,6 @@ interface LocationPayload {
   elevation_m: number | null;
   timezone: string;
   source: "gps" | "search";
-}
-
-interface HistoricalClimateProfilePoint {
-  hour: number;
-  sample_count: number;
-  average_temperature_c: number;
-  minimum_temperature_c: number;
-  maximum_temperature_c: number;
-  average_relative_humidity_pct: number | null;
-  average_wind_speed_m_s: number;
-  average_solar_irradiance_w_m2: number;
-  average_direct_radiation_w_m2: number;
-  average_diffuse_radiation_w_m2: number;
-  average_direct_normal_irradiance_w_m2: number;
-  average_cloud_cover_pct: number | null;
-  daylight_fraction: number;
-}
-
-interface HistoricalClimateResult {
-  start_date: string;
-  end_date: string;
-  timezone: string;
-  model: string;
-  elevation_m: number | null;
-  years_available: number;
-  hourly_samples: number;
-  selected_month: number | null;
-  profile_type: string;
-  climate_profile: HistoricalClimateProfilePoint[];
-  source: string;
 }
 
 interface SimulationPoint {
@@ -346,7 +320,10 @@ export default function SimulationPage() {
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Period</span>
-                    <span className="text-white">{historicalClimate.start_date} → {historicalClimate.end_date}</span>
+                    <span className="text-white">
+                      {historicalClimate.actual_start_date || historicalClimate.requested_start_date} →{" "}
+                      {historicalClimate.actual_end_date || historicalClimate.requested_end_date}
+                    </span>
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Profile</span>

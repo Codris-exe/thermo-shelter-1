@@ -35,7 +35,7 @@ interface Shelter3DProps {
    * Climate inputs are visualization inputs only.
    * The thermal engine remains the source of simulation results.
    */
-  outdoorTemperatureC?: number;
+  outdoorTemperatureC?: number | null;
   solarIrradianceWm2?: number;
   windSpeedMs?: number;
   isDay?: boolean;

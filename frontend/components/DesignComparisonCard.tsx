@@ -129,14 +129,14 @@ export default function DesignComparisonCard({
         </div>
 
         {/* Optimized */}
-        <div className="rounded-lg border border-violet-400/20 bg-violet-400/[0.06] p-2.5">
-          <div className="text-[9px] font-semibold uppercase tracking-wide text-violet-300">
-            Optimized
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.06] p-2.5">
+          <div className="text-[9px] font-semibold uppercase tracking-wide text-amber-400">
+            Optimized Design
           </div>
 
           <div className="mt-2 space-y-2">
             <div>
-              <div className="text-[8px] text-slate-600">
+              <div className="text-[8px] text-slate-500">
                 Orientation
               </div>
 

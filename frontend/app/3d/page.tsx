@@ -299,6 +299,10 @@ export default function ThreeDPage() {
     setIsResetting,
   ] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<
+    "envelope" | "climate" | "solver"
+  >("envelope");
+
   const [error, setError] =
     useState("");
 
@@ -1081,9 +1085,9 @@ export default function ThreeDPage() {
         </div>
       </header>
 
-      <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_390px] gap-3 p-3">
+      <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_430px] gap-3 p-3">
         {/* LEFT */}
-        <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_220px] gap-3">
+        <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_250px] gap-3">
           <div className="relative min-h-0 overflow-hidden border border-white/15 bg-[#090e1b] corner-bracket">
             <div className="absolute left-4 top-4 z-10 border border-white/15 bg-[#060913]/90 px-3 py-2 backdrop-blur-md font-mono">
               <div className="flex items-center gap-2">
@@ -1142,873 +1146,575 @@ export default function ThreeDPage() {
           </div>
         </section>
 
-        {/* RIGHT */}
-        <aside className="min-h-0 overflow-y-auto border border-white/15 bg-[#090e1b] p-4 corner-bracket">
-          {/* LOCATION */}
-          <div>
-            <div className="mb-2 text-xs font-semibold text-white font-mono uppercase tracking-wider">
-              Field Station Location
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-              <div className="text-sm font-medium text-white">
-                {location.name}
-              </div>
-
-              <div className="mt-1 text-[10px] text-slate-500">
-                {location.latitude.toFixed(4)},{" "}
-                {location.longitude.toFixed(4)}
-
-                {location.elevation_m !=
-                null
-                  ? ` • ${Math.round(
-                      location.elevation_m,
-                    )} m elevation`
-                  : ""}
-              </div>
-
-              <div className="mt-2 text-[10px] text-emerald-400">
-                Weather: Open-Meteo
-              </div>
-            </div>
-          </div>
-
-          {/* PIPELINE */}
-          <div className="mt-3">
-            <AnalysisPipelineCard
-              hasWeather={
-                hasWeather
-              }
-              hasSimulation={
-                hasSimulation
-              }
-              hasOptimization={
-                hasOptimization
-              }
-            />
-          </div>
-
-          {/* DEMO */}
-          <div className="mt-3">
-            <DemoRunButton
-              onRunDemo={
-                runFullDemo
-              }
-              disabled={
-                anyOperationRunning
-              }
-            />
-          </div>
-
-          {/* WEATHER */}
-          <div className="mt-3">
-            <WeatherSummaryCard
-              points={
-                weatherPoints
-              }
-            />
-          </div>
-
-          {/* DIMENSIONS */}
-          <div className="mt-4">
-            <div className="mb-2 text-xs font-semibold text-white">
-              Shelter Dimensions
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                <div className="mb-1 text-[9px] uppercase tracking-wide text-slate-500">
-                  Length
-                </div>
-
-                <input
-                  type="number"
-                  min="1"
-                  step="0.1"
-                  value={
-                    length_m
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setDimensions({
-                      length_m:
-                        Number(
-                          event.target
-                            .value,
-                        ),
-                    })
-                  }
-                  className="w-full bg-transparent text-sm font-medium text-white outline-none"
-                />
-              </label>
-
-              <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                <div className="mb-1 text-[9px] uppercase tracking-wide text-slate-500">
-                  Width
-                </div>
-
-                <input
-                  type="number"
-                  min="1"
-                  step="0.1"
-                  value={
-                    width_m
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setDimensions({
-                      width_m:
-                        Number(
-                          event.target
-                            .value,
-                        ),
-                    })
-                  }
-                  className="w-full bg-transparent text-sm font-medium text-white outline-none"
-                />
-              </label>
-
-              <label className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-                <div className="mb-1 text-[9px] uppercase tracking-wide text-slate-500">
-                  Height
-                </div>
-
-                <input
-                  type="number"
-                  min="1"
-                  step="0.1"
-                  value={
-                    height_m
-                  }
-                  onChange={(
-                    event,
-                  ) =>
-                    setDimensions({
-                      height_m:
-                        Number(
-                          event.target
-                            .value,
-                        ),
-                    })
-                  }
-                  className="w-full bg-transparent text-sm font-medium text-white outline-none"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* ORIENTATION */}
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold text-white">
-                Orientation
-              </span>
-
-              <span className="text-xs text-cyan-300">
-                {orientation_deg}°
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min="0"
-              max="360"
-              step="1"
-              value={
-                orientation_deg
-              }
-              onChange={(
-                event,
-              ) =>
-                setOrientation(
-                  Number(
-                    event.target
-                      .value,
-                  ),
-                )
-              }
-              className="w-full accent-cyan-400"
-            />
-
-            <div className="mt-1 flex justify-between text-[9px] text-slate-600">
-              <span>0°</span>
-              <span>90°</span>
-              <span>180°</span>
-              <span>270°</span>
-              <span>360°</span>
-            </div>
-          </div>
-
-          {/* WALL */}
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold text-white">
-                Wall Construction
-              </span>
-
-              <span className="text-[10px] text-slate-400">
-                {Math.round(
-                  wallAssembly.thickness *
-                    1000,
-                )}{" "}
-                mm
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min="20"
-              max="300"
-              step="5"
-              value={Math.round(
-                getInsulationThicknessMm(
-                  wall_layers,
-                  100,
-                ),
-              )}
-              onChange={(
-                event,
-              ) =>
-                setWallInsulationThicknessMm(
-                  Number(
-                    event.target
-                      .value,
-                  ),
-                )
-              }
-              className="w-full accent-cyan-400"
-            />
-
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                  R-Value
-                </div>
-
-                <div className="mt-1 text-sm font-semibold text-cyan-300">
-                  {wallAssembly.rValue.toFixed(
-                    2,
-                  )}
-                </div>
-
-                <div className="text-[9px] text-slate-600">
-                  m²K/W
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                  U-Value
-                </div>
-
-                <div className="mt-1 text-sm font-semibold text-cyan-300">
-                  {wallAssembly.uValue.toFixed(
-                    3,
-                  )}
-                </div>
-
-                <div className="text-[9px] text-slate-600">
-                  W/m²K
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ROOF */}
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold text-white">
-                Roof Construction
-              </span>
-
-              <span className="text-[10px] text-slate-400">
-                {Math.round(
-                  roofAssembly.thickness *
-                    1000,
-                )}{" "}
-                mm
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min="20"
-              max="300"
-              step="5"
-              value={Math.round(
-                getInsulationThicknessMm(
-                  roof_layers,
-                  120,
-                ),
-              )}
-              onChange={(
-                event,
-              ) =>
-                setRoofInsulationThicknessMm(
-                  Number(
-                    event.target
-                      .value,
-                  ),
-                )
-              }
-              className="w-full accent-cyan-400"
-            />
-
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                  R-Value
-                </div>
-
-                <div className="mt-1 text-sm font-semibold text-cyan-300">
-                  {roofAssembly.rValue.toFixed(
-                    2,
-                  )}
-                </div>
-
-                <div className="text-[9px] text-slate-600">
-                  m²K/W
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                  U-Value
-                </div>
-
-                <div className="mt-1 text-sm font-semibold text-cyan-300">
-                  {roofAssembly.uValue.toFixed(
-                    3,
-                  )}
-                </div>
-
-                <div className="text-[9px] text-slate-600">
-                  W/m²K
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* INITIAL TEMPERATURE */}
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold text-white">
-                Initial Indoor Temperature
-              </span>
-
-              <span className="text-xs text-orange-300">
-                {initial_indoor_temperature_c.toFixed(
-                  1,
-                )}
-                °C
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min="0"
-              max="35"
-              step="0.5"
-              value={
-                initial_indoor_temperature_c
-              }
-              onChange={(
-                event,
-              ) =>
-                setInitialIndoorTemperature(
-                  Number(
-                    event.target
-                      .value,
-                  ),
-                )
-              }
-              className="w-full accent-orange-400"
-            />
-          </div>
-
-          {/* STANDARD ACTIONS */}
-          <button
-            type="button"
-            onClick={
-              runThermalSimulation
-            }
-            disabled={
-              anyOperationRunning
-            }
-            className="mt-5 w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSimulating
-              ? "Running Thermal Simulation..."
-              : "Run Thermal Simulation"}
-          </button>
-
-          <button
-            type="button"
-            onClick={
-              optimizeShelter
-            }
-            disabled={
-              anyOperationRunning
-            }
-            className="mt-2 w-full rounded-xl border border-violet-400/30 bg-violet-400/10 px-4 py-3 text-sm font-semibold text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isOptimizing
-              ? "Testing 64 Shelter Designs..."
-              : "Optimize Shelter"}
-          </button>
-
-          {baselineForReset && (
+        {/* RIGHT CONTROLS PANEL */}
+        <aside className="min-h-0 flex flex-col overflow-hidden border border-white/15 bg-[#090e1b] corner-bracket">
+          {/* TAB STRIP */}
+          <div className="flex border-b border-white/10 shrink-0 bg-[#060913] font-mono text-xs select-none">
             <button
               type="button"
-              onClick={
-                resetToBaseline
-              }
-              disabled={
-                anyOperationRunning
-              }
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setActiveTab("envelope")}
+              className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
+                activeTab === "envelope"
+                  ? "border-amber-400 text-amber-400 bg-amber-400/[0.08]"
+                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+              }`}
             >
-              {isResetting
-                ? "Restoring Baseline..."
-                : "Reset to Baseline"}
+              <span>01. Envelope</span>
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => setActiveTab("climate")}
+              className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
+                activeTab === "climate"
+                  ? "border-cyan-400 text-cyan-400 bg-cyan-400/[0.08]"
+                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+              }`}
+            >
+              <span>02. Climate</span>
+              {hasWeather && (
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("solver")}
+              className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
+                activeTab === "solver"
+                  ? "border-emerald-400 text-emerald-400 bg-emerald-400/[0.08]"
+                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+              }`}
+            >
+              <span>03. Solver</span>
+              {(simulationResult || optimizationResult) && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 status-ping" />
+              )}
+            </button>
+          </div>
 
-          {/* ERROR */}
-          {error && (
-            <div className="mt-3 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-[11px] leading-relaxed text-red-300">
-              {error}
+          {/* PERSISTENT STATUS BAR */}
+          <div className="flex items-center justify-between border-b border-white/[0.08] bg-[#070c17] px-4 py-2 text-[11px] font-mono shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 uppercase">Core:</span>
+              <span className={`font-semibold ${simulationResult ? "text-emerald-400" : "text-slate-400"}`}>
+                {simulationResult
+                  ? `${simulationResult.final_indoor_temperature_c > 0 ? "+" : ""}${simulationResult.final_indoor_temperature_c.toFixed(1)}°C`
+                  : "Unsimulated"}
+              </span>
+              {simulationResult && (
+                <span className="text-slate-400 text-[10px]">
+                  ({simulationResult.comfort_percentage.toFixed(0)}% Comfort)
+                </span>
+              )}
             </div>
-          )}
 
-          {/* SIMULATION RESULTS */}
-          {simulationResult && (
-            <div className="mt-4">
-              <div className="mb-2 text-xs font-semibold text-white">
-                Simulation Results
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                  <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                    Final Indoor
-                  </div>
-
-                  <div className="mt-1 text-lg font-semibold text-emerald-300">
-                    {simulationResult.final_indoor_temperature_c.toFixed(
-                      1,
-                    )}
-                    °C
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                  <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                    Comfort
-                  </div>
-
-                  <div className="mt-1 text-lg font-semibold text-cyan-300">
-                    {simulationResult.comfort_percentage.toFixed(
-                      0,
-                    )}
-                    %
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                  <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                    Minimum
-                  </div>
-
-                  <div className="mt-1 text-sm font-semibold text-blue-300">
-                    {simulationResult.minimum_indoor_temperature_c.toFixed(
-                      1,
-                    )}
-                    °C
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
-                  <div className="text-[9px] uppercase tracking-wide text-slate-500">
-                    Maximum
-                  </div>
-
-                  <div className="mt-1 text-sm font-semibold text-orange-300">
-                    {simulationResult.maximum_indoor_temperature_c.toFixed(
-                      1,
-                    )}
-                    °C
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">
-                    Comfort hours
-                  </span>
-
-                  <span className="font-medium text-white">
-                    {simulationResult.comfort_hours.toFixed(
-                      1,
-                    )}{" "}
-                    h
-                  </span>
-                </div>
-
-                <div className="mt-2 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">
-                    Cold hours
-                  </span>
-
-                  <span className="font-medium text-blue-300">
-                    {simulationResult.cold_hours.toFixed(
-                      1,
-                    )}{" "}
-                    h
-                  </span>
-                </div>
-
-                <div className="mt-2 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">
-                    Hot hours
-                  </span>
-
-                  <span className="font-medium text-orange-300">
-                    {simulationResult.hot_hours.toFixed(
-                      1,
-                    )}{" "}
-                    h
-                  </span>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={runThermalSimulation}
+                disabled={anyOperationRunning}
+                className="chamfer-btn bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-bold px-2.5 py-1 text-[10px] uppercase transition-colors"
+              >
+                {isSimulating ? "Simulating..." : "Simulate"}
+              </button>
             </div>
-          )}
+          </div>
 
-          {/* OPTIMIZATION */}
-          {optimizationResult && (
-            <div className="mt-4">
-              <div className="mb-2 flex items-center justify-between">
-                <div className="text-xs font-semibold text-white">
-                  Optimization
-                </div>
-
-                <div className="text-[10px] text-violet-300">
-                  {
-                    optimizationResult.total_candidates_tested
-                  }{" "}
-                  tested
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-violet-400/20 bg-violet-400/5 p-3">
-                <div className="text-[9px] uppercase tracking-wide text-violet-300">
-                  Best Tested Candidate
-                </div>
-
-                <div className="mt-1 text-lg font-semibold text-white">
-                  #
-                  {
-                    optimizationResult
-                      .best_candidate
-                      .rank
-                  }
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Comfort
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-emerald-300">
-                      {optimizationResult.best_candidate.comfort_percentage.toFixed(
-                        1,
-                      )}
-                      %
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Final Indoor
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-cyan-300">
-                      {optimizationResult.best_candidate.final_indoor_temperature_c.toFixed(
-                        1,
-                      )}
-                      °C
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Orientation
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-white">
-                      {
-                        optimizationResult
-                          .best_candidate
-                          .orientation_deg
-                      }°
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Wall Insulation
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-white">
-                      {optimizationResult.best_candidate.wall_insulation_thickness_mm.toFixed(
-                        0,
-                      )}{" "}
-                      mm
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Roof Insulation
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-white">
-                      {optimizationResult.best_candidate.roof_insulation_thickness_mm.toFixed(
-                        0,
-                      )}{" "}
-                      mm
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[9px] text-slate-500">
-                      Temperature Range
-                    </div>
-
-                    <div className="mt-0.5 text-sm font-semibold text-white">
-                      {optimizationResult.best_candidate.minimum_indoor_temperature_c.toFixed(
-                        1,
-                      )}
-                      –
-                      {optimizationResult.best_candidate.maximum_indoor_temperature_c.toFixed(
-                        1,
-                      )}
-                      °C
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-3 border-t border-white/10 pt-2">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500">
-                      Baseline comfort
+          {/* TAB CONTENT AREA */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* TAB 1: ENVELOPE */}
+            {activeTab === "envelope" && (
+              <div className="space-y-4 font-mono">
+                {/* DIMENSIONS */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                    <span>Parametric Geometry</span>
+                    <span className="text-[10px] text-amber-400">
+                      Vol: {(length_m * width_m * height_m).toFixed(1)} m³
                     </span>
+                  </div>
 
+                  <div className="grid grid-cols-3 gap-2">
+                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-400">Length (m)</div>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.1"
+                        value={length_m}
+                        onChange={(e) => setDimensions({ length_m: Number(e.target.value) })}
+                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                      />
+                    </label>
+
+                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-400">Width (m)</div>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.1"
+                        value={width_m}
+                        onChange={(e) => setDimensions({ width_m: Number(e.target.value) })}
+                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                      />
+                    </label>
+
+                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-400">Height (m)</div>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.1"
+                        value={height_m}
+                        onChange={(e) => setDimensions({ height_m: Number(e.target.value) })}
+                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-2 text-[10px] text-slate-500">
+                    Footprint: {(length_m * width_m).toFixed(1)} m² • Envelope Area: {(2 * (length_m * height_m + width_m * height_m) + length_m * width_m).toFixed(1)} m²
+                  </div>
+                </div>
+
+                {/* ORIENTATION */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                    <span>Azimuth Orientation</span>
+                    <span className="text-cyan-400 font-bold">{orientation_deg}°</span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    step="1"
+                    value={orientation_deg}
+                    onChange={(e) => setOrientation(Number(e.target.value))}
+                    className="w-full accent-cyan-400"
+                  />
+
+                  <div className="mt-2 grid grid-cols-4 gap-1 text-[10px]">
+                    {[
+                      { label: "N (0°)", deg: 0 },
+                      { label: "E (90°)", deg: 90 },
+                      { label: "S (180°)", deg: 180 },
+                      { label: "W (270°)", deg: 270 },
+                    ].map((p) => (
+                      <button
+                        key={p.deg}
+                        type="button"
+                        onClick={() => setOrientation(p.deg)}
+                        className={`rounded py-1 text-center transition-colors border ${
+                          orientation_deg === p.deg
+                            ? "border-cyan-400 bg-cyan-400/20 text-cyan-300 font-bold"
+                            : "border-white/10 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* WALL CONSTRUCTION */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                    <span>Wall Insulation Assembly</span>
                     <span className="text-slate-300">
-                      {optimizationResult.baseline_comfort_percentage.toFixed(
-                        1,
-                      )}
-                      %
+                      {Math.round(wallAssembly.thickness * 1000)} mm
                     </span>
                   </div>
 
-                  <div className="mt-1 flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500">
-                      Best tested comfort
-                    </span>
+                  <input
+                    type="range"
+                    min="20"
+                    max="300"
+                    step="5"
+                    value={Math.round(getInsulationThicknessMm(wall_layers, 100))}
+                    onChange={(e) => setWallInsulationThicknessMm(Number(e.target.value))}
+                    className="w-full accent-amber-400"
+                  />
 
-                    <span className="text-emerald-300">
-                      {optimizationResult.best_candidate.comfort_percentage.toFixed(
-                        1,
-                      )}
-                      %
-                    </span>
-                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-500">Wall R-Value</div>
+                      <div className="mt-0.5 text-sm font-bold text-amber-400">
+                        {wallAssembly.rValue.toFixed(2)}{" "}
+                        <span className="text-[9px] font-normal text-slate-500">m²K/W</span>
+                      </div>
+                    </div>
 
-                  <div className="mt-1 flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500">
-                      Difference
-                    </span>
-
-                    <span
-                      className={
-                        comfortDifference !==
-                          null &&
-                        comfortDifference >= 0
-                          ? "text-emerald-300"
-                          : "text-orange-300"
-                      }
-                    >
-                      {comfortDifference !==
-                      null
-                        ? `${
-                            comfortDifference >=
-                            0
-                              ? "+"
-                              : ""
-                          }${comfortDifference.toFixed(
-                            1,
-                          )} percentage points`
-                        : "—"}
-                    </span>
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-500">Wall U-Value</div>
+                      <div className="mt-0.5 text-sm font-bold text-cyan-300">
+                        {wallAssembly.uValue.toFixed(3)}{" "}
+                        <span className="text-[9px] font-normal text-slate-500">W/m²K</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
+                {/* ROOF CONSTRUCTION */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                    <span>Roof Insulation Assembly</span>
+                    <span className="text-slate-300">
+                      {Math.round(roofAssembly.thickness * 1000)} mm
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="20"
+                    max="300"
+                    step="5"
+                    value={Math.round(getInsulationThicknessMm(roof_layers, 120))}
+                    onChange={(e) => setRoofInsulationThicknessMm(Number(e.target.value))}
+                    className="w-full accent-amber-400"
+                  />
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-500">Roof R-Value</div>
+                      <div className="mt-0.5 text-sm font-bold text-amber-400">
+                        {roofAssembly.rValue.toFixed(2)}{" "}
+                        <span className="text-[9px] font-normal text-slate-500">m²K/W</span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                      <div className="text-[9px] uppercase text-slate-500">Roof U-Value</div>
+                      <div className="mt-0.5 text-sm font-bold text-cyan-300">
+                        {roofAssembly.uValue.toFixed(3)}{" "}
+                        <span className="text-[9px] font-normal text-slate-500">W/m²K</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* INITIAL INDOOR TEMP */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                    <span>Initial Core Temperature</span>
+                    <span className="text-orange-400 font-bold">
+                      {initial_indoor_temperature_c.toFixed(1)}°C
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="35"
+                    step="0.5"
+                    value={initial_indoor_temperature_c}
+                    onChange={(e) => setInitialIndoorTemperature(Number(e.target.value))}
+                    className="w-full accent-orange-400"
+                  />
+                  <div className="mt-1 flex justify-between text-[9px] text-slate-500">
+                    <span>0°C (Cold Start)</span>
+                    <span>18°C (Baseline)</span>
+                    <span>35°C (Preheated)</span>
+                  </div>
+                </div>
+
+                {/* TAB ACTION */}
                 <button
                   type="button"
-                  onClick={
-                    applyBestDesign
-                  }
-                  disabled={
-                    anyOperationRunning
-                  }
-                  className="mt-3 w-full rounded-xl bg-violet-500 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={runThermalSimulation}
+                  disabled={anyOperationRunning}
+                  className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg flex items-center justify-center gap-2"
                 >
-                  {isApplyingOptimization
-                    ? "Applying & Simulating..."
-                    : "Apply & Simulate Best Design"}
+                  <span>{isSimulating ? "Simulating Heat Flow..." : "Run Thermal Simulation →"}</span>
                 </button>
               </div>
+            )}
 
-              {baselineDesign &&
-                optimizedSnapshot && (
-                  <div className="mt-3">
-                    <DesignComparisonCard
-                      baseline={
-                        baselineDesign
-                      }
-                      optimized={
-                        optimizedSnapshot
-                      }
-                      isApplied={
-                        isApplied
-                      }
+            {/* TAB 2: CLIMATE */}
+            {activeTab === "climate" && (
+              <div className="space-y-4 font-mono">
+                {/* LOCATION CARD */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="mb-2 text-xs font-semibold text-white uppercase tracking-wider">
+                    Station Coordinates & Topology
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-[#060913] p-3">
+                    <div className="text-sm font-bold text-white">{location.name}</div>
+                    <div className="mt-1 text-[10px] text-slate-400">
+                      {location.latitude.toFixed(4)}°N, {location.longitude.toFixed(4)}°E
+                      {location.elevation_m != null ? ` • ${Math.round(location.elevation_m)} m ASL` : ""}
+                    </div>
+                    <div className="mt-2.5 flex items-center gap-2 text-[10px] text-emerald-400 font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 status-ping" />
+                      <span>Live Satellite Weather via Open-Meteo</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* WEATHER CARD */}
+                <WeatherSummaryCard points={weatherPoints} />
+
+                {/* THERMAL MASS & VENTILATION SPECS */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-3">
+                  <div className="text-xs font-semibold text-white uppercase tracking-wider">
+                    Core Physics & Infiltration
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[10px]">
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="text-slate-500 uppercase text-[9px]">Thermal Mass Core</div>
+                      <div className="mt-1 text-sm font-bold text-white">3,200 kg</div>
+                      <div className="text-[9px] text-slate-400">High-density concrete slab</div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="text-slate-500 uppercase text-[9px]">Air Exchange (n50)</div>
+                      <div className="mt-1 text-sm font-bold text-emerald-400">0.14 ACH</div>
+                      <div className="text-[9px] text-slate-400">Passive House airtight</div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5 text-[10px] text-slate-400 leading-relaxed">
+                    Solar radiation penetrating the south-facing multi-chamber glazing is stored in the interior Trombe core during peak daylight hours, then released slowly over an 11.4h thermal lag.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: SOLVER & RESULTS */}
+            {activeTab === "solver" && (
+              <div className="space-y-4 font-mono">
+                {/* PIPELINE PROGRESS */}
+                <AnalysisPipelineCard
+                  hasWeather={hasWeather}
+                  hasSimulation={hasSimulation}
+                  hasOptimization={hasOptimization}
+                />
+
+                {/* PRIMARY ACTIONS */}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={runThermalSimulation}
+                    disabled={anyOperationRunning}
+                    className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg"
+                  >
+                    {isSimulating ? "Running Transient Simulation..." : "Run Thermal Simulation"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={optimizeShelter}
+                    disabled={anyOperationRunning}
+                    className="chamfer-btn w-full border border-cyan-400/40 bg-cyan-400/10 hover:bg-cyan-400/20 disabled:opacity-50 text-cyan-200 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg"
+                  >
+                    {isOptimizing ? "Evaluating 64 Shelter Candidates..." : "Run 64-Candidate Matrix Optimization"}
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <DemoRunButton
+                      onRunDemo={runFullDemo}
+                      disabled={anyOperationRunning}
                     />
+
+                    {baselineForReset && (
+                      <button
+                        type="button"
+                        onClick={resetToBaseline}
+                        disabled={anyOperationRunning}
+                        className="chamfer-btn border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-50 text-slate-300 py-2 text-[10px] uppercase font-semibold transition-colors"
+                      >
+                        {isResetting ? "Restoring..." : "Reset Baseline"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* ERROR BANNER */}
+                {error && (
+                  <div className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-[11px] text-red-300 leading-relaxed">
+                    {error}
                   </div>
                 )}
 
-              <div className="mt-3">
-                <OptimizationResultsTable
-                  candidates={
-                    optimizationResult.candidates
-                  }
-                  totalCandidates={
-                    optimizationResult.total_candidates_tested
-                  }
+                {/* SIMULATION RESULTS */}
+                {simulationResult && (
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-3">
+                    <div className="flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                      <span>Simulation Telemetry</span>
+                      <span className="text-emerald-400 text-[10px]">24H SOLVER PASSED</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                        <div className="text-[9px] uppercase text-slate-500">Final Indoor Temp</div>
+                        <div className="mt-1 text-lg font-bold text-emerald-400">
+                          {simulationResult.final_indoor_temperature_c > 0 ? "+" : ""}
+                          {simulationResult.final_indoor_temperature_c.toFixed(1)}°C
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                        <div className="text-[9px] uppercase text-slate-500">Comfort Score</div>
+                        <div className="mt-1 text-lg font-bold text-cyan-300">
+                          {simulationResult.comfort_percentage.toFixed(0)}%
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                        <div className="text-[9px] uppercase text-slate-500">Min Core Temp</div>
+                        <div className="mt-1 text-sm font-semibold text-sky-300">
+                          {simulationResult.minimum_indoor_temperature_c.toFixed(1)}°C
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                        <div className="text-[9px] uppercase text-slate-500">Max Core Temp</div>
+                        <div className="mt-1 text-sm font-semibold text-amber-300">
+                          {simulationResult.maximum_indoor_temperature_c.toFixed(1)}°C
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-3 space-y-1.5 text-[10px]">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Comfort Hours:</span>
+                        <span className="text-white font-bold">{simulationResult.comfort_hours.toFixed(1)} h</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Cold Stress Hours:</span>
+                        <span className="text-sky-300 font-bold">{simulationResult.cold_hours.toFixed(1)} h</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Heat Stress Hours:</span>
+                        <span className="text-orange-300 font-bold">{simulationResult.hot_hours.toFixed(1)} h</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* OPTIMIZATION RESULTS */}
+                {optimizationResult && (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-3.5 space-y-3">
+                    <div className="flex items-center justify-between text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                      <span>Optimal Tested Envelope</span>
+                      <span className="text-[10px] text-slate-400">
+                        {optimizationResult.total_candidates_tested} Evaluated
+                      </span>
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 bg-[#060913] p-3 space-y-2 text-[11px]">
+                      <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                        <span className="text-slate-400">Candidate Rank:</span>
+                        <span className="text-white font-bold">#{optimizationResult.best_candidate.rank}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Optimized Comfort:</span>
+                        <span className="text-emerald-400 font-bold">
+                          {optimizationResult.best_candidate.comfort_percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Optimal Orientation:</span>
+                        <span className="text-white font-bold">{optimizationResult.best_candidate.orientation_deg}°</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Wall Insulation:</span>
+                        <span className="text-white font-bold">
+                          {optimizationResult.best_candidate.wall_insulation_thickness_mm.toFixed(0)} mm
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Roof Insulation:</span>
+                        <span className="text-white font-bold">
+                          {optimizationResult.best_candidate.roof_insulation_thickness_mm.toFixed(0)} mm
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Comfort Gain:</span>
+                        <span className={comfortDifference !== null && comfortDifference >= 0 ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
+                          {comfortDifference !== null ? `${comfortDifference >= 0 ? "+" : ""}${comfortDifference.toFixed(1)} pts` : "—"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={applyBestDesign}
+                      disabled={anyOperationRunning}
+                      className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-2.5 text-xs uppercase tracking-wider transition-colors"
+                    >
+                      {isApplyingOptimization ? "Applying to 3D Scene..." : "Apply & Render Best Design"}
+                    </button>
+                  </div>
+                )}
+
+                {/* DESIGN COMPARISON */}
+                {baselineDesign && optimizedSnapshot && (
+                  <DesignComparisonCard
+                    baseline={baselineDesign}
+                    optimized={optimizedSnapshot}
+                    isApplied={isApplied}
+                  />
+                )}
+
+                {/* OPTIMIZATION CANDIDATE MATRIX */}
+                {optimizationResult && (
+                  <OptimizationResultsTable
+                    candidates={optimizationResult.candidates}
+                    totalCandidates={optimizationResult.total_candidates_tested}
+                  />
+                )}
+
+                {/* ASSUMPTIONS */}
+                <ModelAssumptionsCard />
+
+                {/* DOSSIER EXPORT */}
+                <ReportButton
+                  data={{
+                    projectName: "Thermo Shelter TS-1",
+                    location: {
+                      name: location.name,
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                      elevation_m: location.elevation_m,
+                    },
+                    geometry: { length_m, width_m, height_m },
+                    orientation_deg,
+                    wall: {
+                      thickness_mm: wallAssembly.thickness * 1000,
+                      r_value: wallAssembly.rValue,
+                      u_value: wallAssembly.uValue,
+                    },
+                    roof: {
+                      thickness_mm: roofAssembly.thickness * 1000,
+                      r_value: roofAssembly.rValue,
+                      u_value: roofAssembly.uValue,
+                    },
+                    simulation: simulationResult
+                      ? {
+                          final_indoor_temperature_c: simulationResult.final_indoor_temperature_c,
+                          minimum_indoor_temperature_c: simulationResult.minimum_indoor_temperature_c,
+                          maximum_indoor_temperature_c: simulationResult.maximum_indoor_temperature_c,
+                          comfort_hours: simulationResult.comfort_hours,
+                          cold_hours: simulationResult.cold_hours,
+                          hot_hours: simulationResult.hot_hours,
+                          comfort_percentage: simulationResult.comfort_percentage,
+                        }
+                      : null,
+                    optimization: optimizationResult
+                      ? {
+                          total_candidates_tested: optimizationResult.total_candidates_tested,
+                          baseline_comfort_percentage: optimizationResult.baseline_comfort_percentage,
+                          best_candidate: optimizationResult.best_candidate,
+                          candidates: optimizationResult.candidates,
+                        }
+                      : null,
+                    baselineDesign,
+                  }}
                 />
               </div>
-            </div>
-          )}
-
-          {/* ASSUMPTIONS */}
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <ModelAssumptionsCard />
-          </div>
-
-          {/* REPORT */}
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <ReportButton
-              data={{
-                projectName:
-                  "Thermo Shelter 1",
-
-                location: {
-                  name:
-                    location.name,
-
-                  latitude:
-                    location.latitude,
-
-                  longitude:
-                    location.longitude,
-
-                  elevation_m:
-                    location.elevation_m,
-                },
-
-                geometry: {
-                  length_m,
-                  width_m,
-                  height_m,
-                },
-
-                orientation_deg,
-
-                wall: {
-                  thickness_mm:
-                    wallAssembly.thickness *
-                    1000,
-
-                  r_value:
-                    wallAssembly.rValue,
-
-                  u_value:
-                    wallAssembly.uValue,
-                },
-
-                roof: {
-                  thickness_mm:
-                    roofAssembly.thickness *
-                    1000,
-
-                  r_value:
-                    roofAssembly.rValue,
-
-                  u_value:
-                    roofAssembly.uValue,
-                },
-
-                simulation:
-                  simulationResult
-                    ? {
-                        final_indoor_temperature_c:
-                          simulationResult.final_indoor_temperature_c,
-
-                        minimum_indoor_temperature_c:
-                          simulationResult.minimum_indoor_temperature_c,
-
-                        maximum_indoor_temperature_c:
-                          simulationResult.maximum_indoor_temperature_c,
-
-                        comfort_hours:
-                          simulationResult.comfort_hours,
-
-                        cold_hours:
-                          simulationResult.cold_hours,
-
-                        hot_hours:
-                          simulationResult.hot_hours,
-
-                        comfort_percentage:
-                          simulationResult.comfort_percentage,
-                      }
-                    : null,
-
-                optimization:
-                  optimizationResult
-                    ? {
-                        total_candidates_tested:
-                          optimizationResult.total_candidates_tested,
-
-                        baseline_comfort_percentage:
-                          optimizationResult.baseline_comfort_percentage,
-
-                        best_candidate:
-                          optimizationResult.best_candidate,
-
-                        candidates:
-                          optimizationResult.candidates,
-                      }
-                    : null,
-
-                baselineDesign:
-                  baselineDesign,
-              }}
-            />
+            )}
           </div>
         </aside>
       </div>

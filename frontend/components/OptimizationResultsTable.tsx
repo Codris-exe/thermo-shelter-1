@@ -59,14 +59,14 @@ export default function OptimizationResultsTable({
             key={`${candidate.rank}-${candidate.orientation_deg}-${candidate.wall_insulation_thickness_mm}-${candidate.roof_insulation_thickness_mm}`}
             className={`grid grid-cols-[32px_48px_62px_62px_1fr] items-center border-t border-white/5 px-2 py-2 text-[10px] ${
               candidate.rank === 1
-                ? "bg-violet-400/[0.08]"
+                ? "bg-amber-400/[0.1]"
                 : ""
             }`}
           >
             <div
               className={
                 candidate.rank === 1
-                  ? "font-bold text-violet-300"
+                  ? "font-bold text-amber-400"
                   : "text-slate-500"
               }
             >

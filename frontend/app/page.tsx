@@ -519,11 +519,14 @@ export default function HomePage() {
               src="/images/night-thermal-shelter.jpg"
               alt="Himalayan research station shelter under the Milky Way with glowing thermal core"
               fill
-              className="object-cover object-center opacity-80"
+              className="object-cover object-center"
+              priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070b14] via-[#070b14]/75 to-[#070b14] pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#070b14]/95 via-[#070b14]/70 to-transparent lg:w-3/4 pointer-events-none" />
-            <div className="absolute inset-0 cad-grid opacity-15 pointer-events-none" />
+            {/* Subtle edge fades to blend into background seamlessly without hiding the shelter */}
+            <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-[#070b14] to-transparent" />
+            <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#070b14] to-transparent" />
+            {/* Gentle cinematic contrast behind text for perfect readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent lg:w-3/5" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">

@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
+import { historicalClimateToSimulationWeather } from "../../lib/historicalWeatherAdapter";
+import { useHistoricalClimateStore } from "../../stores/historicalClimateStore";
 
 interface WeatherPoint {
   timestamp: string;
@@ -18,13 +21,51 @@ interface WeatherPoint {
   ground_temperature_c: number | null;
 }
 
-interface WeatherResponse {
+interface WeatherSummary {
   latitude: number;
   longitude: number;
   elevation_m: number;
   timezone: string;
   source: string;
-  points: WeatherPoint[];
+}
+
+interface LocationPayload {
+  name: string;
+  latitude: number;
+  longitude: number;
+  elevation_m: number | null;
+  timezone: string;
+  source: "gps" | "search";
+}
+
+interface HistoricalClimateProfilePoint {
+  hour: number;
+  sample_count: number;
+  average_temperature_c: number;
+  minimum_temperature_c: number;
+  maximum_temperature_c: number;
+  average_relative_humidity_pct: number | null;
+  average_wind_speed_m_s: number;
+  average_solar_irradiance_w_m2: number;
+  average_direct_radiation_w_m2: number;
+  average_diffuse_radiation_w_m2: number;
+  average_direct_normal_irradiance_w_m2: number;
+  average_cloud_cover_pct: number | null;
+  daylight_fraction: number;
+}
+
+interface HistoricalClimateResult {
+  start_date: string;
+  end_date: string;
+  timezone: string;
+  model: string;
+  elevation_m: number | null;
+  years_available: number;
+  hourly_samples: number;
+  selected_month: number | null;
+  profile_type: string;
+  climate_profile: HistoricalClimateProfilePoint[];
+  source: string;
 }
 
 interface SimulationPoint {
@@ -61,156 +102,85 @@ interface SimulationResult {
   points: SimulationPoint[];
 }
 
-interface LocationResult {
-  name: string;
-  country: string | null;
-  country_code: string | null;
-  region: string | null;
-  latitude: number;
-  longitude: number;
-  elevation_m: number | null;
-  timezone: string | null;
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function readSession<T>(key: string): T | null {
+  try {
+    const value = sessionStorage.getItem(key);
+    return value ? (JSON.parse(value) as T) : null;
+  } catch {
+    return null;
+  }
 }
 
-export default function RegionalSimulationPage() {
-  const [locationQuery, setLocationQuery] = useState("Leh");
-  const [locations, setLocations] = useState<LocationResult[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
-  const [weather, setWeather] = useState<WeatherResponse | null>(null);
+export default function SimulationPage() {
+  const [location, setLocation] = useState<LocationPayload | null>(null);
+  const [weatherSummary, setWeatherSummary] = useState<WeatherSummary | null>(null);
+  const [historicalClimate, setHistoricalClimate] = useState<HistoricalClimateResult | null>(null);
+  const [weatherPoints, setWeatherPoints] = useState<WeatherPoint[]>([]);
   const [initialTemperature, setInitialTemperature] = useState(18);
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingSimulation, setIsLoadingSimulation] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [error, setError] = useState("");
 
-  async function searchLocation() {
-    if (!locationQuery.trim()) return;
-    setIsSearchingLocation(true);
-    setError("");
+  const setHistoricalClimateStoreResult = useHistoricalClimateStore(
+    (state) => state.setResult,
+  );
 
-    try {
-      const response = await fetch(
-        `/backend-api/api/location/search?q=${encodeURIComponent(locationQuery)}`
+  useEffect(() => {
+    const savedLocation = readSession<LocationPayload>(
+      "thermo-shelter-selected-location",
+    );
+    const savedWeather = readSession<WeatherSummary>(
+      "thermo-shelter-weather-summary",
+    );
+    const savedClimate = readSession<HistoricalClimateResult>(
+      "thermo-shelter-historical-climate",
+    );
+
+    if (!savedLocation || !savedClimate) {
+      setError(
+        "No location and historical climate are loaded. Return to the Location page and complete the setup first.",
       );
-
-      if (!response.ok) {
-        throw new Error("Location search failed.");
-      }
-
-      const data = await response.json();
-      setLocations(data.results ?? []);
-      if (!data.results || data.results.length === 0) {
-        setError("No locations found. Try another city or coordinates.");
-      }
-    } catch (searchError) {
-      console.error(searchError);
-      setError("Unable to search for the location. Ensure the backend is running.");
-    } finally {
-      setIsSearchingLocation(false);
-    }
-  }
-
-  async function loadWeather(location: LocationResult) {
-    setSelectedLocation(location);
-    setIsLoadingWeather(true);
-    setError("");
-    setResult(null);
-
-    try {
-      const response = await fetch(
-        `/backend-api/api/weather/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hours=24`
-      );
-
-      if (!response.ok) {
-        throw new Error("Weather request failed.");
-      }
-
-      const data: WeatherResponse = await response.json();
-      setWeather(data);
-    } catch (weatherError) {
-      console.error(weatherError);
-      setError("Unable to retrieve real weather data for this location.");
-    } finally {
-      setIsLoadingWeather(false);
-    }
-  }
-
-  async function useMyLocation() {
-    setIsGettingLocation(true);
-    setError("");
-    setResult(null);
-
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by this browser.");
-      setIsGettingLocation(false);
+      setIsLoading(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
-          const accuracy = position.coords.accuracy;
+    setLocation(savedLocation);
+    setWeatherSummary(savedWeather);
+    setHistoricalClimate(savedClimate);
+    setHistoricalClimateStoreResult(savedClimate);
 
-          const currentLocation: LocationResult = {
-            name: "Current Location",
-            country: null,
-            country_code: null,
-            region: null,
-            latitude,
-            longitude,
-            elevation_m: null,
-            timezone: null,
-          };
+    const converted = historicalClimateToSimulationWeather(savedClimate);
+    setWeatherPoints(converted);
+    setIsLoading(false);
+  }, [setHistoricalClimateStoreResult]);
 
-          setSelectedLocation(currentLocation);
-          setLocations([]);
-
-          const weatherResponse = await fetch(
-            `/backend-api/api/weather/forecast?latitude=${latitude}&longitude=${longitude}&hours=24`
-          );
-
-          if (!weatherResponse.ok) {
-            throw new Error("Weather request failed.");
-          }
-
-          const weatherData: WeatherResponse = await weatherResponse.json();
-          setWeather(weatherData);
-          setLocationQuery(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-        } catch (locationError) {
-          console.error(locationError);
-          setError("Your location was detected, but weather data could not be retrieved.");
-        } finally {
-          setIsGettingLocation(false);
-        }
-      },
-      (locationError) => {
-        console.error(locationError);
-        let message = "Unable to access your current location.";
-        if (locationError.code === locationError.PERMISSION_DENIED) {
-          message = "Location permission was denied. Please allow location access in your browser.";
-        } else if (locationError.code === locationError.POSITION_UNAVAILABLE) {
-          message = "Your current location could not be determined.";
-        } else if (locationError.code === locationError.TIMEOUT) {
-          message = "Location request timed out. Please try again.";
-        }
-        setError(message);
-        setIsGettingLocation(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 300000,
-      }
-    );
-  }
+  const climateLabel = useMemo(() => {
+    if (!historicalClimate) return "Historical climate";
+    if (historicalClimate.selected_month) {
+      return `${MONTH_NAMES[historicalClimate.selected_month - 1]} representative profile`;
+    }
+    return "Annual representative profile";
+  }, [historicalClimate]);
 
   async function runSimulation() {
-    if (!selectedLocation || !weather) {
-      setError("Select a location and load weather before running the simulation.");
+    if (!location || weatherPoints.length < 2) {
+      setError("Location and historical climate data are required before running the simulation.");
       return;
     }
 
@@ -221,12 +191,12 @@ export default function RegionalSimulationPage() {
       const payload = {
         design: {
           location: {
-            name: selectedLocation.name,
-            latitude: selectedLocation.latitude,
-            longitude: selectedLocation.longitude,
-            elevation_m: selectedLocation.elevation_m,
-            timezone: weather.timezone,
-            source: selectedLocation.name === "Current Location" ? "gps" : "search",
+            name: location.name,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            elevation_m: location.elevation_m,
+            timezone: location.timezone,
+            source: location.source,
           },
           geometry: {
             shape: "rectangular",
@@ -275,39 +245,35 @@ export default function RegionalSimulationPage() {
             initial_temperature_c: 12,
             coupling_w_per_k: 5,
           },
-          ventilation: {
-            ach: 0.5,
-          },
-          comfort: {
-            minimum_c: 18,
-            maximum_c: 26,
-          },
+          ventilation: { ach: 0.5 },
+          comfort: { minimum_c: 18, maximum_c: 26 },
         },
         initial_indoor_temperature_c: initialTemperature,
-        weather: weather.points,
+        weather: weatherPoints,
         internal_heat_gain_w: 200,
         timestep_minutes: 60,
       };
 
       const response = await fetch("/backend-api/api/simulations/run", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const message = await response.text();
-        throw new Error(message);
+        throw new Error(message || "Thermal simulation failed.");
       }
 
       const data: SimulationResult = await response.json();
       setResult(data);
-      setError("");
-    } catch (simError) {
-      console.error(simError);
-      setError("Simulation execution failed. Please verify your connection to the simulation backend.");
+    } catch (simulationError) {
+      console.error(simulationError);
+      setError(
+        simulationError instanceof Error
+          ? simulationError.message
+          : "Simulation execution failed. Check the FastAPI backend.",
+      );
     } finally {
       setIsLoadingSimulation(false);
     }
@@ -315,154 +281,97 @@ export default function RegionalSimulationPage() {
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 antialiased font-sans">
-      {/* Top Header */}
       <header className="border-b border-white/10 bg-[#070b14]/90 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-xs font-mono tracking-wider text-slate-400 hover:text-white transition flex items-center gap-1.5"
-            >
-              <span>←</span>
-              <span>Back to Home</span>
+            <Link href="/" className="text-xs font-mono tracking-wider text-slate-400 hover:text-white transition">
+              ← Back to Home
             </Link>
             <span className="text-white/20">|</span>
             <div className="text-sm font-bold tracking-tight text-white font-mono">
-              24-HOUR REGIONAL THERMAL SIMULATION
+              HISTORICAL CLIMATE THERMAL SIMULATION
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Link
-              href="/3d"
-              className="rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-1.5 text-xs font-bold font-mono tracking-wider uppercase transition shadow-sm"
-            >
-              3D Simulator →
-            </Link>
-          </div>
+          <Link
+            href="/3d"
+            className="rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-1.5 text-xs font-bold font-mono tracking-wider uppercase transition"
+          >
+            3D Simulator →
+          </Link>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Panel: Location Search & Inputs */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-6 shadow-sm">
-              <h2 className="text-base font-bold uppercase tracking-wider text-white font-mono mb-4">
-                01. Select Location
-              </h2>
+        {isLoading ? (
+          <div className="min-h-[70vh] flex items-center justify-center">
+            <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-8 text-center">
+              <div className="text-cyan-400 font-mono text-sm animate-pulse">
+                Loading selected location and historical climate...
+              </div>
+            </div>
+          </div>
+        ) : !location || !historicalClimate ? (
+          <div className="max-w-2xl mx-auto mt-16 rounded-2xl border border-amber-500/20 bg-amber-950/20 p-8 text-center">
+            <div className="text-4xl">📍</div>
+            <h1 className="mt-4 text-2xl font-bold">Location setup required</h1>
+            <p className="mt-3 text-slate-400">
+              Select a location and load its historical climate profile before entering the simulation.
+            </p>
+            <Link
+              href="/location"
+              className="mt-6 inline-flex rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
+            >
+              Go to Location Setup
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-4 space-y-6">
+              <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/10 p-6 shadow-sm">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-400 font-bold font-mono">
+                  01. Active Climate Setup
+                </div>
+                <h1 className="mt-2 text-2xl font-bold text-white">
+                  {location.name}
+                </h1>
+                <p className="mt-1 text-xs text-slate-500 font-mono">
+                  {location.latitude.toFixed(4)}°, {location.longitude.toFixed(4)}°
+                </p>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") searchLocation();
-                  }}
-                  placeholder="Enter city or region (e.g. Leh, Siachen)..."
-                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#070b14] px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
-                />
-                <button
-                  onClick={searchLocation}
-                  disabled={isSearchingLocation}
-                  className="rounded-xl bg-cyan-600 hover:bg-cyan-500 px-4 py-2.5 text-xs font-bold font-mono text-white transition disabled:opacity-50"
-                >
-                  {isSearchingLocation ? "..." : "Search"}
-                </button>
+                <div className="mt-5 space-y-2 text-xs font-mono">
+                  <div className="flex justify-between text-slate-400">
+                    <span>Climate source</span>
+                    <span className="text-emerald-300">{historicalClimate.source}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Period</span>
+                    <span className="text-white">{historicalClimate.start_date} → {historicalClimate.end_date}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Profile</span>
+                    <span className="text-white">{climateLabel}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Years</span>
+                    <span className="text-white">{historicalClimate.years_available}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Hourly samples</span>
+                    <span className="text-white">{historicalClimate.hourly_samples.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Simulation hours</span>
+                    <span className="text-white">{weatherPoints.length}</span>
+                  </div>
+                </div>
               </div>
 
-              <button
-                onClick={useMyLocation}
-                disabled={isGettingLocation}
-                className="mt-3 w-full rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 px-4 py-2.5 text-xs font-bold font-mono text-cyan-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                <span>📍</span>
-                <span>{isGettingLocation ? "Detecting GPS..." : "Use My Current Location"}</span>
-              </button>
+              <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-6 shadow-sm font-mono">
+                <h2 className="text-base font-bold uppercase tracking-wider text-white mb-4">
+                  02. Shelter Model
+                </h2>
 
-              {locations.length > 0 && (
-                <div className="mt-4 space-y-2 max-h-48 overflow-y-auto pr-1">
-                  <div className="text-[10px] uppercase font-mono tracking-wider text-slate-500">
-                    Select a match:
-                  </div>
-                  {locations.map((loc) => (
-                    <button
-                      key={`${loc.latitude}-${loc.longitude}-${loc.name}`}
-                      onClick={() => loadWeather(loc)}
-                      className="w-full rounded-xl border border-white/10 bg-[#070b14] hover:border-cyan-500/60 p-3 text-left transition text-xs font-mono"
-                    >
-                      <p className="font-bold text-white">{loc.name}</p>
-                      <p className="text-slate-400 mt-0.5">
-                        {loc.region ? `${loc.region}, ` : ""}
-                        {loc.country}
-                      </p>
-                      <p className="text-[10px] text-slate-500 mt-1">
-                        {loc.latitude.toFixed(4)}°, {loc.longitude.toFixed(4)}°
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {selectedLocation && (
-                <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 font-mono text-xs">
-                  <div className="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">
-                    Active Location Target
-                  </div>
-                  <div className="text-sm font-bold text-white mt-1">{selectedLocation.name}</div>
-                  {selectedLocation.region && (
-                    <div className="text-slate-400">
-                      {selectedLocation.region}
-                      {selectedLocation.country ? `, ${selectedLocation.country}` : ""}
-                    </div>
-                  )}
-                  <div className="text-[10px] text-slate-500 mt-1">
-                    Lat: {selectedLocation.latitude.toFixed(4)}° | Lon: {selectedLocation.longitude.toFixed(4)}°
-                  </div>
-                </div>
-              )}
-
-              {isLoadingWeather && (
-                <div className="mt-4 p-3 rounded-xl bg-slate-900 border border-white/10 text-xs font-mono text-cyan-400 animate-pulse text-center">
-                  Loading 24h satellite weather forecast...
-                </div>
-              )}
-
-              {weather && (
-                <div className="mt-4 rounded-xl border border-white/10 bg-[#070b14] p-4 font-mono text-xs space-y-2">
-                  <div className="text-[10px] uppercase tracking-wider text-amber-400 font-bold">
-                    Real 24h Forecast Loaded
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Source:</span>
-                    <span className="text-white font-semibold">{weather.source}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Elevation:</span>
-                    <span className="text-white font-semibold">
-                      {weather.elevation_m ? `${weather.elevation_m.toFixed(0)} m` : "—"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Timezone:</span>
-                    <span className="text-white font-semibold">{weather.timezone}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Forecast Points:</span>
-                    <span className="text-white font-semibold">{weather.points.length} Hours</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Shelter Settings */}
-            <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-6 shadow-sm font-mono">
-              <h2 className="text-base font-bold uppercase tracking-wider text-white mb-4">
-                02. Shelter Model
-              </h2>
-
-              <div>
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1.5">
                   Initial Indoor Temp (°C)
                 </label>
@@ -470,161 +379,123 @@ export default function RegionalSimulationPage() {
                   type="number"
                   value={initialTemperature}
                   onChange={(e) => setInitialTemperature(Number(e.target.value))}
-                  className="w-full rounded-xl border border-white/10 bg-[#070b14] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono"
+                  className="w-full rounded-xl border border-white/10 bg-[#070b14] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500"
                 />
-              </div>
 
-              <div className="mt-4 rounded-xl border border-white/10 bg-[#070b14] p-3 text-xs text-slate-400 space-y-1.5">
-                <div className="text-slate-300 font-semibold mb-1">Preset Thermal Mass Envelope:</div>
-                <div>• Geometry: 5m × 4m × 3m (South Glazed)</div>
-                <div>• Wall: 200mm Brick + 100mm Rock Wool</div>
-                <div>• Thermal Mass: 1,000 kg Basalt Stone</div>
-                <div>• Ventilation: 0.5 ACH Natural Convection</div>
-              </div>
-
-              <button
-                onClick={runSimulation}
-                disabled={isLoadingSimulation || !weather}
-                className="mt-6 w-full rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 py-3.5 px-4 font-bold text-xs uppercase tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
-              >
-                {isLoadingSimulation ? "Simulating 24 Hours..." : "Run 24h Real-Weather Simulation"}
-              </button>
-
-              {error && (
-                <div className="mt-4 p-3 rounded-xl border border-rose-500/30 bg-rose-950/30 text-rose-300 text-xs">
-                  {error}
+                <div className="mt-4 rounded-xl border border-white/10 bg-[#070b14] p-3 text-xs text-slate-400 space-y-1.5">
+                  <div className="text-slate-300 font-semibold mb-1">Preset Thermal Envelope</div>
+                  <div>• Geometry: 5m × 4m × 3m</div>
+                  <div>• Wall: 200mm Brick + 100mm Rock Wool</div>
+                  <div>• Roof: 100mm Concrete + 120mm Rock Wool</div>
+                  <div>• Thermal Mass: 1,000 kg Stone</div>
+                  <div>• Ventilation: 0.5 ACH</div>
+                  <div>• Comfort: 18–26°C</div>
                 </div>
+
+                <button
+                  onClick={runSimulation}
+                  disabled={isLoadingSimulation || weatherPoints.length < 2}
+                  className="mt-6 w-full rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 py-3.5 px-4 font-bold text-xs uppercase tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isLoadingSimulation ? "Simulating Historical Profile..." : "Run Historical Climate Simulation"}
+                </button>
+
+                {error && (
+                  <div className="mt-4 p-3 rounded-xl border border-rose-500/30 bg-rose-950/30 text-rose-300 text-xs leading-relaxed">
+                    {error}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-8 space-y-6">
+              {!result ? (
+                <div className="h-[600px] flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#0b1120] text-center p-8">
+                  <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-3xl mb-4">
+                    🏔️☀️🏠
+                  </div>
+                  <h3 className="text-xl font-bold text-white tracking-tight">
+                    Historical Climate Ready
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-400 max-w-md leading-relaxed">
+                    The location page has already selected the climate dataset. This simulation uses its representative 24-hour historical profile rather than asking for a second location.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 font-mono">
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Final Indoor</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-cyan-400 mt-2">{result.final_indoor_temperature_c.toFixed(1)}°C</div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Min Indoor</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-sky-400 mt-2">{result.minimum_indoor_temperature_c.toFixed(1)}°C</div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Max Indoor</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-amber-400 mt-2">{result.maximum_indoor_temperature_c.toFixed(1)}°C</div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Thermal Comfort</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-2">{result.comfort_percentage.toFixed(1)}%</div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Mass Core Temp</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-orange-400 mt-2">
+                        {result.final_thermal_mass_temperature_c !== null ? `${result.final_thermal_mass_temperature_c.toFixed(1)}°C` : "—"}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
+                      <div className="text-xs uppercase text-slate-400 tracking-wider">Cold / Hot Hours</div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-200 mt-2">{result.cold_hours.toFixed(1)} / {result.hot_hours.toFixed(1)} h</div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-6 font-mono shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-4 border-b border-white/10">
+                      <div>
+                        <h3 className="text-base font-bold text-white uppercase tracking-wider">24-Hour Historical Thermal Data</h3>
+                        <p className="text-xs text-slate-400 mt-0.5">{location.name} · {climateLabel} · {historicalClimate.model}</p>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b border-white/10 text-slate-400 uppercase text-[10px] tracking-wider">
+                            <th className="py-2.5 px-3">Time</th>
+                            <th className="py-2.5 px-3">Outdoor °C</th>
+                            <th className="py-2.5 px-3 text-cyan-400">Indoor °C</th>
+                            <th className="py-2.5 px-3 text-amber-400">Mass °C</th>
+                            <th className="py-2.5 px-3">Solar W</th>
+                            <th className="py-2.5 px-3">Heat Loss W</th>
+                            <th className="py-2.5 px-3">Mass Flow W</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {result.points.map((point) => (
+                            <tr key={point.timestamp} className="hover:bg-white/[0.03] transition">
+                              <td className="py-2.5 px-3 font-semibold text-slate-300">{new Date(point.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+                              <td className="py-2.5 px-3 text-slate-400">{point.outdoor_temperature_c.toFixed(1)}</td>
+                              <td className="py-2.5 px-3 font-bold text-cyan-400">{point.indoor_temperature_c.toFixed(1)}</td>
+                              <td className="py-2.5 px-3 font-semibold text-amber-400">{point.thermal_mass_temperature_c.toFixed(1)}</td>
+                              <td className="py-2.5 px-3 text-slate-300">{point.solar_gain_w.toFixed(0)}</td>
+                              <td className="py-2.5 px-3 text-rose-400">{point.total_heat_loss_w.toFixed(0)}</td>
+                              <td className="py-2.5 px-3 text-emerald-400">{point.thermal_mass_heat_transfer_w.toFixed(0)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
-
-          {/* Right Panel: Results & Telemetry Table */}
-          <div className="lg:col-span-8 space-y-6">
-            {!result ? (
-              <div className="h-[600px] flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#0b1120] text-center p-8">
-                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mb-4">
-                  🏔️
-                </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  No Simulation Results Yet
-                </h3>
-                <p className="mt-2 text-sm text-slate-400 max-w-md leading-relaxed">
-                  Search for any global high-altitude region or town on the left panel, load the 24-hour Open-Meteo satellite weather forecast, and click Run Simulation.
-                </p>
-              </div>
-            ) : (
-              <>
-                {/* 6 Key Performance Metric Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 font-mono">
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Final Indoor</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-cyan-400 mt-2">
-                      {result.final_indoor_temperature_c.toFixed(1)}°C
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Min Indoor</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-sky-400 mt-2">
-                      {result.minimum_indoor_temperature_c.toFixed(1)}°C
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Max Indoor</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-amber-400 mt-2">
-                      {result.maximum_indoor_temperature_c.toFixed(1)}°C
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Thermal Comfort</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-2">
-                      {result.comfort_percentage.toFixed(1)}%
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Mass Core Temp</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-orange-400 mt-2">
-                      {result.final_thermal_mass_temperature_c !== null
-                        ? `${result.final_thermal_mass_temperature_c.toFixed(1)}°C`
-                        : "—"}
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-5">
-                    <div className="text-xs uppercase text-slate-400 tracking-wider">Cold Hours</div>
-                    <div className="text-2xl sm:text-3xl font-bold text-slate-300 mt-2">
-                      {result.cold_hours.toFixed(1)} h
-                    </div>
-                  </div>
-                </div>
-
-                {/* 24-Hour Telemetry Table */}
-                <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-6 font-mono shadow-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-4 border-b border-white/10">
-                    <div>
-                      <h3 className="text-base font-bold text-white uppercase tracking-wider">
-                        24-Hour Transient Simulation Data
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Location: {selectedLocation?.name} · Weather Source: {weather?.source}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead>
-                        <tr className="border-b border-white/10 text-slate-400 uppercase text-[10px] tracking-wider">
-                          <th className="py-2.5 px-3">Time</th>
-                          <th className="py-2.5 px-3">Outdoor °C</th>
-                          <th className="py-2.5 px-3 text-cyan-400">Indoor °C</th>
-                          <th className="py-2.5 px-3 text-amber-400">Mass °C</th>
-                          <th className="py-2.5 px-3">Solar W</th>
-                          <th className="py-2.5 px-3">Heat Loss W</th>
-                          <th className="py-2.5 px-3">Mass Flow W</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {result.points.map((pt) => (
-                          <tr key={pt.timestamp} className="hover:bg-white/[0.03] transition">
-                            <td className="py-2.5 px-3 font-semibold text-slate-300">
-                              {new Date(pt.timestamp).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </td>
-                            <td className="py-2.5 px-3 text-slate-400">
-                              {pt.outdoor_temperature_c.toFixed(1)}
-                            </td>
-                            <td className="py-2.5 px-3 font-bold text-cyan-400">
-                              {pt.indoor_temperature_c.toFixed(1)}
-                            </td>
-                            <td className="py-2.5 px-3 font-semibold text-amber-400">
-                              {pt.thermal_mass_temperature_c.toFixed(1)}
-                            </td>
-                            <td className="py-2.5 px-3 text-slate-300">
-                              {pt.solar_gain_w.toFixed(0)}
-                            </td>
-                            <td className="py-2.5 px-3 text-rose-400">
-                              {pt.total_heat_loss_w.toFixed(0)}
-                            </td>
-                            <td className="py-2.5 px-3 text-emerald-400">
-                              {pt.thermal_mass_heat_transfer_w.toFixed(0)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );
 }
+

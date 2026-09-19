@@ -351,7 +351,7 @@ export default function LocationPage() {
       JSON.stringify(historicalClimate),
     );
 
-    router.push("/3d");
+    router.push("/simulate");
   }
 
   const canContinue =
@@ -384,7 +384,7 @@ export default function LocationPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-slate-400">
-              Step 1 of 2
+              Step 1 of 3
             </div>
           </div>
         </header>
@@ -766,7 +766,7 @@ export default function LocationPage() {
           </span>
 
           <span>
-            Location → Weather → Historical Climate → Simulator
+            Location → Weather → Historical Climate → Thermal Simulation
           </span>
         </footer>
       </div>

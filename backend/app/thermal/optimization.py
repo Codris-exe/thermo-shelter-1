@@ -139,7 +139,7 @@ def _sort_candidates(
         key=lambda candidate: (
             -candidate.comfort_percentage,
             -candidate.comfort_hours,
-            -(
+            (
                 candidate.maximum_indoor_temperature_c
                 - candidate.minimum_indoor_temperature_c
             ),

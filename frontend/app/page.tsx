@@ -22,30 +22,7 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const elements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-scale");
-    if (!elements.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-revealed");
-          } else {
-            entry.target.classList.remove("is-revealed");
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -40px 0px",
-      }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans">

@@ -31,94 +31,130 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
-      {/* 1. Top Navigation */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#070b14]/80 backdrop-blur-md border-b border-slate-200/70 dark:border-white/10 shadow-sm transition-colors duration-200">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-6 lg:px-12 h-16">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-mono font-bold text-amber-700 dark:text-amber-400 text-xs">
-              TS
-            </div>
-            <div>
-              <div
-                className="text-sm font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors"
-                style={{ fontFamily: "var(--font-headline)" }}
-              >
-                THERMO SHELTER 1
-              </div>
-              <div className="text-[10px] font-mono tracking-wider text-slate-500 dark:text-slate-400">
-                PASSIVE ALPINE LAB
-              </div>
-            </div>
+      {/* 1. Transparent Floating Navigation (Matches Reference) */}
+      <header className="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            aria-label="Thermo Shelter Home"
+            className="w-10 h-10 rounded-full bg-black/35 hover:bg-black/50 border border-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all shadow-md"
+          >
+            <span className="text-sm font-bold font-mono">TS</span>
           </Link>
+          <Link
+            href="/"
+            className="text-lg font-black tracking-wider text-white uppercase drop-shadow-md hover:text-white/90 transition-colors"
+            style={{ fontFamily: "var(--font-headline)" }}
+          >
+            THERMO SHELTER
+          </Link>
+        </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            <Link href="/3d" className="hover:text-slate-950 dark:hover:text-white transition-colors">
-              3D Simulator
-            </Link>
-            <a href="#how-it-works" className="hover:text-slate-950 dark:hover:text-white transition-colors">
-              Heat Flow
-            </a>
-            <a href="#night-autonomy" className="hover:text-slate-950 dark:hover:text-white transition-colors">
-              Night Thermal
-            </a>
-            <a href="#deployments" className="hover:text-slate-950 dark:hover:text-white transition-colors">
-              Deployments
-            </a>
-          </nav>
+        <nav className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm">
+          <Link href="/3d" className="hover:text-white transition-colors">
+            3D Simulator
+          </Link>
+          <a href="#how-it-works" className="hover:text-white transition-colors">
+            Heat Flow
+          </a>
+          <a href="#night-autonomy" className="hover:text-white transition-colors">
+            Autonomy
+          </a>
+          <a href="#deployments" className="hover:text-white transition-colors">
+            Stations
+          </a>
+        </nav>
 
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/20 p-1">
             <ThemeToggle />
+          </div>
 
+          <div className="hidden sm:flex items-center gap-2">
             <Link
               href="/3d"
-              className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase transition-colors flex items-center gap-2 shadow-sm"
+              className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md"
             >
-              <span>Launch Simulator</span>
-              <span>→</span>
+              Start Here
+            </Link>
+            <Link
+              href="/3d"
+              aria-label="Start Simulator"
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md flex items-center justify-center text-xs font-bold transition shadow-md"
+            >
+              ↗
             </Link>
           </div>
         </div>
       </header>
 
       <main>
-        {/* 2. Hero Section - Ultra-clean First Page Area with 1 Central Title */}
+        {/* 2. Fullscreen Panoramic Alpine Hero Section */}
         <section
           id="hero"
-          className="relative h-[calc(100vh-64px)] min-h-[600px] flex flex-col items-center justify-center border-b border-slate-200 dark:border-white/10 overflow-hidden select-none"
+          className="relative h-screen min-h-[720px] flex flex-col justify-between items-center pt-28 pb-12 sm:pb-16 px-6 overflow-hidden select-none"
         >
-          {/* Alpine Mountain Photography Backdrop */}
+          {/* Real Full-bleed High-Resolution Alpine Photography */}
           <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/images/hero-alpine-shelter.jpg"
               alt="Extreme-altitude passive solar alpine shelter on Himalayan ridge"
               fill
               priority
-              className="object-cover object-center opacity-80 dark:opacity-70 transition-transform duration-1000"
+              className="object-cover object-center"
             />
-            {/* Subtle atmospheric vignette and lighting overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/40 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/50" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#f8fafc]/30 via-transparent to-[#f8fafc] dark:from-[#070b14]/30 dark:via-transparent dark:to-[#070b14]" />
-            <div className="absolute inset-0 cad-grid opacity-15" />
+            {/* Elegant cinematic contrast gradients matching Frostbound reference */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65" />
           </div>
 
-          {/* Centerpiece: Only 1 Single Title in the Middle */}
-          <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pointer-events-none">
+          {/* Upper Title: Giant Tracked Letters Across the Sky (like W A N D E R) */}
+          <div className="relative z-10 w-full flex justify-center items-center mt-6 sm:mt-10">
             <h1
-              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-slate-950 dark:text-white uppercase drop-shadow-md"
+              className="text-white text-6xl sm:text-8xl md:text-9xl lg:text-[11rem] xl:text-[12.5rem] font-light tracking-[0.24em] sm:tracking-[0.32em] uppercase select-none drop-shadow-2xl text-center pl-[0.24em] sm:pl-[0.32em] leading-none"
               style={{ fontFamily: "var(--font-headline)" }}
             >
-              THERMO SHELTER 1
+              SHELTER
             </h1>
           </div>
 
-          {/* Clean Scroll Indicator */}
+          {/* Lower Subtitle & Signature White Pill Button Duo */}
+          <div className="relative z-10 flex flex-col items-center text-center space-y-3 sm:space-y-4 max-w-2xl mx-auto">
+            <h2
+              className="text-white text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight uppercase drop-shadow-xl"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              HIMALAYAS
+            </h2>
+            <p className="text-white/90 text-sm sm:text-base lg:text-lg font-normal tracking-wide drop-shadow-md">
+              Where passive solar physics meets -50°C.
+            </p>
+
+            {/* Signature White Pill & Circular Arrow Button Pair */}
+            <div className="flex items-center gap-2 pt-2 sm:pt-3">
+              <Link
+                href="/3d"
+                className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm tracking-wide uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
+              >
+                Launch 3D Simulator
+              </Link>
+              <Link
+                href="/3d"
+                aria-label="Launch 3D Simulator"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white hover:bg-slate-100 text-slate-950 flex items-center justify-center font-bold text-lg sm:text-xl transition-all shadow-2xl transform hover:scale-[1.05]"
+              >
+                ↗
+              </Link>
+            </div>
+          </div>
+
+          {/* Clean Minimalist Scroll Prompt */}
           <a
             href="#telemetry"
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer"
+            className="relative z-10 flex flex-col items-center gap-1.5 text-white/75 hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer drop-shadow-md"
           >
-            <span>Scroll</span>
-            <span className="w-5 h-8 rounded-full border border-slate-400/50 dark:border-white/20 flex items-start justify-center p-1">
-              <span className="w-1.5 h-2.5 rounded-full bg-amber-500 animate-bounce" />
+            <span>Explore Telemetry</span>
+            <span className="w-4 h-7 rounded-full border border-white/40 flex items-start justify-center p-1">
+              <span className="w-1 h-2 rounded-full bg-white animate-bounce" />
             </span>
           </a>
         </section>

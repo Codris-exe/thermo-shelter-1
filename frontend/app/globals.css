@@ -15,15 +15,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-headline: var(--font-ubuntu), "Ubuntu", sans-serif;
-  --font-body: var(--font-ubuntu), "Ubuntu", sans-serif;
+  --font-headline: var(--font-nunito), "Nunito", sans-serif;
+  --font-body: var(--font-nunito), "Nunito", sans-serif;
   --font-mono: var(--font-mono), "JetBrains Mono", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-ubuntu), "Ubuntu", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-nunito), "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* CAD Drafting Grid and Technical Textures - Light Theme */

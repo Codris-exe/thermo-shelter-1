@@ -2,7 +2,6 @@
 
 import {
   Canvas,
-  useFrame,
   useThree,
 } from "@react-three/fiber";
 
@@ -15,6 +14,7 @@ import * as THREE from "three";
 
 import {
   useEffect,
+  useMemo,
   useRef,
 } from "react";
 
@@ -30,6 +30,31 @@ interface Shelter3DProps {
   orientation?: number;
   wallThickness?: number;
   roofThickness?: number;
+
+  /*
+   * Climate inputs are visualization inputs only.
+   * The thermal engine remains the source of simulation results.
+   */
+  outdoorTemperatureC?: number;
+  solarIrradianceWm2?: number;
+  windSpeedMs?: number;
+  isDay?: boolean;
+
+  /*
+   * Hour-of-day used to animate the visual sun path.
+   * This is a visualization control, not a replacement
+   * for the physical solar-position model.
+   */
+  climateHour?: number;
+
+  /*
+   * Geographic and seasonal inputs used by the solar-position model.
+   * The default values represent the initial Ladakh/Leh demo location.
+   */
+  latitude?: number;
+  longitude?: number;
+  climateMonth?: number | null;
+  timezoneOffsetHours?: number;
 }
 
 
@@ -74,8 +99,17 @@ function ShelterModel({
   orientation,
   wallThickness,
   roofThickness,
-}: Required<Shelter3DProps>) {
-
+}: Required<
+  Pick<
+    Shelter3DProps,
+    | "length"
+    | "width"
+    | "height"
+    | "orientation"
+    | "wallThickness"
+    | "roofThickness"
+  >
+>) {
   const windowWidth = 1.5;
   const windowHeight = 1.2;
   const windowBottom = 1.5;
@@ -112,18 +146,14 @@ function ShelterModel({
         0,
       ]}
     >
-
       {/* FLOOR */}
-
       <mesh
         position={[
           0,
           -0.1,
           0,
         ]}
-        material={
-          floorMaterial
-        }
+        material={floorMaterial}
         receiveShadow
       >
         <boxGeometry
@@ -135,9 +165,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* SOUTH WALL LEFT */}
-
       <mesh
         position={[
           -(
@@ -147,9 +175,7 @@ function ShelterModel({
           height / 2,
           -width / 2,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -161,9 +187,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* SOUTH WALL RIGHT */}
-
       <mesh
         position={[
           windowWidth / 2 +
@@ -171,9 +195,7 @@ function ShelterModel({
           height / 2,
           -width / 2,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -185,9 +207,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* SOUTH WALL ABOVE WINDOW */}
-
       {topWindowHeight > 0 && (
         <mesh
           position={[
@@ -197,9 +217,7 @@ function ShelterModel({
               topWindowHeight / 2,
             -width / 2,
           ]}
-          material={
-            wallMaterial
-          }
+          material={wallMaterial}
           castShadow
         >
           <boxGeometry
@@ -212,9 +230,7 @@ function ShelterModel({
         </mesh>
       )}
 
-
       {/* SOUTH WINDOW */}
-
       <mesh
         position={[
           0,
@@ -224,9 +240,7 @@ function ShelterModel({
             wallThickness / 2 -
             0.03,
         ]}
-        material={
-          glassMaterial
-        }
+        material={glassMaterial}
       >
         <boxGeometry
           args={[
@@ -237,9 +251,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* NORTH WALL LEFT */}
-
       <mesh
         position={[
           -(
@@ -249,9 +261,7 @@ function ShelterModel({
           height / 2,
           width / 2,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -263,9 +273,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* NORTH WALL RIGHT */}
-
       <mesh
         position={[
           doorWidth / 2 +
@@ -273,9 +281,7 @@ function ShelterModel({
           height / 2,
           width / 2,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -287,9 +293,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* NORTH WALL ABOVE DOOR */}
-
       {topDoorHeight > 0 && (
         <mesh
           position={[
@@ -298,9 +302,7 @@ function ShelterModel({
               topDoorHeight / 2,
             width / 2,
           ]}
-          material={
-            wallMaterial
-          }
+          material={wallMaterial}
           castShadow
         >
           <boxGeometry
@@ -313,9 +315,7 @@ function ShelterModel({
         </mesh>
       )}
 
-
       {/* DOOR */}
-
       <mesh
         position={[
           0,
@@ -324,9 +324,7 @@ function ShelterModel({
             wallThickness / 2 -
             0.03,
         ]}
-        material={
-          doorMaterial
-        }
+        material={doorMaterial}
       >
         <boxGeometry
           args={[
@@ -337,18 +335,14 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* EAST WALL */}
-
       <mesh
         position={[
           length / 2,
           height / 2,
           0,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -360,18 +354,14 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* WEST WALL */}
-
       <mesh
         position={[
           -length / 2,
           height / 2,
           0,
         ]}
-        material={
-          wallMaterial
-        }
+        material={wallMaterial}
         castShadow
       >
         <boxGeometry
@@ -383,9 +373,7 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* ROOF */}
-
       <mesh
         position={[
           0,
@@ -393,9 +381,7 @@ function ShelterModel({
             roofThickness / 2,
           0,
         ]}
-        material={
-          roofMaterial
-        }
+        material={roofMaterial}
         castShadow
       >
         <boxGeometry
@@ -409,18 +395,14 @@ function ShelterModel({
         />
       </mesh>
 
-
       {/* THERMAL MASS */}
-
       <mesh
         position={[
           0,
           0.55,
           0,
         ]}
-        material={
-          massMaterial
-        }
+        material={massMaterial}
         castShadow
       >
         <boxGeometry
@@ -431,7 +413,6 @@ function ShelterModel({
           ]}
         />
       </mesh>
-
     </group>
   );
 }
@@ -446,18 +427,14 @@ function CameraController({
   width: number;
   height: number;
 }) {
-
-  const { camera } =
-    useThree();
+  const { camera } = useThree();
 
   const controlsRef =
     useRef<OrbitControlsImpl | null>(
       null,
     );
 
-
   useEffect(() => {
-
     const largestDimension =
       Math.max(
         length,
@@ -481,7 +458,6 @@ function CameraController({
     );
 
     if (controlsRef.current) {
-
       controlsRef.current.target.set(
         0,
         height / 2,
@@ -492,14 +468,12 @@ function CameraController({
     }
 
     camera.updateProjectionMatrix();
-
   }, [
     camera,
     length,
     width,
     height,
   ]);
-
 
   return (
     <OrbitControls
@@ -518,32 +492,293 @@ function CameraController({
 }
 
 
-function SunLight() {
+function degreesToRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function radiansToDegrees(value: number) {
+  return (value * 180) / Math.PI;
+}
+
+function normalizeDegrees(value: number) {
+  return ((value % 360) + 360) % 360;
+}
+
+function dayOfYearForMonth(month: number | null | undefined) {
+  const safeMonth = Math.min(
+    12,
+    Math.max(1, Math.round(month ?? 6)),
+  );
+
+  // Representative mid-month date. For an annual profile,
+  // June 21 is used as a neutral high-solar reference day.
+  const day = month == null ? 21 : 15;
+  const date = new Date(
+    Date.UTC(2025, safeMonth - 1, day),
+  );
+
+  const start = new Date(Date.UTC(2025, 0, 1));
+  return (
+    Math.floor(
+      (date.getTime() - start.getTime()) / 86400000,
+    ) + 1
+  );
+}
+
+interface SolarPosition {
+  elevationDeg: number;
+  azimuthDeg: number;
+  isAboveHorizon: boolean;
+}
+
+function calculateSolarPosition({
+  latitude,
+  longitude,
+  climateHour,
+  climateMonth,
+  timezoneOffsetHours,
+}: {
+  latitude: number;
+  longitude: number;
+  climateHour: number;
+  climateMonth: number | null | undefined;
+  timezoneOffsetHours: number;
+}): SolarPosition {
+  const safeLatitude = THREE.MathUtils.clamp(
+    latitude,
+    -89.9,
+    89.9,
+  );
+
+  const n = dayOfYearForMonth(climateMonth);
+  const gamma =
+    (2 * Math.PI * (n - 1)) / 365;
+
+  const equationOfTimeMinutes =
+    229.18 *
+    (0.000075 +
+      0.001868 * Math.cos(gamma) -
+      0.032077 * Math.sin(gamma) -
+      0.014615 * Math.cos(2 * gamma) -
+      0.040849 * Math.sin(2 * gamma));
+
+  const declinationRad =
+    0.006918 -
+    0.399912 * Math.cos(gamma) +
+    0.070257 * Math.sin(gamma) -
+    0.006758 * Math.cos(2 * gamma) +
+    0.000907 * Math.sin(2 * gamma) -
+    0.002697 * Math.cos(3 * gamma) +
+    0.00148 * Math.sin(3 * gamma);
+
+  // Convert local clock time into local solar time using the
+  // longitude correction and equation of time.
+  const standardMeridian =
+    15 * timezoneOffsetHours;
+
+  const timeCorrectionMinutes =
+    4 * (longitude - standardMeridian) +
+    equationOfTimeMinutes;
+
+  const solarTimeHours =
+    climateHour +
+    timeCorrectionMinutes / 60;
+
+  let hourAngleDeg =
+    15 * (solarTimeHours - 12);
+
+  while (hourAngleDeg > 180) {
+    hourAngleDeg -= 360;
+  }
+
+  while (hourAngleDeg < -180) {
+    hourAngleDeg += 360;
+  }
+
+  const latitudeRad = degreesToRadians(
+    safeLatitude,
+  );
+
+  const hourAngleRad = degreesToRadians(
+    hourAngleDeg,
+  );
+
+  const cosZenith = THREE.MathUtils.clamp(
+    Math.sin(latitudeRad) *
+        Math.sin(declinationRad) +
+      Math.cos(latitudeRad) *
+        Math.cos(declinationRad) *
+        Math.cos(hourAngleRad),
+    -1,
+    1,
+  );
+
+  const zenithRad = Math.acos(cosZenith);
+  const elevationDeg =
+    90 - radiansToDegrees(zenithRad);
+
+  // Solar azimuth measured clockwise from true north.
+  const azimuthRad = Math.atan2(
+    Math.sin(hourAngleRad),
+    Math.cos(hourAngleRad) *
+        Math.sin(latitudeRad) -
+      Math.tan(declinationRad) *
+        Math.cos(latitudeRad),
+  );
+
+  const azimuthDeg = normalizeDegrees(
+    radiansToDegrees(azimuthRad) + 180,
+  );
+
+  return {
+    elevationDeg,
+    azimuthDeg,
+    isAboveHorizon: elevationDeg > 0,
+  };
+}
+
+function ClimateSun({
+  solarIrradianceWm2,
+  isDay,
+  climateHour,
+  latitude,
+  longitude,
+  climateMonth,
+  timezoneOffsetHours,
+}: {
+  solarIrradianceWm2: number;
+  isDay: boolean;
+  climateHour: number;
+  latitude: number;
+  longitude: number;
+  climateMonth: number | null | undefined;
+  timezoneOffsetHours: number;
+}) {
+  const lightRef =
+    useRef<THREE.DirectionalLight | null>(
+      null,
+    );
+
+  const sunMeshRef =
+    useRef<THREE.Mesh | null>(
+      null,
+    );
+
+  const solarPosition = useMemo(
+    () =>
+      calculateSolarPosition({
+        latitude,
+        longitude,
+        climateHour,
+        climateMonth,
+        timezoneOffsetHours,
+      }),
+    [
+      latitude,
+      longitude,
+      climateHour,
+      climateMonth,
+      timezoneOffsetHours,
+    ],
+  );
+
+  const visualSolarFactor =
+    THREE.MathUtils.clamp(
+      solarIrradianceWm2 / 800,
+      0,
+      1,
+    );
+
+  const solarElevationRad = degreesToRadians(
+    Math.max(0, solarPosition.elevationDeg),
+  );
+
+  const horizontalRadius = 10;
+
+  // Coordinate convention for the shelter scene:
+  // north = +Z, south = -Z, east = +X, west = -X.
+  // Therefore azimuth 180° (south) maps to z = -radius.
+  const azimuthRad = degreesToRadians(
+    solarPosition.azimuthDeg,
+  );
+
+  const sunX =
+    Math.sin(azimuthRad) * horizontalRadius;
+
+  const sunZ =
+    -Math.cos(azimuthRad) * horizontalRadius;
+
+  const sunY =
+    1.5 +
+    Math.sin(solarElevationRad) *
+      (5.5 + visualSolarFactor * 4.5);
+
+  const visible =
+    isDay &&
+    solarPosition.isAboveHorizon &&
+    solarIrradianceWm2 > 5;
+
+  const targetIntensity = visible
+    ? 0.45 + visualSolarFactor * 2.35
+    : 0.08;
+
+  useEffect(() => {
+    if (lightRef.current) {
+      lightRef.current.intensity =
+        targetIntensity;
+
+      lightRef.current.position.set(
+        sunX,
+        Math.max(1.5, sunY),
+        sunZ,
+      );
+    }
+
+    if (sunMeshRef.current) {
+      sunMeshRef.current.visible = visible;
+
+      sunMeshRef.current.position.set(
+        sunX,
+        Math.max(1.5, sunY),
+        sunZ,
+      );
+    }
+  }, [
+    targetIntensity,
+    sunX,
+    sunY,
+    sunZ,
+    visible,
+  ]);
 
   return (
     <>
-
       <directionalLight
+        ref={lightRef}
         position={[
-          6,
-          10,
-          -6,
+          sunX,
+          Math.max(1.5, sunY),
+          sunZ,
         ]}
-        intensity={2.5}
+        intensity={targetIntensity}
         castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
       />
 
       <mesh
+        ref={sunMeshRef}
+        visible={visible}
         position={[
-          6,
-          10,
-          -6,
+          sunX,
+          Math.max(1.5, sunY),
+          sunZ,
         ]}
       >
-
         <sphereGeometry
           args={[
-            0.4,
+            0.4 +
+              visualSolarFactor * 0.2,
             24,
             24,
           ]}
@@ -552,10 +787,169 @@ function SunLight() {
         <meshBasicMaterial
           color="#facc15"
         />
-
       </mesh>
-
     </>
+  );
+}
+
+function ClimateAtmosphere({
+  outdoorTemperatureC,
+  solarIrradianceWm2,
+  windSpeedMs,
+  isDay,
+}: {
+  outdoorTemperatureC: number | null;
+  solarIrradianceWm2: number;
+  windSpeedMs: number;
+  isDay: boolean;
+}) {
+  const {
+    scene,
+  } = useThree();
+
+  const normalizedTemperature =
+    outdoorTemperatureC === null
+      ? 0.5
+      : THREE.MathUtils.clamp(
+          (outdoorTemperatureC + 20) /
+            60,
+          0,
+          1,
+        );
+
+  const daytimeBrightness =
+    THREE.MathUtils.clamp(
+      solarIrradianceWm2 / 800,
+      0,
+      1,
+    );
+
+  /*
+   * Background changes are purely visual indicators
+   * of the environmental state.
+   */
+  const background = useMemo(() => {
+    if (!isDay) {
+      return new THREE.Color(
+        "#020617",
+      );
+    }
+
+    if (normalizedTemperature < 0.35) {
+      return new THREE.Color(
+        "#0f2742",
+      );
+    }
+
+    if (normalizedTemperature > 0.7) {
+      return new THREE.Color(
+        "#3a2615",
+      );
+    }
+
+    return new THREE.Color(
+      "#12243a",
+    );
+  }, [
+    isDay,
+    normalizedTemperature,
+  ]);
+
+  useEffect(() => {
+    scene.background = background;
+
+    return () => {
+      scene.background = null;
+    };
+  }, [
+    scene,
+    background,
+  ]);
+
+  /*
+   * Keep this component tied to wind so the 3D scene
+   * will visually respond further when wind indicators
+   * are added without changing the current model.
+   */
+  void windSpeedMs;
+  void daytimeBrightness;
+
+  return null;
+}
+
+
+function ClimateOverlay({
+  outdoorTemperatureC,
+  solarIrradianceWm2,
+  windSpeedMs,
+  isDay,
+}: {
+  outdoorTemperatureC: number | null;
+  solarIrradianceWm2: number;
+  windSpeedMs: number;
+  isDay: boolean;
+}) {
+  return (
+    <group>
+      <sprite
+        position={[
+          0,
+          4,
+          0,
+        ]}
+      >
+        <spriteMaterial
+          transparent
+          opacity={0}
+        />
+      </sprite>
+
+      {isDay && solarIrradianceWm2 > 5 && (
+        <pointLight
+          position={[
+            2,
+            5,
+            -2,
+          ]}
+          intensity={Math.min(
+            1.2,
+            solarIrradianceWm2 /
+              650,
+          )}
+          distance={12}
+        />
+      )}
+
+      {outdoorTemperatureC !== null && (
+        <mesh
+          position={[
+            0,
+            -0.08,
+            0,
+          ]}
+        >
+          <ringGeometry
+            args={[
+              3.1,
+              3.14,
+              48,
+            ]}
+          />
+
+          <meshBasicMaterial
+            color={
+              outdoorTemperatureC <= 0
+                ? "#38bdf8"
+                : outdoorTemperatureC >= 25
+                  ? "#fb923c"
+                  : "#22c55e"
+            }
+            transparent
+            opacity={0.14}
+          />
+        </mesh>
+      )}
+    </group>
   );
 }
 
@@ -567,11 +961,18 @@ export default function Shelter3D({
   orientation = 180,
   wallThickness = 0.312,
   roofThickness = 0.22,
+  outdoorTemperatureC = null,
+  solarIrradianceWm2 = 0,
+  windSpeedMs = 0,
+  isDay = true,
+  climateHour = 12,
+  latitude = 34.1650,
+  longitude = 77.5840,
+  climateMonth = 1,
+  timezoneOffsetHours = 5.5,
 }: Shelter3DProps) {
-
   return (
     <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-950">
-
       <Canvas
         shadows
         camera={{
@@ -588,22 +989,36 @@ export default function Shelter3D({
           antialias: true,
         }}
       >
-
-        <color
-          attach="background"
-          args={[
-            "#020617",
-          ]}
+        <ClimateAtmosphere
+          outdoorTemperatureC={
+            outdoorTemperatureC
+          }
+          solarIrradianceWm2={
+            solarIrradianceWm2
+          }
+          windSpeedMs={windSpeedMs}
+          isDay={isDay}
         />
-
 
         <ambientLight
-          intensity={1.2}
+          intensity={
+            isDay
+              ? 0.55
+              : 0.3
+        }
+      />
+
+        <ClimateSun
+          solarIrradianceWm2={
+            solarIrradianceWm2
+          }
+          isDay={isDay}
+          climateHour={climateHour}
+          latitude={latitude}
+          longitude={longitude}
+          climateMonth={climateMonth}
+          timezoneOffsetHours={timezoneOffsetHours}
         />
-
-
-        <SunLight />
-
 
         <Grid
           args={[
@@ -620,7 +1035,6 @@ export default function Shelter3D({
           fadeStrength={1}
         />
 
-
         <ShelterModel
           length={length}
           width={width}
@@ -636,15 +1050,23 @@ export default function Shelter3D({
           }
         />
 
+        <ClimateOverlay
+          outdoorTemperatureC={
+            outdoorTemperatureC
+          }
+          solarIrradianceWm2={
+            solarIrradianceWm2
+          }
+          windSpeedMs={windSpeedMs}
+          isDay={isDay}
+        />
 
         <CameraController
           length={length}
           width={width}
           height={height}
         />
-
       </Canvas>
-
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Rubik, JetBrains_Mono } from "next/font/google";
+import { Ubuntu, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
-const rubik = Rubik({
-  variable: "--font-rubik",
+const ubuntu = Ubuntu({
+  variable: "--font-ubuntu",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${rubik.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${ubuntu.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script

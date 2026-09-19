@@ -1,65 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const Shelter3D = dynamic(() => import("@/components/Shelter3D"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center font-mono text-xs text-amber-700 dark:text-amber-400">
-      <span className="w-2 h-2 rounded-full bg-amber-500 status-ping mr-2" />
-      INITIALIZING 3D ENGINE...
-    </div>
-  ),
-});
-
-interface ShelterPreset {
-  name: string;
-  length: number;
-  width: number;
-  height: number;
-  desc: string;
-}
-
-const PRESETS: Record<string, ShelterPreset> = {
-  standard: {
-    name: "Expedition Standard",
-    length: 6.0,
-    width: 4.0,
-    height: 2.8,
-    desc: "4-Person Alpine Research",
-  },
-  compact: {
-    name: "High Ridge Outpost",
-    length: 4.5,
-    width: 3.2,
-    height: 2.5,
-    desc: "2-Person Emergency Refuge",
-  },
-  basecamp: {
-    name: "Base Camp Station",
-    length: 8.0,
-    width: 5.0,
-    height: 3.2,
-    desc: "8-Person Field Headquarters",
-  },
-};
-
 export default function HomePage() {
-  const [selectedPreset, setSelectedPreset] = useState<string>("standard");
-  const [orientation, setOrientation] = useState<number>(180);
-
-  const currentPreset = PRESETS[selectedPreset] ?? PRESETS.standard;
-
-  // Approximate solar capture factor based on azimuth alignment to true south (180°)
-  const azimuthOffset = Math.abs(orientation - 180);
-  const solarCaptureEff = Math.max(
-    25,
-    Math.round(Math.cos((azimuthOffset * Math.PI) / 180) * 45 + 55),
-  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
@@ -104,9 +49,9 @@ export default function HomePage() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            <a href="#hero-3d" className="hover:text-slate-950 dark:hover:text-white transition-colors">
-              3D Model
-            </a>
+            <Link href="/3d" className="hover:text-slate-950 dark:hover:text-white transition-colors">
+              3D Simulator
+            </Link>
             <a href="#how-it-works" className="hover:text-slate-950 dark:hover:text-white transition-colors">
               Heat Flow
             </a>
@@ -133,9 +78,9 @@ export default function HomePage() {
       </header>
 
       <main>
-        {/* 3. Hero Section with Real High-Altitude Photography & Live 3D Parametric Viewer */}
+        {/* 3. Hero Section with Real High-Altitude Photography */}
         <section
-          id="hero-3d"
+          id="hero"
           className="relative min-h-[calc(100vh-80px)] flex flex-col justify-center py-16 lg:py-24 border-b border-slate-200 dark:border-white/10 overflow-hidden"
         >
           {/* Real Generated Cinematic Background Photo */}
@@ -154,177 +99,69 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              {/* Left Column: Mission Overview & Architectural Headline */}
-              <div className="lg:col-span-6 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-600/30 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 font-mono text-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 status-ping" />
-                  <span>Passive Solar Architecture</span>
-                  <span className="text-slate-400 dark:text-slate-500">•</span>
-                  <span>Zero Fuel Burn</span>
-                </div>
-
-                <h1
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 dark:text-white leading-[1.1]"
-                  style={{ fontFamily: "var(--font-headline)" }}
-                >
-                  Engineered for <span className="text-sky-600 dark:text-cyan-400">-50°C</span>.
-                  <br />
-                  Powered entirely by the sun.
-                </h1>
-
-                <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-xl">
-                  Thermo Shelter 1 captures low-angle winter sunlight on high-altitude peaks,
-                  storing it within a 3,200 kg phase-change Trombe matrix. It maintains a stable{" "}
-                  <strong className="text-amber-700 dark:text-amber-400 font-semibold">+19.5°C</strong> interior through
-                  11.4 hours of darkness without kerosene or diesel generators.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link
-                    href="/3d"
-                    className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold text-xs px-7 py-4 tracking-wider uppercase transition-colors inline-flex items-center gap-3 shadow-md"
-                  >
-                    <span>Open Full 3D Simulator</span>
-                    <span>→</span>
-                  </Link>
-
-                  <a
-                    href="#how-it-works"
-                    className="chamfer-btn border border-slate-300 dark:border-white/20 bg-white hover:bg-slate-50 dark:bg-[#090e1b]/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-xs px-6 py-4 tracking-wider uppercase transition-colors shadow-sm"
-                  >
-                    Heat Flow Diagram ↓
-                  </a>
-                </div>
-
-                {/* Quick HUD Metrics */}
-                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 dark:border-white/10 font-mono text-[11px]">
-                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Internal Core</div>
-                    <div className="text-base font-bold text-amber-700 dark:text-amber-400 mt-0.5">+19.5°C</div>
-                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">Autonomous</div>
-                  </div>
-
-                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Insulation Barrier</div>
-                    <div className="text-base font-bold text-sky-700 dark:text-cyan-400 mt-0.5">R-82.4</div>
-                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">Aerogel Core</div>
-                  </div>
-
-                  <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-                    <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Aux Fuel</div>
-                    <div className="text-base font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">0.0 L</div>
-                    <div className="text-slate-500 dark:text-slate-400 text-[9px]">100% Solar</div>
-                  </div>
-                </div>
+            <div className="max-w-3xl space-y-6">
+              {/* Architectural badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-600/30 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 font-mono text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 status-ping" />
+                <span>Passive Solar Architecture</span>
+                <span className="text-slate-400 dark:text-slate-500">•</span>
+                <span>Zero Fuel Burn</span>
               </div>
 
-              {/* Right Column: Interactive 3D Model Viewport */}
-              <div className="lg:col-span-6">
-                <div className="border border-slate-200 dark:border-white/20 bg-white dark:bg-[#090e1b]/90 shadow-xl rounded-2xl overflow-hidden corner-bracket">
-                  {/* 3D Viewport Header */}
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060913]/90 px-4 py-3 font-mono text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 status-ping" />
-                      <span className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                        Interactive 3D Envelope
-                      </span>
-                    </div>
+              {/* Main Headline */}
+              <h1
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 dark:text-white leading-[1.1]"
+                style={{ fontFamily: "var(--font-headline)" }}
+              >
+                Engineered for <span className="text-sky-600 dark:text-cyan-400">-50°C</span>.
+                <br />
+                Powered entirely by the sun.
+              </h1>
 
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                      ORBIT: <span className="text-sky-700 dark:text-cyan-400 font-bold">DRAG 360°</span>
-                    </div>
-                  </div>
+              {/* Lead Paragraph */}
+              <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-2xl">
+                Thermo Shelter 1 captures low-angle winter sunlight on high-altitude peaks,
+                storing it within a 3,200 kg phase-change Trombe matrix. It maintains a stable{" "}
+                <strong className="text-amber-700 dark:text-amber-400 font-semibold">+19.5°C</strong> interior through
+                11.4 hours of darkness without kerosene or diesel generators.
+              </p>
 
-                  {/* 3D WebGL Canvas */}
-                  <div className="relative h-[340px] sm:h-[380px] w-full cad-grid-dense bg-slate-100 dark:bg-[#050810]">
-                    {/* Live CAD Floating Telemetry */}
-                    <div className="absolute left-3 top-3 z-10 font-mono text-[10px] space-y-1 bg-white/95 dark:bg-[#060913]/85 border border-slate-200 dark:border-white/10 p-2.5 rounded shadow-sm backdrop-blur-sm pointer-events-none">
-                      <div className="text-slate-500 dark:text-slate-400">
-                        SPAN:{" "}
-                        <span className="text-slate-900 dark:text-white font-bold">
-                          {currentPreset.length}m × {currentPreset.width}m × {currentPreset.height}m
-                        </span>
-                      </div>
-                      <div className="text-slate-500 dark:text-slate-400">
-                        AZIMUTH: <span className="text-amber-700 dark:text-amber-400 font-bold">{orientation}°</span>
-                      </div>
-                      <div className="text-slate-500 dark:text-slate-400">
-                        SOLAR EFFICIENCY:{" "}
-                        <span className="text-emerald-700 dark:text-emerald-400 font-bold">{solarCaptureEff}%</span>
-                      </div>
-                    </div>
+              {/* Actions */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <Link
+                  href="/3d"
+                  className="chamfer-btn bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold text-xs px-7 py-4 tracking-wider uppercase transition-colors inline-flex items-center gap-3 shadow-md"
+                >
+                  <span>Launch 3D Thermal Simulator</span>
+                  <span>→</span>
+                </Link>
 
-                    <Shelter3D
-                      length={currentPreset.length}
-                      width={currentPreset.width}
-                      height={currentPreset.height}
-                      orientation={orientation}
-                      wallThickness={0.2}
-                      roofThickness={0.25}
-                    />
-                  </div>
+                <a
+                  href="#how-it-works"
+                  className="chamfer-btn border border-slate-300 dark:border-white/20 bg-white hover:bg-slate-50 dark:bg-[#090e1b]/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-xs px-6 py-4 tracking-wider uppercase transition-colors shadow-sm"
+                >
+                  Heat Flow Diagram ↓
+                </a>
+              </div>
 
-                  {/* Interactive Controls Bar */}
-                  <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#070c17] space-y-3 font-mono text-xs">
-                    {/* Presets */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
-                        Preset:
-                      </span>
-                      <div className="grid grid-cols-3 gap-1.5 w-full">
-                        {Object.entries(PRESETS).map(([key, p]) => (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => setSelectedPreset(key)}
-                            className={`py-1.5 px-2 rounded text-[10px] uppercase font-semibold border transition-all truncate ${
-                              selectedPreset === key
-                                ? "border-amber-600 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-400/20 dark:text-amber-300 font-bold shadow-xs"
-                                : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04]"
-                            }`}
-                          >
-                            {p.name.split(" ")[0]}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+              {/* Quick HUD Metrics */}
+              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200 dark:border-white/10 font-mono text-[11px] max-w-xl">
+                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Internal Core</div>
+                  <div className="text-base font-bold text-amber-700 dark:text-amber-400 mt-0.5">+19.5°C</div>
+                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">Autonomous</div>
+                </div>
 
-                    {/* Azimuth / Orientation Slider */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center text-[10px]">
-                        <span className="text-slate-500 dark:text-slate-400 uppercase">Orientation Azimuth:</span>
-                        <span className="text-sky-700 dark:text-cyan-400 font-bold">{orientation}°</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="360"
-                        step="5"
-                        value={orientation}
-                        onChange={(e) => setOrientation(Number(e.target.value))}
-                        className="w-full accent-sky-600 dark:accent-cyan-400"
-                      />
-                      <div className="flex justify-between text-[9px] text-slate-500 dark:text-slate-400 pt-0.5">
-                        <span>N (0°)</span>
-                        <span>E (90°)</span>
-                        <span className="text-amber-700 dark:text-amber-400 font-bold">S (180° Optimal)</span>
-                        <span>W (270°)</span>
-                        <span>N (360°)</span>
-                      </div>
-                    </div>
+                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Insulation Barrier</div>
+                  <div className="text-base font-bold text-sky-700 dark:text-cyan-400 mt-0.5">R-82.4</div>
+                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">Aerogel Core</div>
+                </div>
 
-                    {/* Launch Full 3D Suite button */}
-                    <div className="pt-1">
-                      <Link
-                        href="/3d"
-                        className="chamfer-btn w-full bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-bold py-2.5 text-center text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-sm"
-                      >
-                        <span>Configure in Full 3D Thermal Simulator</span>
-                        <span>→</span>
-                      </Link>
-                    </div>
-                  </div>
+                <div className="border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#060913]/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
+                  <div className="text-slate-500 dark:text-slate-400 uppercase text-[9px]">Aux Fuel</div>
+                  <div className="text-base font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">0.0 L</div>
+                  <div className="text-slate-500 dark:text-slate-400 text-[9px]">100% Solar</div>
                 </div>
               </div>
             </div>

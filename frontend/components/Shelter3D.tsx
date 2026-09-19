@@ -33,6 +33,40 @@ interface Shelter3DProps {
 }
 
 
+const wallMaterial = new THREE.MeshStandardMaterial({
+  color: "#a16207",
+  roughness: 0.85,
+});
+
+const roofMaterial = new THREE.MeshStandardMaterial({
+  color: "#64748b",
+  roughness: 0.8,
+});
+
+const floorMaterial = new THREE.MeshStandardMaterial({
+  color: "#475569",
+  roughness: 0.9,
+});
+
+const glassMaterial = new THREE.MeshStandardMaterial({
+  color: "#38bdf8",
+  transparent: true,
+  opacity: 0.65,
+  roughness: 0.15,
+  metalness: 0.1,
+});
+
+const doorMaterial = new THREE.MeshStandardMaterial({
+  color: "#334155",
+  roughness: 0.8,
+});
+
+const massMaterial = new THREE.MeshStandardMaterial({
+  color: "#78716c",
+  roughness: 0.95,
+});
+
+
 function ShelterModel({
   length,
   width,
@@ -67,47 +101,6 @@ function ShelterModel({
       height - doorHeight,
       0,
     );
-
-
-  const wallMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#a16207",
-      roughness: 0.85,
-    });
-
-  const roofMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#64748b",
-      roughness: 0.8,
-    });
-
-  const floorMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#475569",
-      roughness: 0.9,
-    });
-
-  const glassMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#38bdf8",
-      transparent: true,
-      opacity: 0.65,
-      roughness: 0.15,
-      metalness: 0.1,
-    });
-
-  const doorMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#334155",
-      roughness: 0.8,
-    });
-
-  const massMaterial =
-    new THREE.MeshStandardMaterial({
-      color: "#78716c",
-      roughness: 0.95,
-    });
-
 
   return (
     <group

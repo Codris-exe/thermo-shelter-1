@@ -1,7 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Shelter3D from "@/components/Shelter3D";
+import dynamic from "next/dynamic";
+
+const Shelter3D = dynamic(() => import("@/components/Shelter3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+      Loading 3D Scene...
+    </div>
+  ),
+});
 import ThermalResultsChart from "@/components/ThermalResultsChart";
 import WeatherSummaryCard from "@/components/WeatherSummaryCard";
 import OptimizationResultsTable from "@/components/OptimizationResultsTable";
@@ -470,7 +479,7 @@ export default function ThreeDPage() {
         result,
       );
     } catch (err) {
-      console.error(err);
+      console.warn("Thermal simulation notice:", err);
 
       setError(
         err instanceof Error
@@ -624,7 +633,7 @@ export default function ThreeDPage() {
 
       return result;
     } catch (err) {
-      console.error(err);
+      console.warn("Optimize shelter notice:", err);
 
       throw err;
     } finally {
@@ -711,7 +720,7 @@ export default function ThreeDPage() {
         optimizationResult,
       );
     } catch (err) {
-      console.error(err);
+      console.warn("Apply optimization notice:", err);
 
       setError(
         err instanceof Error
@@ -964,7 +973,7 @@ export default function ThreeDPage() {
 
       setIsApplied(false);
     } catch (err) {
-      console.error(err);
+      console.warn("Restore baseline notice:", err);
 
       setError(
         err instanceof Error

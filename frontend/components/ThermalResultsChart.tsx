@@ -24,12 +24,10 @@ interface ThermalResultsChartProps {
 }
 
 function formatTime(timestamp: string) {
-  const date = new Date(timestamp);
-
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (timestamp.includes("T")) {
+    return timestamp.split("T")[1].slice(0, 5);
+  }
+  return timestamp;
 }
 
 function formatValue(value: number, digits = 1) {

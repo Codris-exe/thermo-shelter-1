@@ -530,7 +530,8 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-            <div className="scroll-reveal max-w-2xl space-y-4 mb-16">
+            {/* Clean Right-Aligned Frosted Glass Editorial Header */}
+            <div className="lg:ml-auto max-w-2xl mb-16 p-8 sm:p-10 rounded-3xl bg-[#070b14]/80 backdrop-blur-2xl border border-white/15 shadow-2xl space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-cyan-400 border border-cyan-500/20 bg-cyan-500/10 backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 Night Autonomy & Telemetry
@@ -543,7 +544,7 @@ export default function HomePage() {
                 <br />
                 Zero Active Generators.
               </h2>
-              <p className="text-slate-300 text-base sm:text-lg leading-relaxed font-sans">
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-sans">
                 When the sun dips below the Himalayan ridges, ambient temperatures plummet to
                 deadly sub-zero levels. Thermo Shelter maintains thermal equilibrium through its
                 11.4-hour calibrated thermal lag, slowly radiating daytime solar warmth through the
@@ -552,7 +553,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-              <div className="scroll-reveal scroll-delay-1 border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-amber-500/30 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-amber-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
                 <div>
                   <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(251,191,36,0.15)]">
                     11.4h
@@ -560,7 +561,7 @@ export default function HomePage() {
                   <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
                     Calibrated Radiant Lag
                   </h3>
-                  <p className="text-xs text-white/60 font-sans leading-relaxed">
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
                     Heat gathered during daylight hours takes exactly 11.4 hours to conduct through the
                     Trombe core, peaking radiation right during the coldest pre-dawn hours (03:00 to
                     06:00).
@@ -574,7 +575,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="scroll-reveal scroll-delay-2 border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-cyan-500/30 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-cyan-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
                 <div>
                   <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
                     R-82
@@ -582,7 +583,7 @@ export default function HomePage() {
                   <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
                     Aerogel Vacuum Shell
                   </h3>
-                  <p className="text-xs text-white/60 font-sans leading-relaxed">
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
                     Multi-layer insulation sandwich combining silica aerogel (k=0.014 W/mK) and
                     reflective radiation barriers completely halts conductive, convective, and
                     infrared heat loss.
@@ -596,7 +597,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="scroll-reveal scroll-delay-3 border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-emerald-500/30 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+              <div className="border border-white/15 bg-[#070b14]/80 hover:bg-[#070b14]/90 hover:border-emerald-500/40 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl transition-all duration-300 flex flex-col justify-between group">
                 <div>
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base mb-6 shadow-[0_0_20px_rgba(52,211,153,0.15)]">
                     0.0L
@@ -604,7 +605,7 @@ export default function HomePage() {
                   <h3 className="text-lg font-bold text-white font-sans uppercase mb-2">
                     100% Passive Autonomy
                   </h3>
-                  <p className="text-xs text-white/60 font-sans leading-relaxed">
+                  <p className="text-xs text-white/70 font-sans leading-relaxed">
                     Eliminates catastrophic dependency on supply lines for kerosene or diesel in
                     inaccessible alpine zones, preventing carbon monoxide poisoning and mechanical
                     freezing failures.

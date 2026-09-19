@@ -1,15 +1,34 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const Hero3DScene = dynamic(() => import("@/components/Hero3DScene"), {
-  ssr: false,
-});
-
 export default function HomePage() {
+  useEffect(() => {
+    const elements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-scale");
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-revealed");
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -40px 0px",
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans transition-colors duration-200">
       {/* 1. Top Navigation */}
@@ -62,10 +81,10 @@ export default function HomePage() {
       </header>
 
       <main>
-        {/* 2. Hero Section - Ultra-clean First Page Area with 1 Central Title & 3D Interactive Animation */}
+        {/* 2. Hero Section - Ultra-clean First Page Area with 1 Central Title */}
         <section
           id="hero"
-          className="relative h-[calc(100vh-64px)] min-h-[640px] flex flex-col items-center justify-center border-b border-slate-200 dark:border-white/10 overflow-hidden select-none"
+          className="relative h-[calc(100vh-64px)] min-h-[600px] flex flex-col items-center justify-center border-b border-slate-200 dark:border-white/10 overflow-hidden select-none"
         >
           {/* Alpine Mountain Photography Backdrop */}
           <div className="absolute inset-0 z-0 pointer-events-none">
@@ -74,15 +93,13 @@ export default function HomePage() {
               alt="Extreme-altitude passive solar alpine shelter on Himalayan ridge"
               fill
               priority
-              className="object-cover object-center opacity-65 dark:opacity-55"
+              className="object-cover object-center opacity-80 dark:opacity-70 transition-transform duration-1000"
             />
-            {/* Subtle atmospheric vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/50 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/60" />
-            <div className="absolute inset-0 cad-grid opacity-20" />
+            {/* Subtle atmospheric vignette and lighting overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/40 dark:from-[#070b14] dark:via-transparent dark:to-[#070b14]/50" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#f8fafc]/30 via-transparent to-[#f8fafc] dark:from-[#070b14]/30 dark:via-transparent dark:to-[#070b14]" />
+            <div className="absolute inset-0 cad-grid opacity-15" />
           </div>
-
-          {/* 3D Interactive Floating Architecture & Particle Scene */}
-          <Hero3DScene />
 
           {/* Centerpiece: Only 1 Single Title in the Middle */}
           <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pointer-events-none">
@@ -94,26 +111,26 @@ export default function HomePage() {
             </h1>
           </div>
 
-          {/* Clean Scroll to Explore Indicator */}
+          {/* Clean Scroll Indicator */}
           <a
             href="#telemetry"
             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer"
           >
             <span>Scroll</span>
             <span className="w-5 h-8 rounded-full border border-slate-400/50 dark:border-white/20 flex items-start justify-center p-1">
-              <span className="w-1.5 h-2 rounded-full bg-amber-500 animate-bounce" />
+              <span className="w-1.5 h-2.5 rounded-full bg-amber-500 animate-bounce" />
             </span>
           </a>
         </section>
 
-        {/* 3. Quick Telemetry Readout Strip */}
+        {/* 3. Quick Telemetry Readout Strip with Scroll Reveal */}
         <section
           id="telemetry"
-          className="py-10 border-b border-slate-200 dark:border-white/10 bg-white/70 dark:bg-[#070b14]/70 backdrop-blur-sm"
+          className="py-12 border-b border-slate-200 dark:border-white/10 bg-white/70 dark:bg-[#070b14]/70 backdrop-blur-sm"
         >
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
+              <div className="scroll-reveal scroll-delay-1 p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Internal Stability
                 </div>
@@ -121,7 +138,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Constant core comfort zone</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
+              <div className="scroll-reveal scroll-delay-2 p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Envelope Rating
                 </div>
@@ -129,7 +146,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">m²·K/W combined barrier</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
+              <div className="scroll-reveal scroll-delay-3 p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Thermal Lag
                 </div>
@@ -137,7 +154,7 @@ export default function HomePage() {
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Nighttime radiant release</div>
               </div>
 
-              <div className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
+              <div className="scroll-reveal scroll-delay-4 p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b1120]/80 rounded-xl shadow-sm">
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Auxiliary Fuel
                 </div>
@@ -148,10 +165,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4. Visual Cross-Section & How It Works */}
+        {/* 4. Visual Cross-Section & How It Works with Scroll Reveal */}
         <section className="py-20 border-b border-slate-200 dark:border-white/10" id="how-it-works">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
                 <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-2 font-semibold">
                   System Diagram
@@ -170,7 +187,7 @@ export default function HomePage() {
             </div>
 
             {/* Clean SVG Cross-Section Illustration */}
-            <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-md rounded-2xl overflow-hidden p-6 sm:p-8">
+            <div className="scroll-reveal-scale border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-md rounded-2xl overflow-hidden p-6 sm:p-8">
               <div className="relative w-full aspect-[16/9] max-h-[460px] bg-slate-50 dark:bg-[#050810] border border-slate-200 dark:border-white/5 rounded-xl p-4 flex items-center justify-center cad-grid-dense">
                 <svg
                   className="w-full h-full"
@@ -371,7 +388,7 @@ export default function HomePage() {
 
               {/* 3 Step Summary Cards Below Diagram */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 font-mono">
-                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                <div className="scroll-reveal scroll-delay-1 p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
                   <div className="text-amber-700 dark:text-amber-400 font-bold text-xs uppercase mb-1">
                     01 / SOLAR ABSORPTION
                   </div>
@@ -384,7 +401,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                <div className="scroll-reveal scroll-delay-2 p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
                   <div className="text-sky-700 dark:text-cyan-400 font-bold text-xs uppercase mb-1">
                     02 / SENSIBLE STORAGE
                   </div>
@@ -397,7 +414,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
+                <div className="scroll-reveal scroll-delay-3 p-4 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] rounded-xl">
                   <div className="text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase mb-1">
                     03 / NIGHTTIME RELEASE
                   </div>
@@ -414,13 +431,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5. Immersive Night Thermal Autonomy Section with Real Background Photo */}
+        {/* 5. Immersive Night Thermal Autonomy Section with Scroll Reveal */}
         <section
           id="night-autonomy"
           className="relative py-24 lg:py-32 border-b border-slate-200 dark:border-white/10 overflow-hidden"
         >
           {/* Real Generated Night Photo with Milky Way and Glowing Shelter */}
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/images/night-thermal-shelter.jpg"
               alt="Himalayan research station shelter under the Milky Way with glowing thermal core"
@@ -433,7 +450,7 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-            <div className="max-w-2xl space-y-4 mb-16">
+            <div className="scroll-reveal max-w-2xl space-y-4 mb-16">
               <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-semibold">
                 Night Autonomy & Telemetry
               </div>
@@ -454,7 +471,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+              <div className="scroll-reveal scroll-delay-1 border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
                 <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 font-bold text-sm mb-4">
                   11.4h
                 </div>
@@ -472,7 +489,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+              <div className="scroll-reveal scroll-delay-2 border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
                 <div className="w-9 h-9 rounded-lg bg-sky-50 dark:bg-cyan-500/10 border border-sky-200 dark:border-cyan-500/30 flex items-center justify-center text-sky-700 dark:text-cyan-400 font-bold text-sm mb-4">
                   R-82
                 </div>
@@ -490,7 +507,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
+              <div className="scroll-reveal scroll-delay-3 border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#090e1b]/85 backdrop-blur-md rounded-2xl p-6 corner-bracket shadow-sm">
                 <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm mb-4">
                   0.0L
                 </div>
@@ -511,10 +528,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 6. Proven Field Deployments */}
+        {/* 6. Proven Field Deployments with Scroll Reveal */}
         <section className="py-20 border-b border-slate-200 dark:border-white/10" id="deployments">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div className="scroll-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
               <div>
                 <div className="text-xs font-mono uppercase tracking-widest text-amber-700 dark:text-amber-400 font-semibold mb-2">
                   Extreme Test Stations
@@ -534,7 +551,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
               {/* Siachen */}
-              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="scroll-reveal scroll-delay-1 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -576,7 +593,7 @@ export default function HomePage() {
               </div>
 
               {/* Spiti */}
-              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="scroll-reveal scroll-delay-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -618,7 +635,7 @@ export default function HomePage() {
               </div>
 
               {/* Andes */}
-              <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
+              <div className="scroll-reveal scroll-delay-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090e1b] shadow-sm rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -662,8 +679,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 7. Clean Interactive CTA Banner */}
-        <section className="py-20 bg-slate-100 dark:bg-gradient-to-b dark:from-[#070b14] dark:to-[#090e1b] border-b border-slate-200 dark:border-white/10">
+        {/* 7. Clean Interactive CTA Banner with Scroll Reveal */}
+        <section className="scroll-reveal-scale py-20 bg-slate-100 dark:bg-gradient-to-b dark:from-[#070b14] dark:to-[#090e1b] border-b border-slate-200 dark:border-white/10">
           <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
             <h2
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 dark:text-white tracking-tight"

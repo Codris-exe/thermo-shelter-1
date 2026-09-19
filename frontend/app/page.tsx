@@ -525,26 +525,26 @@ export default function HomePage() {
             {/* Subtle edge fades to blend into background seamlessly without hiding the shelter */}
             <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-[#070b14] to-transparent" />
             <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#070b14] to-transparent" />
-            {/* Gentle cinematic contrast behind text for perfect readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent lg:w-3/5" />
+            {/* Subtle soft dark vignette on the right to keep unboxed typography readable against the sky */}
+            <div className="absolute inset-y-0 right-0 w-full lg:w-3/5 bg-gradient-to-l from-[#070b14]/70 via-[#070b14]/30 to-transparent pointer-events-none" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-            {/* Clean Right-Aligned Frosted Glass Editorial Header */}
-            <div className="lg:ml-auto max-w-2xl mb-16 p-8 sm:p-10 rounded-3xl bg-[#070b14]/80 backdrop-blur-2xl border border-white/15 shadow-2xl space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-cyan-400 border border-cyan-500/20 bg-cyan-500/10 backdrop-blur-md">
+            {/* Unboxed Clean Right-Aligned Editorial Typography */}
+            <div className="lg:ml-auto max-w-2xl mb-16 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest text-cyan-400 border border-cyan-500/30 bg-cyan-950/40 backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 Night Autonomy & Telemetry
               </div>
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-lg"
                 style={{ fontFamily: "var(--font-headline)" }}
               >
-                Surviving the <span className="text-cyan-400"> -50°C</span> Alpine Night.
+                Surviving the <span className="text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"> -50°C</span> Alpine Night.
                 <br />
                 Zero Active Generators.
               </h2>
-              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-sans">
+              <p className="text-slate-200 text-base sm:text-lg leading-relaxed font-sans drop-shadow-md">
                 When the sun dips below the Himalayan ridges, ambient temperatures plummet to
                 deadly sub-zero levels. Thermo Shelter maintains thermal equilibrium through its
                 11.4-hour calibrated thermal lag, slowly radiating daytime solar warmth through the

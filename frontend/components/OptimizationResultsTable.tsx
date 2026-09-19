@@ -28,25 +28,25 @@ export default function OptimizationResultsTable({
   const visibleCandidates = candidates.slice(0, 5);
 
   return (
-    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
+    <div className="border border-slate-200 bg-white shadow-sm p-3 corner-bracket font-mono">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Optimization Candidates
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-400">
+          <div className="mt-0.5 text-[9px] text-slate-500">
             Top ranked architectural iterations
           </div>
         </div>
 
-        <div className="border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[9px] text-amber-300 font-bold uppercase">
+        <div className="border border-amber-600/30 bg-amber-50 px-2 py-0.5 text-[9px] text-amber-800 font-bold uppercase rounded">
           {totalCandidates} Tested
         </div>
       </div>
 
-      <div className="overflow-hidden border border-white/10">
-        <div className="grid grid-cols-[32px_48px_62px_62px_1fr] bg-white/[0.04] px-2 py-2 text-[8px] uppercase tracking-wide text-slate-500">
+      <div className="overflow-hidden border border-slate-200 rounded-lg">
+        <div className="grid grid-cols-[32px_48px_62px_62px_1fr] bg-slate-50 px-2 py-2 text-[8px] uppercase tracking-wide text-slate-500">
           <div>#</div>
           <div>Orient.</div>
           <div>Wall</div>
@@ -57,34 +57,34 @@ export default function OptimizationResultsTable({
         {visibleCandidates.map((candidate) => (
           <div
             key={`${candidate.rank}-${candidate.orientation_deg}-${candidate.wall_insulation_thickness_mm}-${candidate.roof_insulation_thickness_mm}`}
-            className={`grid grid-cols-[32px_48px_62px_62px_1fr] items-center border-t border-white/5 px-2 py-2 text-[10px] ${
+            className={`grid grid-cols-[32px_48px_62px_62px_1fr] items-center border-t border-slate-200 px-2 py-2 text-[10px] ${
               candidate.rank === 1
-                ? "bg-amber-400/[0.1]"
+                ? "bg-amber-50/80"
                 : ""
             }`}
           >
             <div
               className={
                 candidate.rank === 1
-                  ? "font-bold text-amber-400"
+                  ? "font-bold text-amber-700"
                   : "text-slate-500"
               }
             >
               {candidate.rank}
             </div>
 
-            <div className="text-slate-300">
+            <div className="text-slate-800 font-medium">
               {candidate.orientation_deg}°
             </div>
 
-            <div className="text-slate-300">
+            <div className="text-slate-800 font-medium">
               {candidate.wall_insulation_thickness_mm.toFixed(
                 0,
               )}{" "}
               mm
             </div>
 
-            <div className="text-slate-300">
+            <div className="text-slate-800 font-medium">
               {candidate.roof_insulation_thickness_mm.toFixed(
                 0,
               )}{" "}
@@ -95,14 +95,14 @@ export default function OptimizationResultsTable({
               <span
                 className={
                   candidate.rank === 1
-                    ? "font-semibold text-emerald-300"
-                    : "text-slate-300"
+                    ? "font-bold text-emerald-700"
+                    : "text-slate-800 font-medium"
                 }
               >
                 {candidate.comfort_percentage.toFixed(1)}%
               </span>
 
-              <span className="text-[8px] text-slate-600">
+              <span className="text-[8px] text-slate-400">
                 {candidate.comfort_hours.toFixed(1)} h
               </span>
             </div>
@@ -110,7 +110,7 @@ export default function OptimizationResultsTable({
         ))}
       </div>
 
-      <div className="mt-2 text-[9px] leading-relaxed text-slate-600">
+      <div className="mt-2 text-[9px] leading-relaxed text-slate-400">
         Candidates are ordered using simulated comfort percentage,
         comfort hours, and indoor temperature range.
       </div>

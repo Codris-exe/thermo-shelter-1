@@ -1042,43 +1042,43 @@ export default function ThreeDPage() {
     isResetting;
 
   return (
-    <main className="h-screen overflow-hidden bg-[#070c16] text-slate-100 font-sans">
+    <main className="h-screen overflow-hidden bg-[#f1f5f9] text-slate-900 font-sans">
       {/* ARCHITECTURAL HEADER */}
-      <header className="flex h-[58px] items-center justify-between border-b border-white/10 px-6 bg-[#090e1b]">
+      <header className="flex h-[58px] items-center justify-between border-b border-slate-200 px-6 bg-white shadow-xs">
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-slate-300 hover:text-white transition-colors"
+            className="flex items-center gap-2.5 text-slate-700 hover:text-slate-950 transition-colors"
           >
-            <div className="w-7 h-7 bg-amber-500/10 border border-amber-500/40 flex items-center justify-center chamfer-btn">
-              <span className="font-mono text-amber-400 font-bold text-[11px]">TS</span>
+            <div className="w-7 h-7 bg-amber-500/15 border border-amber-500/40 flex items-center justify-center chamfer-btn">
+              <span className="font-mono text-amber-700 font-bold text-[11px]">TS</span>
             </div>
-            <span className="text-sm font-bold tracking-wider uppercase font-mono text-slate-200">
+            <span className="text-sm font-bold tracking-wider uppercase font-mono text-slate-900">
               THERMO SHELTER // TS-1
             </span>
           </Link>
 
-          <span className="hidden sm:inline text-slate-600 font-mono text-xs">/</span>
+          <span className="hidden sm:inline text-slate-300 font-mono text-xs">/</span>
 
-          <span className="hidden sm:inline text-xs font-mono text-amber-400 font-medium tracking-wide">
+          <span className="hidden sm:inline text-xs font-mono text-amber-700 font-semibold tracking-wide">
             3D INTERACTIVE SIMULATOR
           </span>
         </div>
 
         <div className="flex items-center gap-3 font-mono text-[11px]">
-          <div className="flex items-center gap-2 border border-white/10 bg-[#060913] px-3 py-1 text-slate-300">
-            <span className="h-2 w-2 rounded-full bg-amber-400 status-ping" />
+          <div className="flex items-center gap-2 border border-slate-200 bg-slate-50 px-3 py-1 text-slate-700 rounded">
+            <span className="h-2 w-2 rounded-full bg-amber-500 status-ping" />
             <span>SI UNITS: METRIC</span>
           </div>
 
-          <div className="flex items-center gap-2 border border-white/10 bg-[#060913] px-3 py-1 text-slate-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+          <div className="flex items-center gap-2 border border-slate-200 bg-slate-50 px-3 py-1 text-slate-700 rounded">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
             <span>SOLVER: TRANSIENT EULER</span>
           </div>
 
           <Link
             href="/"
-            className="chamfer-btn border border-white/20 bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-1 transition-colors uppercase text-[10px] tracking-wider"
+            className="chamfer-btn border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 px-3 py-1 transition-colors uppercase text-[10px] tracking-wider font-semibold shadow-xs"
           >
             ← Mission Spec
           </Link>
@@ -1088,16 +1088,16 @@ export default function ThreeDPage() {
       <div className="grid h-[calc(100vh-58px)] grid-cols-[minmax(0,1fr)_430px] gap-3 p-3">
         {/* LEFT */}
         <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_250px] gap-3">
-          <div className="relative min-h-0 overflow-hidden border border-white/15 bg-[#090e1b] corner-bracket">
-            <div className="absolute left-4 top-4 z-10 border border-white/15 bg-[#060913]/90 px-3 py-2 backdrop-blur-md font-mono">
+          <div className="relative min-h-0 overflow-hidden border border-slate-200 bg-white corner-bracket shadow-sm">
+            <div className="absolute left-4 top-4 z-10 border border-slate-200 bg-white/95 px-3 py-2 backdrop-blur-md font-mono shadow-sm rounded">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 status-ping" />
-                <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 status-ping" />
+                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                   3D Parametric Envelope
                 </span>
               </div>
 
-              <div className="mt-1 text-[10px] text-slate-400">
+              <div className="mt-1 text-[10px] text-slate-500">
                 SPAN: {length_m.toFixed(1)}m × {width_m.toFixed(1)}m × {height_m.toFixed(1)}m | ROT: {orientation_deg}°
               </div>
             </div>
@@ -1147,16 +1147,16 @@ export default function ThreeDPage() {
         </section>
 
         {/* RIGHT CONTROLS PANEL */}
-        <aside className="min-h-0 flex flex-col overflow-hidden border border-white/15 bg-[#090e1b] corner-bracket">
+        <aside className="min-h-0 flex flex-col overflow-hidden border border-slate-200 bg-white corner-bracket shadow-sm">
           {/* TAB STRIP */}
-          <div className="flex border-b border-white/10 shrink-0 bg-[#060913] font-mono text-xs select-none">
+          <div className="flex border-b border-slate-200 shrink-0 bg-slate-50 font-mono text-xs select-none">
             <button
               type="button"
               onClick={() => setActiveTab("envelope")}
               className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
                 activeTab === "envelope"
-                  ? "border-amber-400 text-amber-400 bg-amber-400/[0.08]"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+                  ? "border-amber-500 text-amber-800 bg-amber-50/80"
+                  : "border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               <span>01. Envelope</span>
@@ -1166,13 +1166,13 @@ export default function ThreeDPage() {
               onClick={() => setActiveTab("climate")}
               className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
                 activeTab === "climate"
-                  ? "border-cyan-400 text-cyan-400 bg-cyan-400/[0.08]"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+                  ? "border-sky-600 text-sky-800 bg-sky-50/80"
+                  : "border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               <span>02. Climate</span>
               {hasWeather && (
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-600" />
               )}
             </button>
             <button
@@ -1180,28 +1180,28 @@ export default function ThreeDPage() {
               onClick={() => setActiveTab("solver")}
               className={`flex-1 py-3 px-3 text-center border-b-2 transition-all uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 ${
                 activeTab === "solver"
-                  ? "border-emerald-400 text-emerald-400 bg-emerald-400/[0.08]"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]"
+                  ? "border-emerald-600 text-emerald-800 bg-emerald-50/80"
+                  : "border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               <span>03. Solver</span>
               {(simulationResult || optimizationResult) && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 status-ping" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 status-ping" />
               )}
             </button>
           </div>
 
           {/* PERSISTENT STATUS BAR */}
-          <div className="flex items-center justify-between border-b border-white/[0.08] bg-[#070c17] px-4 py-2 text-[11px] font-mono shrink-0">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2 text-[11px] font-mono shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-slate-500 uppercase">Core:</span>
-              <span className={`font-semibold ${simulationResult ? "text-emerald-400" : "text-slate-400"}`}>
+              <span className={`font-bold ${simulationResult ? "text-emerald-700" : "text-slate-500"}`}>
                 {simulationResult
                   ? `${simulationResult.final_indoor_temperature_c > 0 ? "+" : ""}${simulationResult.final_indoor_temperature_c.toFixed(1)}°C`
                   : "Unsimulated"}
               </span>
               {simulationResult && (
-                <span className="text-slate-400 text-[10px]">
+                <span className="text-slate-500 text-[10px]">
                   ({simulationResult.comfort_percentage.toFixed(0)}% Comfort)
                 </span>
               )}
@@ -1212,7 +1212,7 @@ export default function ThreeDPage() {
                 type="button"
                 onClick={runThermalSimulation}
                 disabled={anyOperationRunning}
-                className="chamfer-btn bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-bold px-2.5 py-1 text-[10px] uppercase transition-colors"
+                className="chamfer-btn bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-bold px-2.5 py-1 text-[10px] uppercase transition-colors shadow-xs"
               >
                 {isSimulating ? "Simulating..." : "Simulate"}
               </button>
@@ -1225,48 +1225,48 @@ export default function ThreeDPage() {
             {activeTab === "envelope" && (
               <div className="space-y-4 font-mono">
                 {/* DIMENSIONS */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     <span>Parametric Geometry</span>
-                    <span className="text-[10px] text-amber-400">
+                    <span className="text-[10px] text-amber-700 font-bold">
                       Vol: {(length_m * width_m * height_m).toFixed(1)} m³
                     </span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
-                      <div className="text-[9px] uppercase text-slate-400">Length (m)</div>
+                    <label className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
+                      <div className="text-[9px] uppercase text-slate-500 font-medium">Length (m)</div>
                       <input
                         type="number"
                         min="1"
                         step="0.1"
                         value={length_m}
                         onChange={(e) => setDimensions({ length_m: Number(e.target.value) })}
-                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                        className="mt-1 w-full bg-transparent text-sm font-bold text-slate-900 outline-none"
                       />
                     </label>
 
-                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
-                      <div className="text-[9px] uppercase text-slate-400">Width (m)</div>
+                    <label className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
+                      <div className="text-[9px] uppercase text-slate-500 font-medium">Width (m)</div>
                       <input
                         type="number"
                         min="1"
                         step="0.1"
                         value={width_m}
                         onChange={(e) => setDimensions({ width_m: Number(e.target.value) })}
-                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                        className="mt-1 w-full bg-transparent text-sm font-bold text-slate-900 outline-none"
                       />
                     </label>
 
-                    <label className="rounded-lg border border-white/10 bg-[#060913] p-2">
-                      <div className="text-[9px] uppercase text-slate-400">Height (m)</div>
+                    <label className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
+                      <div className="text-[9px] uppercase text-slate-500 font-medium">Height (m)</div>
                       <input
                         type="number"
                         min="1"
                         step="0.1"
                         value={height_m}
                         onChange={(e) => setDimensions({ height_m: Number(e.target.value) })}
-                        className="mt-1 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                        className="mt-1 w-full bg-transparent text-sm font-bold text-slate-900 outline-none"
                       />
                     </label>
                   </div>
@@ -1277,10 +1277,10 @@ export default function ThreeDPage() {
                 </div>
 
                 {/* ORIENTATION */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     <span>Azimuth Orientation</span>
-                    <span className="text-cyan-400 font-bold">{orientation_deg}°</span>
+                    <span className="text-sky-700 font-bold">{orientation_deg}°</span>
                   </div>
 
                   <input
@@ -1290,7 +1290,7 @@ export default function ThreeDPage() {
                     step="1"
                     value={orientation_deg}
                     onChange={(e) => setOrientation(Number(e.target.value))}
-                    className="w-full accent-cyan-400"
+                    className="w-full accent-sky-600"
                   />
 
                   <div className="mt-2 grid grid-cols-4 gap-1 text-[10px]">
@@ -1304,10 +1304,10 @@ export default function ThreeDPage() {
                         key={p.deg}
                         type="button"
                         onClick={() => setOrientation(p.deg)}
-                        className={`rounded py-1 text-center transition-colors border ${
+                        className={`rounded py-1 text-center transition-colors border shadow-xs ${
                           orientation_deg === p.deg
-                            ? "border-cyan-400 bg-cyan-400/20 text-cyan-300 font-bold"
-                            : "border-white/10 text-slate-400 hover:text-white"
+                            ? "border-sky-600 bg-sky-50 text-sky-800 font-bold"
+                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
                         }`}
                       >
                         {p.label}
@@ -1317,10 +1317,10 @@ export default function ThreeDPage() {
                 </div>
 
                 {/* WALL CONSTRUCTION */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     <span>Wall Insulation Assembly</span>
-                    <span className="text-slate-300">
+                    <span className="text-slate-700 font-semibold">
                       {Math.round(wallAssembly.thickness * 1000)} mm
                     </span>
                   </div>
@@ -1332,33 +1332,33 @@ export default function ThreeDPage() {
                     step="5"
                     value={Math.round(getInsulationThicknessMm(wall_layers, 100))}
                     onChange={(e) => setWallInsulationThicknessMm(Number(e.target.value))}
-                    className="w-full accent-amber-400"
+                    className="w-full accent-amber-500"
                   />
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
                       <div className="text-[9px] uppercase text-slate-500">Wall R-Value</div>
-                      <div className="mt-0.5 text-sm font-bold text-amber-400">
+                      <div className="mt-0.5 text-sm font-bold text-amber-700">
                         {wallAssembly.rValue.toFixed(2)}{" "}
-                        <span className="text-[9px] font-normal text-slate-500">m²K/W</span>
+                        <span className="text-[9px] font-normal text-slate-400">m²K/W</span>
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
                       <div className="text-[9px] uppercase text-slate-500">Wall U-Value</div>
-                      <div className="mt-0.5 text-sm font-bold text-cyan-300">
+                      <div className="mt-0.5 text-sm font-bold text-sky-700">
                         {wallAssembly.uValue.toFixed(3)}{" "}
-                        <span className="text-[9px] font-normal text-slate-500">W/m²K</span>
+                        <span className="text-[9px] font-normal text-slate-400">W/m²K</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* ROOF CONSTRUCTION */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     <span>Roof Insulation Assembly</span>
-                    <span className="text-slate-300">
+                    <span className="text-slate-700 font-semibold">
                       {Math.round(roofAssembly.thickness * 1000)} mm
                     </span>
                   </div>
@@ -1370,33 +1370,33 @@ export default function ThreeDPage() {
                     step="5"
                     value={Math.round(getInsulationThicknessMm(roof_layers, 120))}
                     onChange={(e) => setRoofInsulationThicknessMm(Number(e.target.value))}
-                    className="w-full accent-amber-400"
+                    className="w-full accent-amber-500"
                   />
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
                       <div className="text-[9px] uppercase text-slate-500">Roof R-Value</div>
-                      <div className="mt-0.5 text-sm font-bold text-amber-400">
+                      <div className="mt-0.5 text-sm font-bold text-amber-700">
                         {roofAssembly.rValue.toFixed(2)}{" "}
-                        <span className="text-[9px] font-normal text-slate-500">m²K/W</span>
+                        <span className="text-[9px] font-normal text-slate-400">m²K/W</span>
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-xs">
                       <div className="text-[9px] uppercase text-slate-500">Roof U-Value</div>
-                      <div className="mt-0.5 text-sm font-bold text-cyan-300">
+                      <div className="mt-0.5 text-sm font-bold text-sky-700">
                         {roofAssembly.uValue.toFixed(3)}{" "}
-                        <span className="text-[9px] font-normal text-slate-500">W/m²K</span>
+                        <span className="text-[9px] font-normal text-slate-400">W/m²K</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* INITIAL INDOOR TEMP */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     <span>Initial Core Temperature</span>
-                    <span className="text-orange-400 font-bold">
+                    <span className="text-orange-700 font-bold">
                       {initial_indoor_temperature_c.toFixed(1)}°C
                     </span>
                   </div>
@@ -1408,7 +1408,7 @@ export default function ThreeDPage() {
                     step="0.5"
                     value={initial_indoor_temperature_c}
                     onChange={(e) => setInitialIndoorTemperature(Number(e.target.value))}
-                    className="w-full accent-orange-400"
+                    className="w-full accent-orange-500"
                   />
                   <div className="mt-1 flex justify-between text-[9px] text-slate-500">
                     <span>0°C (Cold Start)</span>
@@ -1422,7 +1422,7 @@ export default function ThreeDPage() {
                   type="button"
                   onClick={runThermalSimulation}
                   disabled={anyOperationRunning}
-                  className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg flex items-center justify-center gap-2"
+                  className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2"
                 >
                   <span>{isSimulating ? "Simulating Heat Flow..." : "Run Thermal Simulation →"}</span>
                 </button>
@@ -1433,19 +1433,19 @@ export default function ThreeDPage() {
             {activeTab === "climate" && (
               <div className="space-y-4 font-mono">
                 {/* LOCATION CARD */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                  <div className="mb-2 text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
+                  <div className="mb-2 text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     Station Coordinates & Topology
                   </div>
 
-                  <div className="rounded-lg border border-white/10 bg-[#060913] p-3">
-                    <div className="text-sm font-bold text-white">{location.name}</div>
-                    <div className="mt-1 text-[10px] text-slate-400">
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
+                    <div className="text-sm font-bold text-slate-900">{location.name}</div>
+                    <div className="mt-1 text-[10px] text-slate-500">
                       {location.latitude.toFixed(4)}°N, {location.longitude.toFixed(4)}°E
                       {location.elevation_m != null ? ` • ${Math.round(location.elevation_m)} m ASL` : ""}
                     </div>
-                    <div className="mt-2.5 flex items-center gap-2 text-[10px] text-emerald-400 font-semibold">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 status-ping" />
+                    <div className="mt-2.5 flex items-center gap-2 text-[10px] text-emerald-700 font-bold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 status-ping" />
                       <span>Live Satellite Weather via Open-Meteo</span>
                     </div>
                   </div>
@@ -1455,26 +1455,26 @@ export default function ThreeDPage() {
                 <WeatherSummaryCard points={weatherPoints} />
 
                 {/* THERMAL MASS & VENTILATION SPECS */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-3">
-                  <div className="text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-3">
+                  <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
                     Core Physics & Infiltration
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                       <div className="text-slate-500 uppercase text-[9px]">Thermal Mass Core</div>
-                      <div className="mt-1 text-sm font-bold text-white">3,200 kg</div>
-                      <div className="text-[9px] text-slate-400">High-density concrete slab</div>
+                      <div className="mt-1 text-sm font-bold text-slate-900">3,200 kg</div>
+                      <div className="text-[9px] text-slate-500">High-density concrete slab</div>
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                    <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                       <div className="text-slate-500 uppercase text-[9px]">Air Exchange (n50)</div>
-                      <div className="mt-1 text-sm font-bold text-emerald-400">0.14 ACH</div>
-                      <div className="text-[9px] text-slate-400">Passive House airtight</div>
+                      <div className="mt-1 text-sm font-bold text-emerald-700">0.14 ACH</div>
+                      <div className="text-[9px] text-slate-500">Passive House airtight</div>
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5 text-[10px] text-slate-400 leading-relaxed">
+                  <div className="rounded-lg border border-slate-200 bg-white p-2.5 text-[10px] text-slate-600 leading-relaxed shadow-xs">
                     Solar radiation penetrating the south-facing multi-chamber glazing is stored in the interior Trombe core during peak daylight hours, then released slowly over an 11.4h thermal lag.
                   </div>
                 </div>
@@ -1497,7 +1497,7 @@ export default function ThreeDPage() {
                     type="button"
                     onClick={runThermalSimulation}
                     disabled={anyOperationRunning}
-                    className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg"
+                    className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-sm"
                   >
                     {isSimulating ? "Running Transient Simulation..." : "Run Thermal Simulation"}
                   </button>
@@ -1506,7 +1506,7 @@ export default function ThreeDPage() {
                     type="button"
                     onClick={optimizeShelter}
                     disabled={anyOperationRunning}
-                    className="chamfer-btn w-full border border-cyan-400/40 bg-cyan-400/10 hover:bg-cyan-400/20 disabled:opacity-50 text-cyan-200 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-lg"
+                    className="chamfer-btn w-full border border-sky-600/30 bg-sky-50 hover:bg-sky-100 disabled:opacity-50 text-sky-900 font-bold py-3 text-xs uppercase tracking-wider transition-colors shadow-sm"
                   >
                     {isOptimizing ? "Evaluating 64 Shelter Candidates..." : "Run 64-Candidate Matrix Optimization"}
                   </button>
@@ -1522,7 +1522,7 @@ export default function ThreeDPage() {
                         type="button"
                         onClick={resetToBaseline}
                         disabled={anyOperationRunning}
-                        className="chamfer-btn border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-50 text-slate-300 py-2 text-[10px] uppercase font-semibold transition-colors"
+                        className="chamfer-btn border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50 text-slate-700 py-2 text-[10px] uppercase font-semibold transition-colors shadow-xs"
                       >
                         {isResetting ? "Restoring..." : "Reset Baseline"}
                       </button>
@@ -1532,62 +1532,62 @@ export default function ThreeDPage() {
 
                 {/* ERROR BANNER */}
                 {error && (
-                  <div className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-[11px] text-red-300 leading-relaxed">
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] text-red-700 leading-relaxed shadow-xs">
                     {error}
                   </div>
                 )}
 
                 {/* SIMULATION RESULTS */}
                 {simulationResult && (
-                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-3">
-                    <div className="flex items-center justify-between text-xs font-semibold text-white uppercase tracking-wider">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-3">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-900 uppercase tracking-wider">
                       <span>Simulation Telemetry</span>
-                      <span className="text-emerald-400 text-[10px]">24H SOLVER PASSED</span>
+                      <span className="text-emerald-700 text-[10px] font-bold">24H SOLVER PASSED</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                         <div className="text-[9px] uppercase text-slate-500">Final Indoor Temp</div>
-                        <div className="mt-1 text-lg font-bold text-emerald-400">
+                        <div className="mt-1 text-lg font-bold text-emerald-700">
                           {simulationResult.final_indoor_temperature_c > 0 ? "+" : ""}
                           {simulationResult.final_indoor_temperature_c.toFixed(1)}°C
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                         <div className="text-[9px] uppercase text-slate-500">Comfort Score</div>
-                        <div className="mt-1 text-lg font-bold text-cyan-300">
+                        <div className="mt-1 text-lg font-bold text-sky-700">
                           {simulationResult.comfort_percentage.toFixed(0)}%
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                         <div className="text-[9px] uppercase text-slate-500">Min Core Temp</div>
-                        <div className="mt-1 text-sm font-semibold text-sky-300">
+                        <div className="mt-1 text-sm font-bold text-sky-700">
                           {simulationResult.minimum_indoor_temperature_c.toFixed(1)}°C
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-white/10 bg-[#060913] p-2.5">
+                      <div className="rounded-lg border border-slate-200 bg-white p-2.5 shadow-xs">
                         <div className="text-[9px] uppercase text-slate-500">Max Core Temp</div>
-                        <div className="mt-1 text-sm font-semibold text-amber-300">
+                        <div className="mt-1 text-sm font-bold text-amber-700">
                           {simulationResult.maximum_indoor_temperature_c.toFixed(1)}°C
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-3 space-y-1.5 text-[10px]">
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-1.5 text-[10px] shadow-xs">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Comfort Hours:</span>
-                        <span className="text-white font-bold">{simulationResult.comfort_hours.toFixed(1)} h</span>
+                        <span className="text-slate-500">Comfort Hours:</span>
+                        <span className="text-slate-900 font-bold">{simulationResult.comfort_hours.toFixed(1)} h</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Cold Stress Hours:</span>
-                        <span className="text-sky-300 font-bold">{simulationResult.cold_hours.toFixed(1)} h</span>
+                        <span className="text-slate-500">Cold Stress Hours:</span>
+                        <span className="text-sky-700 font-bold">{simulationResult.cold_hours.toFixed(1)} h</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Heat Stress Hours:</span>
-                        <span className="text-orange-300 font-bold">{simulationResult.hot_hours.toFixed(1)} h</span>
+                        <span className="text-slate-500">Heat Stress Hours:</span>
+                        <span className="text-orange-700 font-bold">{simulationResult.hot_hours.toFixed(1)} h</span>
                       </div>
                     </div>
                   </div>
@@ -1595,44 +1595,44 @@ export default function ThreeDPage() {
 
                 {/* OPTIMIZATION RESULTS */}
                 {optimizationResult && (
-                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-3.5 space-y-3">
-                    <div className="flex items-center justify-between text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-50/40 p-3.5 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between text-xs font-semibold text-amber-800 uppercase tracking-wider">
                       <span>Optimal Tested Envelope</span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-500 font-medium">
                         {optimizationResult.total_candidates_tested} Evaluated
                       </span>
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-[#060913] p-3 space-y-2 text-[11px]">
-                      <div className="flex justify-between items-center pb-2 border-b border-white/10">
-                        <span className="text-slate-400">Candidate Rank:</span>
-                        <span className="text-white font-bold">#{optimizationResult.best_candidate.rank}</span>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-2 text-[11px] shadow-xs">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span className="text-slate-500">Candidate Rank:</span>
+                        <span className="text-slate-900 font-bold">#{optimizationResult.best_candidate.rank}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Optimized Comfort:</span>
-                        <span className="text-emerald-400 font-bold">
+                        <span className="text-slate-500">Optimized Comfort:</span>
+                        <span className="text-emerald-700 font-bold">
                           {optimizationResult.best_candidate.comfort_percentage.toFixed(1)}%
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Optimal Orientation:</span>
-                        <span className="text-white font-bold">{optimizationResult.best_candidate.orientation_deg}°</span>
+                        <span className="text-slate-500">Optimal Orientation:</span>
+                        <span className="text-slate-900 font-bold">{optimizationResult.best_candidate.orientation_deg}°</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Wall Insulation:</span>
-                        <span className="text-white font-bold">
+                        <span className="text-slate-500">Wall Insulation:</span>
+                        <span className="text-slate-900 font-bold">
                           {optimizationResult.best_candidate.wall_insulation_thickness_mm.toFixed(0)} mm
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Roof Insulation:</span>
-                        <span className="text-white font-bold">
+                        <span className="text-slate-500">Roof Insulation:</span>
+                        <span className="text-slate-900 font-bold">
                           {optimizationResult.best_candidate.roof_insulation_thickness_mm.toFixed(0)} mm
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Comfort Gain:</span>
-                        <span className={comfortDifference !== null && comfortDifference >= 0 ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
+                        <span className="text-slate-500">Comfort Gain:</span>
+                        <span className={comfortDifference !== null && comfortDifference >= 0 ? "text-emerald-700 font-bold" : "text-amber-700 font-bold"}>
                           {comfortDifference !== null ? `${comfortDifference >= 0 ? "+" : ""}${comfortDifference.toFixed(1)} pts` : "—"}
                         </span>
                       </div>
@@ -1642,7 +1642,7 @@ export default function ThreeDPage() {
                       type="button"
                       onClick={applyBestDesign}
                       disabled={anyOperationRunning}
-                      className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-2.5 text-xs uppercase tracking-wider transition-colors"
+                      className="chamfer-btn w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold py-2.5 text-xs uppercase tracking-wider transition-colors shadow-sm"
                     >
                       {isApplyingOptimization ? "Applying to 3D Scene..." : "Apply & Render Best Design"}
                     </button>

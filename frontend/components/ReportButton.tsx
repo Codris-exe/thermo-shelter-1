@@ -962,7 +962,7 @@ export default function ReportButton({
       type="button"
       onClick={generateReport}
       disabled={isGenerating}
-      className="w-full chamfer-btn border border-emerald-400/40 bg-emerald-500/15 hover:bg-emerald-500/25 px-4 py-3 text-xs font-mono font-bold tracking-wider uppercase text-emerald-300 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
+      className="w-full chamfer-btn border border-emerald-600/40 bg-emerald-50 hover:bg-emerald-100 px-4 py-3 text-xs font-mono font-bold tracking-wider uppercase text-emerald-800 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
     >
       <span>{isGenerating ? "Compiling PDF..." : "Export Technical Dossier (PDF)"}</span>
       <span className="text-sm">↓</span>

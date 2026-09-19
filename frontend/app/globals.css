@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #070c16;
-  --foreground: #f1f5f9;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -14,24 +14,24 @@
 }
 
 body {
-  background: #070c16;
-  color: #f1f5f9;
+  background: #f8fafc;
+  color: #0f172a;
   font-family: var(--font-body), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* CAD Drafting Grid and Technical Textures */
+/* CAD Drafting Grid and Technical Textures - Light Theme */
 .cad-grid {
   background-size: 32px 32px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
 }
 
 .cad-grid-dense {
   background-size: 16px 16px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
 }
 
 .corner-bracket {
@@ -44,8 +44,8 @@ body {
   left: -1px;
   width: 7px;
   height: 7px;
-  border-top: 1.5px solid #f59e0b;
-  border-left: 1.5px solid #f59e0b;
+  border-top: 1.5px solid #d97706;
+  border-left: 1.5px solid #d97706;
   pointer-events: none;
   z-index: 10;
 }
@@ -56,8 +56,8 @@ body {
   right: -1px;
   width: 7px;
   height: 7px;
-  border-bottom: 1.5px solid #f59e0b;
-  border-right: 1.5px solid #f59e0b;
+  border-bottom: 1.5px solid #d97706;
+  border-right: 1.5px solid #d97706;
   pointer-events: none;
   z-index: 10;
 }

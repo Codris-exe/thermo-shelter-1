@@ -37,19 +37,19 @@ export default function DemoRunButton({
   }
 
   return (
-    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
+    <div className="border border-slate-200 bg-white shadow-sm p-3 corner-bracket font-mono">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Automated Analysis Run
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-400">
+          <div className="mt-0.5 text-[9px] text-slate-500">
             End-to-end telemetry, simulation &amp; Pareto sweep
           </div>
         </div>
 
-        <div className="border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[8px] text-amber-300 font-bold uppercase">
+        <div className="border border-amber-600/30 bg-amber-50 px-2 py-0.5 text-[8px] text-amber-800 font-bold uppercase rounded">
           AUTOMATED
         </div>
       </div>
@@ -61,19 +61,19 @@ export default function DemoRunButton({
           disabled ||
           isRunning
         }
-        className="mt-3 w-full chamfer-btn bg-amber-500 hover:bg-amber-400 px-4 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-slate-950 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
+        className="mt-3 w-full chamfer-btn bg-amber-500 hover:bg-amber-400 px-4 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-slate-950 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
       >
         <span className="w-2 h-2 rounded-full bg-slate-950 status-ping" />
         <span>{isRunning ? "Executing Pipeline..." : "Execute Automated Workflow"}</span>
         <span className="text-sm">→</span>
       </button>
 
-      <div className="mt-2 text-[9px] leading-relaxed text-slate-400">
+      <div className="mt-2 text-[9px] leading-relaxed text-slate-500">
         Executes real climate ingestion, transient forward Euler solver, and combinatorial parameter optimization.
       </div>
 
       {error && (
-        <div className="mt-2 rounded-lg border border-red-400/20 bg-red-400/5 p-2 text-[9px] leading-relaxed text-red-300">
+        <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2 text-[9px] leading-relaxed text-red-700">
           {error}
         </div>
       )}

@@ -39,7 +39,7 @@ export default function ThermalResultsChart({
 }: ThermalResultsChartProps) {
   if (!points.length) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-sm text-slate-400">
+      <div className="flex h-full items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
         Run the thermal simulation to view results.
       </div>
     );
@@ -56,12 +56,12 @@ export default function ThermalResultsChart({
   return (
     <div className="grid h-full min-h-0 grid-cols-2 gap-3 font-mono">
       {/* Temperature chart */}
-      <div className="min-h-0 border border-white/15 bg-[#090e1b] p-3 corner-bracket">
+      <div className="min-h-0 border border-slate-200 bg-white shadow-sm p-3 corner-bracket">
         <div className="mb-2">
-          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Thermal Temperature Profile
           </div>
-          <div className="text-[10px] text-slate-400">
+          <div className="text-[10px] text-slate-500">
             Indoor core (Amber) vs ambient outdoor (Icy Cyan)
           </div>
         </div>
@@ -79,13 +79,13 @@ export default function ThermalResultsChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(148,163,184,0.12)"
+                stroke="rgba(148,163,184,0.25)"
               />
 
               <XAxis
                 dataKey="time"
                 tick={{
-                  fill: "#94a3b8",
+                  fill: "#64748b",
                   fontSize: 9,
                 }}
                 axisLine={false}
@@ -95,7 +95,7 @@ export default function ThermalResultsChart({
 
               <YAxis
                 tick={{
-                  fill: "#94a3b8",
+                  fill: "#64748b",
                   fontSize: 9,
                 }}
                 axisLine={false}
@@ -105,13 +105,16 @@ export default function ThermalResultsChart({
 
               <Tooltip
                 contentStyle={{
-                  background: "#0f172a",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
                   borderRadius: "10px",
                   fontSize: "11px",
+                  color: "#0f172a",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.07)",
                 }}
                 labelStyle={{
-                  color: "#cbd5e1",
+                  color: "#334155",
+                  fontWeight: 600,
                   marginBottom: "4px",
                 }}
                 formatter={(value, name) => {
@@ -128,6 +131,7 @@ export default function ThermalResultsChart({
                 wrapperStyle={{
                   fontSize: "10px",
                   paddingTop: "4px",
+                  color: "#475569",
                 }}
               />
 
@@ -135,7 +139,7 @@ export default function ThermalResultsChart({
                 type="monotone"
                 dataKey="indoor"
                 name="Indoor Core"
-                stroke="#f59e0b"
+                stroke="#d97706"
                 strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -145,7 +149,7 @@ export default function ThermalResultsChart({
                 type="monotone"
                 dataKey="outdoor"
                 name="Ambient Ext"
-                stroke="#38bdf8"
+                stroke="#0284c7"
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -156,13 +160,13 @@ export default function ThermalResultsChart({
       </div>
 
       {/* Energy chart */}
-      <div className="min-h-0 border border-white/15 bg-[#090e1b] p-3 corner-bracket">
+      <div className="min-h-0 border border-slate-200 bg-white shadow-sm p-3 corner-bracket">
         <div className="mb-2">
-          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Energy Balance Flux
           </div>
-          <div className="text-[10px] text-slate-400">
-            Solar radiation gain (Amber) vs total heat loss (Zinc)
+          <div className="text-[10px] text-slate-500">
+            Solar radiation gain (Amber) vs total heat loss (Red)
           </div>
         </div>
 
@@ -179,13 +183,13 @@ export default function ThermalResultsChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(148,163,184,0.12)"
+                stroke="rgba(148,163,184,0.25)"
               />
 
               <XAxis
                 dataKey="time"
                 tick={{
-                  fill: "#94a3b8",
+                  fill: "#64748b",
                   fontSize: 9,
                 }}
                 axisLine={false}
@@ -195,7 +199,7 @@ export default function ThermalResultsChart({
 
               <YAxis
                 tick={{
-                  fill: "#94a3b8",
+                  fill: "#64748b",
                   fontSize: 9,
                 }}
                 axisLine={false}
@@ -205,13 +209,16 @@ export default function ThermalResultsChart({
 
               <Tooltip
                 contentStyle={{
-                  background: "#0f172a",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
                   borderRadius: "10px",
                   fontSize: "11px",
+                  color: "#0f172a",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.07)",
                 }}
                 labelStyle={{
-                  color: "#cbd5e1",
+                  color: "#334155",
+                  fontWeight: 600,
                   marginBottom: "4px",
                 }}
                 formatter={(value, name) => {
@@ -228,6 +235,7 @@ export default function ThermalResultsChart({
                 wrapperStyle={{
                   fontSize: "10px",
                   paddingTop: "4px",
+                  color: "#475569",
                 }}
               />
 
@@ -235,7 +243,7 @@ export default function ThermalResultsChart({
                 type="monotone"
                 dataKey="solar"
                 name="Solar Gain"
-                stroke="#f59e0b"
+                stroke="#d97706"
                 strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -245,7 +253,7 @@ export default function ThermalResultsChart({
                 type="monotone"
                 dataKey="heatLoss"
                 name="Heat Transfer"
-                stroke="#f87171"
+                stroke="#e11d48"
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}

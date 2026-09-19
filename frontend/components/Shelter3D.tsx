@@ -570,7 +570,7 @@ export default function Shelter3D({
 }: Shelter3DProps) {
 
   return (
-    <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-950">
+    <div className="h-full min-h-[520px] w-full overflow-hidden rounded-xl bg-slate-100">
 
       <Canvas
         shadows
@@ -592,13 +592,13 @@ export default function Shelter3D({
         <color
           attach="background"
           args={[
-            "#020617",
+            "#f1f5f9",
           ]}
         />
 
 
         <ambientLight
-          intensity={1.2}
+          intensity={1.3}
         />
 
 
@@ -612,10 +612,10 @@ export default function Shelter3D({
           ]}
           cellSize={1}
           cellThickness={0.6}
-          cellColor="#334155"
+          cellColor="#cbd5e1"
           sectionSize={5}
           sectionThickness={1}
-          sectionColor="#64748b"
+          sectionColor="#94a3b8"
           fadeDistance={30}
           fadeStrength={1}
         />

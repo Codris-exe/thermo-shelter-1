@@ -26,10 +26,10 @@ function PipelineStep({
       <div
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold ${
           complete
-            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+            ? "border-emerald-600/30 bg-emerald-50 text-emerald-700"
             : active
-              ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
-              : "border-white/10 bg-white/[0.03] text-slate-600"
+              ? "border-amber-500/40 bg-amber-50 text-amber-700"
+              : "border-slate-200 bg-slate-100 text-slate-400"
         }`}
       >
         {complete ? "✓" : number}
@@ -39,16 +39,16 @@ function PipelineStep({
         <div
           className={`text-[10px] font-semibold ${
             complete
-              ? "text-emerald-300"
+              ? "text-emerald-700"
               : active
-                ? "text-cyan-300"
-                : "text-slate-500"
+                ? "text-amber-700"
+                : "text-slate-400"
           }`}
         >
           {title}
         </div>
 
-        <div className="mt-0.5 text-[8px] leading-relaxed text-slate-600">
+        <div className="mt-0.5 text-[8px] leading-relaxed text-slate-500">
           {description}
         </div>
       </div>
@@ -62,19 +62,19 @@ export default function AnalysisPipelineCard({
   hasOptimization,
 }: AnalysisPipelineCardProps) {
   return (
-    <div className="border border-white/15 bg-[#090e1b] p-3 corner-bracket font-mono">
+    <div className="border border-slate-200 bg-white shadow-sm p-3 corner-bracket font-mono">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-white uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Evaluation Pipeline
           </div>
 
-          <div className="mt-0.5 text-[9px] text-slate-400">
+          <div className="mt-0.5 text-[9px] text-slate-500">
             Automated physics simulation chain
           </div>
         </div>
 
-        <div className="border border-cyan-400/30 bg-cyan-400/10 px-2 py-0.5 text-[8px] text-cyan-300 font-bold uppercase">
+        <div className="border border-sky-600/30 bg-sky-50 px-2 py-0.5 text-[8px] text-sky-700 font-bold uppercase rounded">
           LIVE
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function AnalysisPipelineCard({
         />
       </div>
 
-      <div className="mt-3 border-t border-white/5 pt-2 text-[8px] leading-relaxed text-slate-600">
+      <div className="mt-3 border-t border-slate-200 pt-2 text-[8px] leading-relaxed text-slate-400">
         The pipeline uses the same design state throughout the
         visualization, simulation and optimization workflow.
       </div>

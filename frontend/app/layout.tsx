@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Nunito, JetBrains_Mono } from "next/font/google";
+import { Rubik, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
-const nunito = Nunito({
-  variable: "--font-nunito",
+const rubik = Rubik({
+  variable: "--font-rubik",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${nunito.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${rubik.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script

@@ -140,11 +140,12 @@ export default function HomePage() {
               alt="Extreme-altitude passive solar alpine shelter on Himalayan ridge"
               fill
               priority
-              className="object-cover object-center opacity-20 filter contrast-105 brightness-105"
+              className="object-cover object-center opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/85 to-[#f8fafc]/70" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f8fafc] via-[#f8fafc]/80 to-transparent" />
-            <div className="absolute inset-0 cad-grid opacity-50 pointer-events-none" />
+            {/* Subtle light wash to ensure text readability on the left while keeping mountain photo vibrant */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#f8fafc]/95 via-[#f8fafc]/60 to-transparent lg:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-transparent to-[#f8fafc]/30 pointer-events-none" />
+            <div className="absolute inset-0 cad-grid opacity-20 pointer-events-none" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
@@ -637,11 +638,11 @@ export default function HomePage() {
               src="/images/night-thermal-shelter.jpg"
               alt="Himalayan research station shelter under the Milky Way with glowing thermal core"
               fill
-              className="object-cover object-center opacity-20 filter contrast-105 brightness-105"
+              className="object-cover object-center opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-[#f8fafc]" />
-            <div className="absolute inset-0 bg-[#f8fafc]/60" />
-            <div className="absolute inset-0 cad-grid opacity-35 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-white/50 to-[#f8fafc] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent lg:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 cad-grid opacity-20 pointer-events-none" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">

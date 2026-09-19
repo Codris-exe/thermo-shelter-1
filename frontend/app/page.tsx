@@ -107,30 +107,19 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65" />
           </div>
 
-          {/* Upper Title: Giant Tracked Letters Across the Sky (like W A N D E R) */}
-          <div className="relative z-10 w-full flex justify-center items-center mt-6 sm:mt-10">
+          {/* Upper Title: Giant Tracked Letters Across the Sky */}
+          <div className="relative z-10 w-full flex justify-center items-center mt-4 sm:mt-8">
             <h1
-              className="text-white text-6xl sm:text-8xl md:text-9xl lg:text-[11rem] xl:text-[12.5rem] font-light tracking-[0.24em] sm:tracking-[0.32em] uppercase select-none drop-shadow-2xl text-center pl-[0.24em] sm:pl-[0.32em] leading-none"
+              className="text-white text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[9.5rem] font-light tracking-[0.14em] sm:tracking-[0.2em] uppercase select-none drop-shadow-2xl text-center pl-[0.14em] sm:pl-[0.2em] leading-none"
               style={{ fontFamily: "var(--font-headline)" }}
             >
-              SHELTER
+              THERMO SHELTER
             </h1>
           </div>
 
-          {/* Lower Subtitle & Signature White Pill Button Duo */}
-          <div className="relative z-10 flex flex-col items-center text-center space-y-3 sm:space-y-4 max-w-2xl mx-auto">
-            <h2
-              className="text-white text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight uppercase drop-shadow-xl"
-              style={{ fontFamily: "var(--font-headline)" }}
-            >
-              HIMALAYAS
-            </h2>
-            <p className="text-white/90 text-sm sm:text-base lg:text-lg font-normal tracking-wide drop-shadow-md">
-              Where passive solar physics meets -50°C.
-            </p>
-
-            {/* Signature White Pill & Circular Arrow Button Pair */}
-            <div className="flex items-center gap-2 pt-2 sm:pt-3">
+          {/* Bottom Area: 3D Simulation Button Pair & Clean Scroll Prompt */}
+          <div className="relative z-10 flex flex-col items-center gap-5 sm:gap-6 pb-2">
+            <div className="flex items-center gap-2">
               <Link
                 href="/3d"
                 className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm tracking-wide uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
@@ -145,18 +134,17 @@ export default function HomePage() {
                 ↗
               </Link>
             </div>
-          </div>
 
-          {/* Clean Minimalist Scroll Prompt */}
-          <a
-            href="#telemetry"
-            className="relative z-10 flex flex-col items-center gap-1.5 text-white/75 hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer drop-shadow-md"
-          >
-            <span>Explore Telemetry</span>
-            <span className="w-4 h-7 rounded-full border border-white/40 flex items-start justify-center p-1">
-              <span className="w-1 h-2 rounded-full bg-white animate-bounce" />
-            </span>
-          </a>
+            <a
+              href="#telemetry"
+              className="flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors font-mono text-[10px] tracking-widest uppercase cursor-pointer drop-shadow-md"
+            >
+              <span>Explore Telemetry</span>
+              <span className="w-4 h-7 rounded-full border border-white/40 flex items-start justify-center p-1">
+                <span className="w-1 h-2 rounded-full bg-white animate-bounce" />
+              </span>
+            </a>
+          </div>
         </section>
 
         {/* 3. Quick Telemetry Readout Strip with Scroll Reveal */}

@@ -93,7 +93,7 @@ export default function HomePage() {
                 href="/onboarding"
                 className="text-xs uppercase tracking-wider text-amber-400 hover:text-amber-300 font-semibold transition-colors"
               >
-                Site Setup →
+                Site Location →
               </Link>
 
               <button
@@ -105,28 +105,26 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 font-mono text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickLogin("admin")}
-                className="rounded-full border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 px-3.5 py-1.5 text-xs font-mono font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                className="rounded-full border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 px-3 py-1 font-semibold transition"
               >
-                <span>🛡️</span>
-                <span>Admin</span>
+                Admin
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickLogin("user")}
-                className="rounded-full border border-cyan-400/40 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 px-3.5 py-1.5 text-xs font-mono font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                className="rounded-full border border-cyan-400/40 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 px-3 py-1 font-semibold transition"
               >
-                <span>🔬</span>
-                <span>User</span>
+                User
               </button>
 
               <Link
                 href="/login"
-                className="hidden sm:inline text-xs text-slate-400 hover:text-white transition font-mono px-1.5 py-1"
+                className="hidden sm:inline text-xs text-slate-400 hover:text-white transition px-1 py-1"
               >
                 Accounts →
               </Link>

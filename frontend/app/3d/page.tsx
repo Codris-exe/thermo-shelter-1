@@ -20,6 +20,8 @@ import ModelAssumptionsCard from "@/components/ModelAssumptionsCard";
 import AnalysisPipelineCard from "@/components/AnalysisPipelineCard";
 import DemoRunButton from "@/components/DemoRunButton";
 import { useShelterDesignStore } from "@/stores/shelterDesignStore";
+import { isAuthenticated } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 import ClimateModeCard from "@/components/ClimateModeCard";
 import { useClimateSimulationStore } from "@/stores/climateSimulationStore";
 import { useHistoricalClimateStore } from "@/stores/historicalClimateStore";

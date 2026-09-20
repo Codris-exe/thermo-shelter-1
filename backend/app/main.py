@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -9,13 +10,18 @@ if str(BACKEND_ROOT) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.auth import router as auth_router
 from app.api.historical_weather import router as historical_weather_router
+from app.api.land import router as land_router
 from app.api.location import router as location_router
 from app.api.optimization import router as optimization_router
 from app.api.simulation import router as simulation_router
 from app.api.solar import router as solar_router
 from app.api.weather import router as weather_router
 from app.api.materials import router as materials_router
+from app.auth import init_db
+
+init_db()
 
 app = FastAPI(
     title="Thermo Shelter 1 API",
@@ -26,9 +32,6 @@ app = FastAPI(
     ),
     version="0.5.0",
 )
-
-
-import os
 
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS")
 
@@ -55,7 +58,8 @@ app.add_middleware(
 )
 
 
-# Existing application routers
+app.include_router(auth_router)
+app.include_router(land_router)
 app.include_router(simulation_router)
 app.include_router(location_router)
 app.include_router(weather_router)

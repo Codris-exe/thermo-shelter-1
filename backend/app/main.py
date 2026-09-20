@@ -18,26 +18,35 @@ from app.api.optimization import router as optimization_router
 from app.api.simulation import router as simulation_router
 from app.api.solar import router as solar_router
 from app.api.weather import router as weather_router
+from app.api.materials import router as materials_router
 from app.auth import init_db
 
 init_db()
-
 
 app = FastAPI(
     title="Thermo Shelter 1 API",
     description=(
         "Backend for passive shelter thermal simulation, "
         "real weather analysis, historical climate modeling, "
-        "solar modeling and optimization."
+        "solar modeling, optimization and AI 3D design generation."
     ),
     version="0.5.0",
 )
 
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS")
+
 if allowed_origins_env:
-    origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+    origins = [
+        origin.strip()
+        for origin in allowed_origins_env.split(",")
+        if origin.strip()
+    ]
 else:
-    origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,6 +66,9 @@ app.include_router(weather_router)
 app.include_router(historical_weather_router)
 app.include_router(solar_router)
 app.include_router(optimization_router)
+app.include_router(materials_router)
+
+
 
 
 @app.get("/")
@@ -77,4 +89,10 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+
+    uvicorn.run(
+        "app.main:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+    )

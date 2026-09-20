@@ -1,20 +1,30 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { saveAuth, isAuthenticated } from "@/lib/auth";
 
 const API_BASE = "/backend-api";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const searchParams = useSearchParams();
+  const requestedMode = searchParams.get("mode") === "register" ? "register" : "login";
+
+  const [mode, setMode] = useState<"login" | "register">(requestedMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const qMode = searchParams.get("mode");
+    if (qMode === "register" || qMode === "login") {
+      setMode(qMode);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAuthenticated()) router.replace("/onboarding");
@@ -154,5 +164,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#070b14] flex items-center justify-center text-white font-mono text-sm">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -3,10 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getStoredUser, clearAuth, AuthUser } from "@/lib/auth";
 
 export default function HomePage() {
   const [heroOpacity, setHeroOpacity] = useState(1);
   const [heroTranslateY, setHeroTranslateY] = useState(0);
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  const handleSignOut = () => {
+    clearAuth();
+    setUser(null);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,10 +39,20 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-amber-500 selection:text-white antialiased font-sans">
       {/* 1. Transparent Floating Navigation */}
       <header className="absolute top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6 flex items-center justify-between">
-        <div className="w-20 hidden md:block" />
+        {/* Top Left: Launch Simulator option */}
+        <div className="flex items-center">
+          <Link
+            href="/3d"
+            className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md flex items-center gap-2"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span>Launch Simulator</span>
+          </Link>
+        </div>
 
-        <nav className="flex items-center gap-5 sm:gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm mx-auto md:mx-0">
-          <Link href="/login" className="hover:text-white transition-colors">
+        {/* Center: Main Navigation */}
+        <nav className="hidden md:flex items-center gap-5 sm:gap-8 text-xs font-semibold uppercase tracking-widest text-white/90 drop-shadow-sm">
+          <Link href="/3d" className="hover:text-white transition-colors">
             3D Simulator
           </Link>
           <Link href="/simulate" className="hover:text-white transition-colors">
@@ -48,13 +69,43 @@ export default function HomePage() {
           </a>
         </nav>
 
-        <div className="flex items-center">
-          <Link
-            href="/login"
-            className="rounded-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md px-5 py-2 text-xs font-bold tracking-wider uppercase transition shadow-md"
-          >
-            Launch Simulator
-          </Link>
+        {/* Top Right: Login & Sign Up options */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          {user ? (
+            <div className="flex items-center gap-3 font-mono">
+              <span className="hidden sm:inline text-xs text-white/70">
+                Hi, <strong className="text-cyan-400 font-semibold">{user.name}</strong>
+              </span>
+              <Link
+                href="/onboarding"
+                className="text-xs uppercase tracking-wider text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+              >
+                Site Setup →
+              </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-3.5 py-1.5 text-xs transition"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Link
+                href="/login?mode=login"
+                className="text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors px-2 py-1"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/login?mode=register"
+                className="rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 sm:px-5 py-2 text-xs uppercase tracking-wider transition-all shadow-md shadow-cyan-500/20"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
@@ -117,7 +168,7 @@ export default function HomePage() {
             }}
           >
             <Link
-              href="/login"
+              href="/3d"
               className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-9 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl transform hover:scale-[1.02]"
             >
               Launch 3D Simulator
@@ -588,7 +639,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href="/3d"
                   className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
                 >
                   Simulate Siachen →
@@ -630,7 +681,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href="/3d"
                   className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
                 >
                   Simulate Spiti →
@@ -672,7 +723,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href="/3d"
                   className="mt-8 w-full text-center rounded-full border border-white/15 bg-white/[0.06] hover:bg-white hover:text-slate-950 text-white py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md group-hover:border-white/30"
                 >
                   Simulate Andes →
@@ -698,7 +749,7 @@ export default function HomePage() {
 
             <div className="pt-4 flex items-center justify-center font-mono">
               <Link
-                href="/login"
+                href="/3d"
                 className="rounded-full bg-white hover:bg-slate-100 text-slate-950 font-bold px-10 sm:px-12 py-4 text-xs sm:text-sm tracking-widest uppercase transition-all shadow-2xl hover:scale-105 inline-flex items-center gap-2.5"
               >
                 <span>Launch 3D Simulator</span>
@@ -719,7 +770,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs">
-            <Link href="/login" className="text-amber-400 hover:text-amber-300 font-semibold transition-colors">
+            <Link href="/3d" className="text-amber-400 hover:text-amber-300 font-semibold transition-colors">
               3D Simulator
             </Link>
             <Link href="/simulate" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">

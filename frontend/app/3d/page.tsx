@@ -249,12 +249,6 @@ function getTimezoneOffsetHours(timezone: string | null | undefined, month: numb
 }
 
 export default function ThreeDPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isAuthenticated()) router.replace("/login");
-  }, [router]);
-
   const {
     location,
     shape,

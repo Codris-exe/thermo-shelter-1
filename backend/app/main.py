@@ -15,7 +15,7 @@ from app.api.optimization import router as optimization_router
 from app.api.simulation import router as simulation_router
 from app.api.solar import router as solar_router
 from app.api.weather import router as weather_router
-
+from app.api.materials import router as materials_router
 
 app = FastAPI(
     title="Thermo Shelter 1 API",
@@ -62,6 +62,7 @@ app.include_router(weather_router)
 app.include_router(historical_weather_router)
 app.include_router(solar_router)
 app.include_router(optimization_router)
+app.include_router(materials_router)
 
 
 

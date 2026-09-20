@@ -14,6 +14,18 @@ export interface MaterialLayer {
   thickness_m: number;
 }
 
+export interface MaterialOption {
+  id: string;
+  name: string;
+  thermal_conductivity_w_mk: number;
+  density_kg_m3: number;
+  specific_heat_j_kgk: number;
+  solar_absorptivity: number;
+  emissivity: number;
+  category: string;
+  description: string;
+}
+
 export interface WindowConfig {
   wall: "north" | "south" | "east" | "west";
   width_m: number;
@@ -64,6 +76,36 @@ export interface ShelterDesignState {
 
   initial_indoor_temperature_c: number;
 
+  /*
+   * Material selection actions
+   */
+  setWallMaterial: (
+    materialId: string,
+  ) => void;
+
+  setRoofMaterial: (
+    materialId: string,
+  ) => void;
+
+  setFloorMaterial: (
+    materialId: string,
+  ) => void;
+
+  setWallInsulationMaterial: (
+    materialId: string,
+  ) => void;
+
+  setRoofInsulationMaterial: (
+    materialId: string,
+  ) => void;
+
+  setThermalMassMaterial: (
+    materialId: string,
+  ) => void;
+
+  /*
+   * Existing design actions
+   */
   setLocation: (
     location: ShelterLocation,
   ) => void;
@@ -117,6 +159,13 @@ export const useShelterDesignStore =
 
     orientation_deg: 180,
 
+    /*
+     * Default wall assembly:
+     *
+     * Brick
+     * Rock Wool
+     * Gypsum
+     */
     wall_layers: [
       {
         material_id: "brick",
@@ -132,6 +181,12 @@ export const useShelterDesignStore =
       },
     ],
 
+    /*
+     * Default roof assembly:
+     *
+     * Concrete
+     * Rock Wool
+     */
     roof_layers: [
       {
         material_id: "concrete",
@@ -143,6 +198,11 @@ export const useShelterDesignStore =
       },
     ],
 
+    /*
+     * Default floor:
+     *
+     * Concrete
+     */
     floor_layers: [
       {
         material_id: "concrete",
@@ -186,6 +246,239 @@ export const useShelterDesignStore =
     initial_indoor_temperature_c: 18,
 
 
+    /*
+     * ---------------------------------------------------------
+     * MATERIAL SELECTION
+     * ---------------------------------------------------------
+     */
+
+    setWallMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        /*
+         * Change the primary structural/wall material.
+         *
+         * We deliberately only replace the first wall layer.
+         * Existing insulation and interior layers remain intact.
+         */
+        if (state.wall_layers.length === 0) {
+          return {
+            wall_layers: [
+              {
+                material_id: materialId,
+                thickness_m: 0.20,
+              },
+            ],
+          };
+        }
+
+        const layers = [...state.wall_layers];
+
+        layers[0] = {
+          ...layers[0],
+          material_id: materialId,
+        };
+
+        return {
+          wall_layers: layers,
+        };
+      }),
+
+
+    setRoofMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        /*
+         * Change the primary roof material.
+         */
+        if (state.roof_layers.length === 0) {
+          return {
+            roof_layers: [
+              {
+                material_id: materialId,
+                thickness_m: 0.10,
+              },
+            ],
+          };
+        }
+
+        const layers = [...state.roof_layers];
+
+        layers[0] = {
+          ...layers[0],
+          material_id: materialId,
+        };
+
+        return {
+          roof_layers: layers,
+        };
+      }),
+
+
+    setFloorMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        /*
+         * Change the primary floor material.
+         */
+        if (state.floor_layers.length === 0) {
+          return {
+            floor_layers: [
+              {
+                material_id: materialId,
+                thickness_m: 0.12,
+              },
+            ],
+          };
+        }
+
+        const layers = [...state.floor_layers];
+
+        layers[0] = {
+          ...layers[0],
+          material_id: materialId,
+        };
+
+        return {
+          floor_layers: layers,
+        };
+      }),
+
+
+    setWallInsulationMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        /*
+         * Find the existing insulation layer.
+         *
+         * If one exists, change only its material.
+         *
+         * If none exists, add a 100 mm insulation layer.
+         */
+        const insulationIndex =
+          state.wall_layers.findIndex(
+            (layer) =>
+              [
+                "rock_wool",
+                "glass_wool",
+                "eps",
+                "xps",
+                "polyurethane",
+                "cellulose",
+                "straw_bale",
+              ].includes(layer.material_id),
+          );
+
+        if (insulationIndex >= 0) {
+          const layers = [
+            ...state.wall_layers,
+          ];
+
+          layers[insulationIndex] = {
+            ...layers[insulationIndex],
+            material_id: materialId,
+          };
+
+          return {
+            wall_layers: layers,
+          };
+        }
+
+        return {
+          wall_layers: [
+            ...state.wall_layers,
+            {
+              material_id: materialId,
+              thickness_m: 0.10,
+            },
+          ],
+        };
+      }),
+
+
+    setRoofInsulationMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        /*
+         * Find the existing roof insulation.
+         */
+        const insulationIndex =
+          state.roof_layers.findIndex(
+            (layer) =>
+              [
+                "rock_wool",
+                "glass_wool",
+                "eps",
+                "xps",
+                "polyurethane",
+                "cellulose",
+                "straw_bale",
+              ].includes(layer.material_id),
+          );
+
+        if (insulationIndex >= 0) {
+          const layers = [
+            ...state.roof_layers,
+          ];
+
+          layers[insulationIndex] = {
+            ...layers[insulationIndex],
+            material_id: materialId,
+          };
+
+          return {
+            roof_layers: layers,
+          };
+        }
+
+        return {
+          roof_layers: [
+            ...state.roof_layers,
+            {
+              material_id: materialId,
+              thickness_m: 0.10,
+            },
+          ],
+        };
+      }),
+
+
+    setThermalMassMaterial: (
+      materialId,
+    ) =>
+      set((state) => {
+        if (!state.thermal_mass) {
+          return {
+            thermal_mass: {
+              material_id: materialId,
+              mass_kg: 1000,
+              specific_heat_j_kgk: 800,
+              initial_temperature_c: 12,
+              coupling_w_per_k: 5,
+            },
+          };
+        }
+
+        return {
+          thermal_mass: {
+            ...state.thermal_mass,
+            material_id: materialId,
+          },
+        };
+      }),
+
+
+    /*
+     * ---------------------------------------------------------
+     * EXISTING DESIGN ACTIONS
+     * ---------------------------------------------------------
+     */
+
     setLocation: (location) =>
       set({
         location,
@@ -227,8 +520,17 @@ export const useShelterDesignStore =
         wall_layers:
           state.wall_layers.map(
             (layer) =>
-              layer.material_id ===
-              "rock_wool"
+              [
+                "rock_wool",
+                "glass_wool",
+                "eps",
+                "xps",
+                "polyurethane",
+                "cellulose",
+                "straw_bale",
+              ].includes(
+                layer.material_id,
+              )
                 ? {
                     ...layer,
                     thickness_m:
@@ -247,8 +549,17 @@ export const useShelterDesignStore =
         roof_layers:
           state.roof_layers.map(
             (layer) =>
-              layer.material_id ===
-              "rock_wool"
+              [
+                "rock_wool",
+                "glass_wool",
+                "eps",
+                "xps",
+                "polyurethane",
+                "cellulose",
+                "straw_bale",
+              ].includes(
+                layer.material_id,
+              )
                 ? {
                     ...layer,
                     thickness_m:

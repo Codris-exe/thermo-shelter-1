@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
-const BACKEND_URL = process.env.BACKEND_API_URL?.replace(/\/$/, "");
+const BACKEND_URL =
+  process.env.BACKEND_API_URL?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    if (!BACKEND_URL) {
-      // Use native Next.js Serverless Route Handlers in app/backend-api/
-      return [];
-    }
     return [
       {
         source: "/backend-api/:path*",

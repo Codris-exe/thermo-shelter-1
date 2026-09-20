@@ -33,10 +33,28 @@ def init_db():
                 name TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
                 created_at INTEGER NOT NULL
             )
             """
         )
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
+        except sqlite3.OperationalError:
+            pass
+
+        # Seed pre-configured Admin & User accounts
+        default_accounts = [
+            ("Station Admin", "admin@thermoshelter.com", "admin123", "admin"),
+            ("Field Researcher", "user@thermoshelter.com", "user123", "user"),
+        ]
+        for name, email, pwd, role in default_accounts:
+            existing = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
+            if not existing:
+                conn.execute(
+                    "INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)",
+                    (name, email, _hash_password(pwd), role, int(time.time())),
+                )
         conn.commit()
 
 
@@ -193,4 +211,31 @@ def authenticate_user(email: str, password: str):
         "name": row["name"],
         "email": row["email"],
         "created_at": int(row["created_at"]),
+    }
+
+
+def quick_login(role: str):
+    target_role = "admin" if role.lower() == "admin" else "user"
+    email = "admin@thermoshelter.com" if target_role == "admin" else "user@thermoshelter.com"
+
+    init_db()
+
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT id, name, email, role, created_at FROM users WHERE email = ?",
+            (email,),
+        ).fetchone()
+
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Preset account for {target_role} could not be found.",
+        )
+
+    user = dict(row)
+    token = create_token(user["id"], user["email"])
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user,
     }

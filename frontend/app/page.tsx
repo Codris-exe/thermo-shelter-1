@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getStoredUser, clearAuth, AuthUser } from "@/lib/auth";
+import { getStoredUser, clearAuth, AuthUser, loginAsPreset } from "@/lib/auth";
 
 export default function HomePage() {
   const [heroOpacity, setHeroOpacity] = useState(1);
@@ -17,6 +17,11 @@ export default function HomePage() {
   const handleSignOut = () => {
     clearAuth();
     setUser(null);
+  };
+
+  const handleQuickLogin = async (role: "admin" | "user") => {
+    const logged = await loginAsPreset(role);
+    setUser(logged);
   };
 
   useEffect(() => {
@@ -69,40 +74,61 @@ export default function HomePage() {
           </a>
         </nav>
 
-        {/* Top Right: Login & Sign Up options */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Top Right: Preset Accounts (Admin / User) */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
-            <div className="flex items-center gap-3 font-mono">
-              <span className="hidden sm:inline text-xs text-white/70">
-                Hi, <strong className="text-cyan-400 font-semibold">{user.name}</strong>
+            <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono text-xs">
+              <span className="hidden sm:inline text-white/80">
+                <span className={`mr-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  user.role === "admin"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-400/40"
+                    : "bg-cyan-500/20 text-cyan-300 border border-cyan-400/40"
+                }`}>
+                  {user.role === "admin" ? "Admin" : "User"}
+                </span>
+                <strong className="text-white font-medium">{user.name}</strong>
               </span>
+
               <Link
                 href="/onboarding"
                 className="text-xs uppercase tracking-wider text-amber-400 hover:text-amber-300 font-semibold transition-colors"
               >
                 Site Setup →
               </Link>
+
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-3.5 py-1.5 text-xs transition"
+                className="rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-3 py-1.5 text-xs transition"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Link
-                href="/login?mode=login"
-                className="text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors px-2 py-1"
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("admin")}
+                className="rounded-full border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 px-3.5 py-1.5 text-xs font-mono font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
               >
-                Log In
-              </Link>
-              <Link
-                href="/login?mode=register"
-                className="rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 sm:px-5 py-2 text-xs uppercase tracking-wider transition-all shadow-md shadow-cyan-500/20"
+                <span>🛡️</span>
+                <span>Admin</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("user")}
+                className="rounded-full border border-cyan-400/40 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 px-3.5 py-1.5 text-xs font-mono font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
               >
-                Sign Up
+                <span>🔬</span>
+                <span>User</span>
+              </button>
+
+              <Link
+                href="/login"
+                className="hidden sm:inline text-xs text-slate-400 hover:text-white transition font-mono px-1.5 py-1"
+              >
+                Accounts →
               </Link>
             </div>
           )}

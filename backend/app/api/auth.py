@@ -7,6 +7,7 @@ from app.auth import (
     authenticate_user,
     create_token,
     get_current_user,
+    quick_login,
     register_user,
 )
 
@@ -17,6 +18,10 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 class AuthRequest(BaseModel):
     email: str
     password: str = Field(min_length=8, max_length=128)
+
+
+class QuickLoginRequest(BaseModel):
+    role: str = "user"
 
 
 class RegisterRequest(AuthRequest):
@@ -49,6 +54,11 @@ def login(payload: AuthRequest):
         "token_type": "bearer",
         "user": user,
     }
+
+
+@router.post("/quick-login")
+def quick_login_route(payload: QuickLoginRequest):
+    return quick_login(payload.role)
 
 
 @router.get("/me")
